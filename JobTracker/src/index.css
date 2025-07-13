@@ -1,0 +1,22 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* Ensure dark mode classes work properly */
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Simple test to verify dark mode */
+.test-dark-mode {
+  background-color: white;
+  color: black;
+}
+
+html.dark .test-dark-mode {
+  background-color: black;
+  color: white;
+}
