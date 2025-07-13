@@ -1,32 +1,84 @@
+{/* 
+  LEARNING COMMENT: Import statements for React functionality and navigation
+  - useState: React hook that allows us to store and update changing data in our component
+  - useNavigate: React Router hook that enables programmatic navigation (like clicking links but in code)
+*/}
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+{/* 
+  LEARNING COMMENT: Dashboard Component - The main dashboard page component
+  - This is a functional React component that returns JSX (HTML-like code)
+  - It displays summary statistics, quick action buttons, and recent job applications
+  - Users see this page after logging in to get an overview of their job search progress
+*/}
 function Dashboard() {
+  
+  {/* 
+    LEARNING COMMENT: Navigation function for programmatic routing
+    - useNavigate returns a function that can send users to different pages
+    - Example: navigate('/jobs') redirects user to the jobs page
+    - This is used in button click handlers to change pages programmatically
+  */}
   const navigate = useNavigate()
   
+  {/* 
+    LEARNING COMMENT: Dashboard statistics state
+    - useState creates a state variable 'stats' with job application summary numbers
+    - Notice we only destructure 'stats' (not setStats) because this data doesn't change
+    - In a real app, this data would come from an API call to get current user stats
+    - These numbers drive the 4 colored cards at the top of the dashboard
+  */}
   const [stats] = useState({
+    // Total number of job applications the user has submitted
     totalApplications: 15,
+    // Applications still waiting for a response from the company  
     pending: 6,
+    // Applications that resulted in interview invitations
     interviews: 5,
+    // Applications that were unfortunately rejected
     rejected: 2
   })
 
+  {/* 
+    LEARNING COMMENT: Recent job applications sample data
+    - useState creates state for storing recent job application data
+    - This is mock data for demonstration - in a real app, this would come from a database
+    - Each job object contains all the information needed to display in the table
+    - Properties explained:
+      * id: unique identifier for each job application
+      * title: the job position name
+      * company: name of the company
+      * status: current stage of the application process
+      * appliedDate: when the application was submitted (YYYY-MM-DD format)
+      * matchScore: percentage of how well your skills match the job (0-100)
+      * salary: the salary range offered for the position
+  */}
   const [recentJobs] = useState([
     {
+      // Unique identifier for database lookups and React keys
       id: 1,
+      // Job position title as listed in the job posting
       title: 'Senior Frontend Developer',
+      // Company name where you applied
       company: 'TechCorp Inc.',
+      // Current status of your application (drives the colored status badge)
       status: 'Second Interview',
+      // Date when you submitted the application
       appliedDate: '2024-01-20',
+      // Algorithm-calculated match between your skills and job requirements
       matchScore: 85,
+      // Salary range as specified in the job posting
       salary: '$120k - $150k'
     },
     {
       id: 2,
       title: 'React Developer',
       company: 'StartupXYZ',
+      // Different status to show variety in the interface
       status: 'Pending',
       appliedDate: '2024-01-18',
+      // Higher match score indicates better skill alignment
       matchScore: 92,
       salary: '$100k - $130k'
     },
@@ -43,8 +95,10 @@ function Dashboard() {
       id: 4,
       title: 'UI/UX Developer',
       company: 'DesignHub',
+      // Rejected status to demonstrate different styling
       status: 'Rejected',
       appliedDate: '2024-01-12',
+      // Lower match score indicates less ideal fit
       matchScore: 65,
       salary: '$90k - $110k'
     },
@@ -59,35 +113,84 @@ function Dashboard() {
     }
   ])
 
+  // 🎨 LEARNING: Status Color Function - Returns different colors based on job application status
+  // This function takes a status string and returns Tailwind CSS classes for styling
+  // 🔄 EFFECT: Change 'bg-emerald-100' to 'bg-blue-100' to see different colors
   const getStatusColor = (status) => {
+    // 🔄 LEARNING: Switch Statement - Like multiple if/else statements
+    // Compares 'status' parameter with each case and returns matching CSS classes
     switch (status) {
-      case 'First Interview': return 'bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-600'
-      case 'Second Interview': return 'bg-teal-100 dark:bg-teal-800 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-600'
-      case 'Third Interview': return 'bg-cyan-100 dark:bg-cyan-800 text-cyan-800 dark:text-cyan-200 border border-cyan-200 dark:border-cyan-600'
-      case 'Final Interview': return 'bg-indigo-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-600'
-      case 'Pending': return 'bg-amber-100 dark:bg-blue-800 text-amber-800 dark:text-blue-200 border border-amber-200 dark:border-blue-600'
-      case 'Applied': return 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-600'
-      case 'Rejected': return 'bg-rose-100 dark:bg-rose-800 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-600'
-      case 'Offer': return 'bg-violet-100 dark:bg-violet-800 text-violet-800 dark:text-violet-200 border border-violet-200 dark:border-violet-600'
-      default: return 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
+      
+      // 🟢 LEARNING: Interview Status Colors - Progressive green shades for interview stages
+      case 'First Interview': 
+        return 'bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-600'
+        // 🎨 BREAKDOWN: bg-emerald-100 (light green background) + dark:bg-emerald-800 (dark mode: dark green)
+        // 📝 text-emerald-800 (dark green text) + dark:text-emerald-200 (dark mode: light green text)
+        // 🔲 border border-emerald-200 (light green border) + dark:border-emerald-600 (dark mode border)
+        
+      case 'Second Interview': 
+        return 'bg-teal-100 dark:bg-teal-800 text-teal-800 dark:text-teal-200 border border-teal-200 dark:border-teal-600'
+        // 🎨 Teal = blue-green color, shows progression from first interview
+        
+      case 'Third Interview': 
+        return 'bg-cyan-100 dark:bg-cyan-800 text-cyan-800 dark:text-cyan-200 border border-cyan-200 dark:border-cyan-600'
+        // 🎨 Cyan = lighter blue-green, closer to final stages
+        
+      case 'Final Interview': 
+        return 'bg-indigo-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-600'
+        // 🎨 Indigo = purple-blue, indicates final stage before decision
+        
+      // 🟡 LEARNING: Waiting Status Colors - Amber/yellow for pending states
+      case 'Pending': 
+        return 'bg-amber-100 dark:bg-blue-800 text-amber-800 dark:text-blue-200 border border-amber-200 dark:border-blue-600'
+        // 🎨 Amber (yellow-orange) in light mode, blue in dark mode for better contrast
+        
+      case 'Applied': 
+        return 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-600'
+        // 🎨 Blue indicates initial application submitted
+        
+      // 🔴 LEARNING: Negative Status Colors - Red for rejection
+      case 'Rejected': 
+        return 'bg-rose-100 dark:bg-rose-800 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-600'
+        // 🎨 Rose (red-pink) clearly indicates rejection
+        
+      // 🟣 LEARNING: Positive Status Colors - Purple for offers
+      case 'Offer': 
+        return 'bg-violet-100 dark:bg-violet-800 text-violet-800 dark:text-violet-200 border border-violet-200 dark:border-violet-600'
+        // 🎨 Violet (purple) indicates success - job offer received
+        
+      // 🔘 LEARNING: Default Case - Fallback for unknown statuses
+      default: 
+        return 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
+        // 🎨 Gray/slate for any status not defined above
     }
   }
 
+  // Main component return statement - Everything inside return() becomes the actual HTML that users see
   return (
+    // Main container with full screen height - min-h-screen ensures the content takes at least the full height of the browser window
     <div className="min-h-screen">
+      {/* Content wrapper with responsive width and padding */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Dashboard Header */}
+        
+        {/* Dashboard Header Section */}
         <div className="text-center mb-12">
+          {/* Main Dashboard Title with gradient text */}
           <h1 className="text-5xl font-light bg-gradient-to-r from-slate-700 via-gray-700 to-slate-800 dark:from-slate-300 dark:via-gray-300 dark:to-slate-200 bg-clip-text text-transparent mb-6">
             Dashboard
           </h1>
+          {/* Decorative underline element */}
           <div className="w-24 h-0.5 bg-gradient-to-r from-slate-400 to-gray-500 dark:from-slate-500 dark:to-gray-400 mx-auto rounded-full"></div>
+          {/* Subtitle/welcome text */}
           <p className="text-slate-600 dark:text-slate-400 mt-4 text-lg font-light">Welcome back! Here's your job search overview</p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Statistics Cards Section */}
         <div className="flex justify-center items-center mb-12">
+          {/* Statistics Cards Grid */}
           <div className="grid grid-cols-4 gap-4 w-fit">
+            
+            {/* Total Applications Card */}
             <div className="bg-gradient-to-br from-white via-slate-50 to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 rounded-xl shadow-lg p-4 text-center border border-slate-200 dark:border-gray-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm w-28">
               <div className="flex flex-col items-center space-y-2">
                 <div className="w-10 h-10 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
