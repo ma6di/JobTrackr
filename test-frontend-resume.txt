@@ -1,0 +1,11 @@
+This is a test resume content for frontend testing.
+
+Skills:
+- JavaScript
+- React
+- Node.js
+- Database Management
+
+Experience:
+- Frontend Developer at TechCorp (2020-2023)
+- Backend Developer at StartupXYZ (2018-2020)
