@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { useJobs } from '../contexts/JobsContext'
 import { useResumes } from '../contexts/ResumesContext'
 import AddJobModal from '../components/AddJobModal'
+import JobViewModal from '../components/JobViewModal'
 
 /* 
   LEARNING COMMENT: Jobs Component - Job applications tracking page
@@ -23,8 +24,10 @@ function Jobs() {
     - useJobs() provides access to job data and functions from global context
     - jobs: array of job application objects with detailed information
     - addJob: function to add new job application to the collection
+    - updateJob: function to update existing job application
+    - deleteJob: function to remove job application
   */
-  const { jobs, addJob } = useJobs()
+  const { jobs, addJob, updateJob, deleteJob } = useJobs()
   
   /* 
     LEARNING COMMENT: Resume context integration
@@ -41,6 +44,15 @@ function Jobs() {
     - setIsAddModalOpen: function to update the modal visibility state
   */
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  
+  /* 
+    LEARNING COMMENT: Edit modal state management
+    - isEditModalOpen: boolean state for edit modal visibility
+    - selectedJob: stores the job being edited or viewed
+  */
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedJob, setSelectedJob] = useState(null)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
 
   /* 
     LEARNING COMMENT: Job submission handler
@@ -52,6 +64,34 @@ function Jobs() {
   const handleAddJob = (jobData) => {
     addJob(jobData)
     setIsAddModalOpen(false)
+  }
+
+  /* 
+    LEARNING COMMENT: Job action handlers
+    - handleViewJob: opens view modal to display job details
+    - handleEditJob: opens edit modal with job data pre-filled
+    - handleDeleteJob: confirms and deletes a job application
+  */
+  const handleViewJob = (job) => {
+    setSelectedJob(job)
+    setIsViewModalOpen(true)
+  }
+
+  const handleEditJob = (job) => {
+    setSelectedJob(job)
+    setIsEditModalOpen(true)
+  }
+
+  const handleUpdateJob = (jobData) => {
+    updateJob(selectedJob.id, jobData)
+    setIsEditModalOpen(false)
+    setSelectedJob(null)
+  }
+
+  const handleDeleteJob = (job) => {
+    if (window.confirm(`Are you sure you want to delete the ${job.position} application at ${job.company}?`)) {
+      deleteJob(job.id)
+    }
   }
 
   /* 
@@ -395,10 +435,14 @@ function Jobs() {
                         {/* 
                           LEARNING COMMENT: View Job Button
                           - Eye icon for viewing/previewing job details
+                          - onClick: opens view modal with job details
                           - p-2: 8px padding on all sides
                           - Neutral gray styling as it's a view-only action
                         */}
-                        <button className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600">
+                        <button 
+                          onClick={() => handleViewJob(job)}
+                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                        >
                           {/* Eye/view icon */}
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
@@ -409,10 +453,13 @@ function Jobs() {
                         {/* 
                           LEARNING COMMENT: Edit Job Button
                           - Pencil icon for editing job information
+                          - onClick: opens edit modal with job data pre-filled
                           - Same neutral styling as view button
-                          - Would open edit modal or navigate to edit page
                         */}
-                        <button className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600">
+                        <button 
+                          onClick={() => handleEditJob(job)}
+                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                        >
                           {/* Pencil/edit icon */}
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
@@ -422,10 +469,13 @@ function Jobs() {
                         {/* 
                           LEARNING COMMENT: Delete Job Button
                           - Trash can icon for deleting job application
+                          - onClick: shows confirmation dialog and deletes job
                           - Same styling as other action buttons for consistency
-                          - Could trigger confirmation modal before deletion
                         */}
-                        <button className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600">
+                        <button 
+                          onClick={() => handleDeleteJob(job)}
+                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                        >
                           {/* Trash/delete icon */}
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd"></path>
@@ -456,6 +506,44 @@ function Jobs() {
         onSave={handleAddJob}
         resumes={resumes}
       />
+
+      {/* 
+        LEARNING COMMENT: Edit Job Modal Component
+        - Reuses AddJobModal component for editing existing jobs
+        - isOpen={isEditModalOpen}: controls edit modal visibility
+        - onClose: closes edit modal and clears selected job
+        - onSave={handleUpdateJob}: function called when user saves job updates
+        - initialData={selectedJob}: pre-fills form with existing job data
+      */}
+      {selectedJob && (
+        <AddJobModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false)
+            setSelectedJob(null)
+          }}
+          onSave={handleUpdateJob}
+          resumes={resumes}
+          initialData={selectedJob}
+          isEdit={true}
+        />
+      )}
+
+      {/* 
+        LEARNING COMMENT: View Job Details Modal
+        - Simple modal to display job information in read-only format
+        - Shows all job details without edit capabilities
+      */}
+      {selectedJob && (
+        <JobViewModal
+          isOpen={isViewModalOpen}
+          onClose={() => {
+            setIsViewModalOpen(false)
+            setSelectedJob(null)
+          }}
+          job={selectedJob}
+        />
+      )}
     </div>
   )
 }

@@ -2,9 +2,11 @@
   LEARNING COMMENT: Import statements for Profile page functionality
   - useState: React hook for managing component state (data that can change)
   - useEffect: React hook for side effects (runs code when component mounts or data changes)
+  - useAuth: Custom hook from AuthContext to access user data and logout function
   - useTheme: Custom hook from our ThemeContext to access dark mode state and toggle function
 */
 import { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 
 /* 
@@ -15,28 +17,27 @@ import { useTheme } from '../contexts/ThemeContext'
 */
 function Profile() {
   /* 
-    LEARNING COMMENT: Theme context integration
+    LEARNING COMMENT: Authentication and theme context integration
+    - useAuth() gives us access to user data and logout function
     - useTheme() gives us access to the current dark mode state and toggle function
-    - isDarkMode: boolean indicating if dark mode is currently active
-    - toggleDarkMode: function to switch between light and dark themes
-    - This connects our Profile page to the global theme management system
+    - This connects our Profile page to both authentication and theme systems
   */
+  const { user: authUser, logout } = useAuth()
   const { isDarkMode, toggleDarkMode } = useTheme()
   
   /* 
-    LEARNING COMMENT: User data state
-    - useState creates state to store user profile information
-    - In a real app, this data would come from an API call or database
-    - Currently using mock data for demonstration purposes
-    - Each property represents different aspects of the user's profile
+    LEARNING COMMENT: User display data state
+    - Derived from authenticated user data
+    - Formats the data for display purposes
+    - Provides fallback values if data is missing
   */
   const [user, setUser] = useState({
-    name: 'John Doe',                    // User's display name
-    email: 'john.doe@example.com',       // User's email address
-    avatar: null,                        // Profile picture (null = use default icon)
-    joinDate: '2024-01-01',             // When the user created their account
-    title: 'Senior Frontend Developer',  // User's job title/position
-    location: 'San Francisco, CA'        // User's location
+    name: '',           // User's display name (will be set from authUser)
+    email: '',          // User's email address (will be set from authUser)
+    avatar: null,       // Profile picture (null = use default icon)
+    joinDate: '',       // When the user created their account
+    title: '',          // User's job title/position (future feature)
+    location: ''        // User's location (future feature)
   })
 
   /* 
@@ -48,6 +49,25 @@ function Profile() {
   const [settings, setSettings] = useState({
     darkMode: isDarkMode                 // Sync with current theme state
   })
+
+  /* 
+    LEARNING COMMENT: useEffect for setting user data from auth context
+    - Runs when the component mounts and when authUser changes
+    - Updates local user state with data from authenticated user
+    - Provides fallback values for optional fields
+  */
+  useEffect(() => {
+    if (authUser) {
+      setUser({
+        name: `${authUser.firstName} ${authUser.lastName}`,
+        email: authUser.email,
+        avatar: authUser.profilePicture || null,
+        joinDate: authUser.createdAt ? new Date(authUser.createdAt).toLocaleDateString() : '',
+        title: authUser.title || '', // Future feature
+        location: authUser.location || '' // Could be added to user model
+      })
+    }
+  }, [authUser])
 
   /* 
     LEARNING COMMENT: useEffect for syncing settings with theme context
@@ -65,17 +85,18 @@ function Profile() {
 
   /* 
     LEARNING COMMENT: Logout handler function
-    - Function that will handle user logout functionality
-    - Currently just logs to console - in a real app would:
-      * Clear user authentication tokens
-      * Redirect to login page
-      * Clear user data from state/localStorage
-      * Make API call to invalidate session
+    - Function that handles user logout functionality
+    - Uses logout function from AuthContext
+    - This will clear authentication tokens, user data, and redirect to login
   */
-  const handleLogout = () => {
-    // Add logout logic here
-    console.log('Logging out...')
-    // Redirect to login or clear auth state
+  const handleLogout = async () => {
+    try {
+      await logout()
+      // AuthContext handles clearing tokens and redirecting to login
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // AuthContext should handle this, but log just in case
+    }
   }
 
   /* 

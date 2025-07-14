@@ -3,8 +3,27 @@
   - createContext: Creates a React context for sharing data between components without passing props down manually
   - useContext: Hook to consume/read values from a React context
   - useState: Hook to manage component state (data that can change over time)
+  - useEffect: Hook to perform side effects (like API calls) when component mounts
 */}
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
+
+{/* 
+  LEARNING COMMENT: Import authentication context to check user login status
+  - useAuth: Custom hook to access user authentication state
+  - Only load resumes when user is authenticated
+*/}
+import { useAuth } from './AuthContext'
+
+{/* 
+  LEARNING COMMENT: Import API functions for backend communication
+  - These functions handle HTTP requests to our backend server
+  - getResumes: fetch all user's resumes from database
+  - createResume: upload new resume with file to backend
+  - updateResume: modify existing resume metadata
+  - deleteResume: remove resume and its file from backend
+  - downloadResume: download resume file from server
+*/}
+import { getResumes, createResume, updateResume, deleteResume, downloadResume } from '../services/api.js'
 
 {/* 
   LEARNING COMMENT: Create a new React context for resumes
@@ -39,122 +58,233 @@ export const useResumes = () => {
   - This is a "provider component" that wraps other components and gives them access to resume data
   - { children } means this component accepts other components as children (like <div><p>child</p></div>)
   - Any component inside this provider can use the useResumes() hook to access resume data
+  - Now integrates with backend API instead of using only local state
 */}
 export const ResumesProvider = ({ children }) => {
   {/* 
+    LEARNING COMMENT: Authentication context integration
+    - Access user authentication state to know when user is logged in
+    - Only fetch resumes when user is authenticated
+    - Clear resumes when user logs out
+  */}
+  const { user, isAuthenticated } = useAuth()
+
+  {/* 
     LEARNING COMMENT: State for storing all resumes
     - useState hook creates a state variable 'resumes' and a function 'setResumes' to update it
-    - Initial value is an array with 2 sample resumes to show the interface
-    - Each resume is an object with properties: id, name, uploadDate, fileSize, format, pages
-    - In a real app, this data would come from a database/API, but we're starting with mock data
+    - Initial value is empty array - real data will be loaded from backend API when user is authenticated
+    - Each resume object comes from the database with properties: id, name, uploadDate, fileSize, format, etc.
   */}
-  const [resumes, setResumes] = useState([
-    { 
-      // Unique identifier for this resume
-      id: 1,
-      // Display name for the resume
-      name: 'Software Engineer Resume',
-      // When this resume was uploaded (YYYY-MM-DD format)
-      uploadDate: '2024-01-15',
-      // File size in kilobytes for display
-      fileSize: '245 KB',
-      // File format (PDF, DOC, etc.)
-      format: 'PDF',
-      // Number of pages in the resume
-      pages: 2
-    },
-    { 
-      id: 2, 
-      name: 'Frontend Developer Resume', 
-      uploadDate: '2024-01-10', 
-      fileSize: '189 KB',
-      format: 'PDF',
-      pages: 1
-    },
-  ])
+  const [resumes, setResumes] = useState([])
 
   {/* 
-    LEARNING COMMENT: Function to add a new resume to the list
-    - Takes resumeData parameter (object with resume information from the upload form)
-    - Creates a new resume object with a unique ID and formatted data
-    - Updates the resumes state array by adding the new resume
-    - Returns the new resume object so the calling component knows what was created
+    LEARNING COMMENT: Loading state management
+    - Tracks whether we're currently fetching data from the backend
+    - Shows loading indicators to users during API calls
+    - Prevents multiple simultaneous API calls
   */}
-  const addResume = (resumeData) => {
-    {/* Create a new resume object with processed data */}
-    const newResume = {
-      // Use current timestamp as unique ID (simple but effective for demo)
-      id: Date.now(),
-      // Use the name provided by the user
-      name: resumeData.name,
-      // Get today's date in YYYY-MM-DD format
-      uploadDate: new Date().toISOString().split('T')[0],
-      // Calculate file size: if file exists, convert bytes to KB and round, otherwise show "Unknown"
-      fileSize: resumeData.file ? `${Math.round(resumeData.file.size / 1024)} KB` : 'Unknown',
-      // Determine format: check if file type includes 'pdf', otherwise assume DOC
-      format: resumeData.file ? resumeData.file.type.includes('pdf') ? 'PDF' : 'DOC' : 'PDF',
-      // Default to 1 page (could be enhanced to read actual page count)
-      pages: 1
+  const [loading, setLoading] = useState(false)
+
+  {/* 
+    LEARNING COMMENT: Error state management
+    - Stores any error messages from failed API calls
+    - Allows UI to display helpful error messages to users
+    - Gets reset when new operations succeed
+  */}
+  const [error, setError] = useState(null)
+
+  {/* 
+    LEARNING COMMENT: Load resumes when user authentication state changes
+    - useEffect runs when isAuthenticated or user changes
+    - Only fetches resumes when user is authenticated
+    - Clears resumes when user logs out
+  */}
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadResumes()
+    } else {
+      // User is not authenticated, clear resumes
+      setResumes([])
+      setError(null)
     }
-    
-    {/* 
-      Update the resumes state using the setter function
-      - setResumes takes a function that receives the previous state (prev)
-      - We return a new array with all previous resumes plus the new one
-      - The spread operator (...prev) copies all existing resumes
-      - This creates a new array instead of modifying the old one (React best practice)
-    */}
-    setResumes(prev => [...prev, newResume])
-    
-    {/* Return the new resume so the calling component can use it (e.g., to close a modal) */}
-    return newResume
+  }, [isAuthenticated, user])
+
+  {/* 
+    LEARNING COMMENT: Function to fetch resumes from backend
+    - Makes API call to get all user's resumes
+    - Handles loading states and error handling
+    - Updates local state with fresh data from server
+    - Only works when user is authenticated
+  */}
+  const loadResumes = async () => {
+    // Don't load if user is not authenticated
+    if (!isAuthenticated || !user) {
+      setResumes([])
+      setError(null)
+      return
+    }
+
+    try {
+      setLoading(true)              // Show loading indicator
+      setError(null)                // Clear any previous errors
+      const data = await getResumes()  // Fetch from backend API
+      setResumes(data.resumes || data || [])    // Update local state (handle different response formats)
+    } catch (err) {
+      console.error('Failed to load resumes:', err)
+      // Only show error if user is still authenticated
+      if (isAuthenticated) {
+        setError('Failed to load resumes. Please try again.')
+      }
+      setResumes([])                // Clear resumes on error
+    } finally {
+      setLoading(false)             // Hide loading indicator whether success or failure
+    }
   }
 
   {/* 
-    LEARNING COMMENT: Function to update an existing resume
-    - Takes id (which resume to update) and updatedData (what to change)
-    - Uses the map method to create a new array with the updated resume
-    - Only updates the resume that matches the given id, leaves others unchanged
+    LEARNING COMMENT: Function to add a new resume with file upload to backend
+    - Takes resumeData parameter (object with resume information and file from the upload form)
+    - Makes API call to backend to upload file and store resume metadata
+    - Updates local state with the new resume returned from backend
+    - Handles loading states and error handling for better user experience
   */}
-  const updateResume = (id, updatedData) => {
-    setResumes(prev => prev.map(resume => {
+  const addResume = async (resumeData) => {
+    try {
+      setLoading(true)                           // Show loading indicator during upload
+      setError(null)                             // Clear any previous errors
+      
       /* 
-        For each resume, check if its ID matches the one we want to update
-        - If it matches: merge the existing resume with the new data using spread operator
-        - If it doesn't match: return the resume unchanged
-        - The spread operator {...resume, ...updatedData} combines objects:
-          * All properties from resume are copied first
-          * All properties from updatedData are copied second (overwriting any duplicates)
+        Make API call to create resume with file upload
+        - backend handles file validation, S3 upload, and database storage
+        - Returns complete resume object with file URL and metadata
       */
-      return resume.id === id ? { ...resume, ...updatedData } : resume
-    }))
+      const newResume = await createResume(resumeData)
+      
+      /* 
+        Update local state with the new resume
+        - Add to existing resumes array using spread operator
+        - newResume contains all the data returned from backend (id, fileUrl, etc.)
+      */
+      setResumes(prev => [...prev, newResume])
+      
+      /* Return the new resume so calling component can handle success */
+      return newResume
+      
+    } catch (err) {
+      console.error('Failed to add resume:', err)
+      setError('Failed to upload resume. Please try again.')
+      throw err                                  // Re-throw so calling component can handle error
+    } finally {
+      setLoading(false)                          // Hide loading indicator
+    }
   }
 
   {/* 
-    LEARNING COMMENT: Function to delete a resume
-    - Takes id parameter (which resume to remove)
-    - Uses the filter method to create a new array without the deleted resume
-    - filter keeps only resumes whose id does NOT match the one we want to delete
+    LEARNING COMMENT: Function to update an existing resume in backend and local state
+    - Takes id (which resume to update) and updatedData (what to change)
+    - Makes API call to update resume metadata in backend database
+    - Updates local state to reflect the changes immediately
+    - Handles errors and loading states
   */}
-  const deleteResume = (id) => {
-    setResumes(prev => prev.filter(resume => resume.id !== id))
+  const updateResumeContext = async (id, updatedData) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      /* Update resume in backend database */
+      const updatedResume = await updateResume(id, updatedData)
+      
+      /* Update local state with the new data */
+      setResumes(prev => prev.map(resume => 
+        resume.id === id ? { ...resume, ...updatedResume } : resume
+      ))
+      
+      return updatedResume
+      
+    } catch (err) {
+      console.error('Failed to update resume:', err)
+      setError('Failed to update resume. Please try again.')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  {/* 
+    LEARNING COMMENT: Function to delete a resume from backend and local state
+    - Takes id parameter (which resume to remove)
+    - Makes API call to delete resume file from S3 and remove from database
+    - Updates local state to remove the deleted resume
+    - Handles errors if deletion fails
+  */}
+  const deleteResumeContext = async (id) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      /* Delete resume from backend (removes file from S3 and database record) */
+      await deleteResume(id)
+      
+      /* Remove from local state */
+      setResumes(prev => prev.filter(resume => resume.id !== id))
+      
+    } catch (err) {
+      console.error('Failed to delete resume:', err)
+      setError('Failed to delete resume. Please try again.')
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  {/* 
+    LEARNING COMMENT: Function to download a resume file
+    - Takes resume object with id and filename
+    - Makes API call to download file from backend/S3
+    - Triggers browser download of the file
+    - Handles errors if download fails
+  */}
+  const downloadResumeContext = async (resume) => {
+    try {
+      setError(null)
+      /* 
+        Download file using the API service
+        - API handles authentication and file retrieval
+        - Automatically triggers browser download
+      */
+      await downloadResume(resume.id, resume.filename || resume.name)
+      
+    } catch (err) {
+      console.error('Failed to download resume:', err)
+      setError('Failed to download resume. Please try again.')
+      throw err
+    }
   }
 
   {/* 
     LEARNING COMMENT: Create the value object to provide to child components
     - This object contains all the data and functions that components can access
+    - Includes loading and error states for better user experience
     - By putting everything in one object, components can destructure what they need
-    - Example: const { resumes, addResume } = useResumes()
+    - Example: const { resumes, addResume, loading, error } = useResumes()
   */}
   const value = {
-    // The array of all resumes
+    // The array of all resumes from backend
     resumes,
-    // Function to add a new resume
+    // Loading state for API operations
+    loading,
+    // Error message from failed API calls
+    error,
+    // Function to add a new resume with file upload
     addResume,
-    // Function to update an existing resume
-    updateResume,
-    // Function to delete a resume
-    deleteResume
+    // Function to update an existing resume (renamed to avoid conflicts)
+    updateResume: updateResumeContext,
+    // Function to delete a resume (renamed to avoid conflicts)
+    deleteResume: deleteResumeContext,
+    // Function to download a resume file
+    downloadResume: downloadResumeContext,
+    // Function to reload resumes from backend
+    loadResumes,
   }
 
   {/* 

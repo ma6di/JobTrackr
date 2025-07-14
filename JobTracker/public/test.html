@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f0f8ff;
+        }
+        .test-box {
+            padding: 20px;
+            background: #e6f3ff;
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .working {
+            color: #006600;
+            font-weight: bold;
+        }
+        .error {
+            color: #cc0000;
+            background: #ffe6e6;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1 class="working">✅ Static HTML is Working!</h1>
+        <p>This static page should load perfectly.</p>
+        <p>Time: <span id="time"></span></p>
+    </div>
+    
+    <div class="test-box">
+        <h2>JavaScript Test:</h2>
+        <div id="js-test">❌ JavaScript not working</div>
+    </div>
+    
+    <div class="test-box">
+        <h2>React Test:</h2>
+        <div id="react-root">❌ React not loaded</div>
+    </div>
+    
+    <div id="error-log"></div>
+    
+    <script>
+        // Basic JavaScript test
+        document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        document.getElementById('js-test').innerHTML = '✅ JavaScript is working!';
+        document.getElementById('js-test').style.color = '#006600';
+        
+        // Error catching
+        window.addEventListener('error', function(e) {
+            document.getElementById('error-log').innerHTML += 
+                '<div class="error">Error: ' + e.message + ' at ' + e.filename + ':' + e.lineno + '</div>';
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            document.getElementById('error-log').innerHTML += 
+                '<div class="error">Promise Rejection: ' + e.reason + '</div>';
+        });
+    </script>
+    
+    <!-- Include React CDN for comparison -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script>
+        // Test React from CDN
+        const { createElement, StrictMode } = React;
+        const { createRoot } = ReactDOM;
+        
+        function TestComponent() {
+            return createElement('div', { 
+                style: { color: '#006600', fontWeight: 'bold' } 
+            }, '✅ React from CDN is working!');
+        }
+        
+        try {
+            const reactRoot = createRoot(document.getElementById('react-root'));
+            reactRoot.render(createElement(StrictMode, null, createElement(TestComponent)));
+        } catch (error) {
+            document.getElementById('react-root').innerHTML = '❌ React error: ' + error.message;
+            document.getElementById('react-root').style.color = '#cc0000';
+        }
+    </script>
+</body>
+</html>

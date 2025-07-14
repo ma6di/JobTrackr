@@ -2,9 +2,11 @@
   LEARNING COMMENT: Import statements for React functionality and navigation
   - useState: React hook that allows us to store and update changing data in our component
   - useNavigate: React Router hook that enables programmatic navigation (like clicking links but in code)
+  - useJobs: Custom hook to access real job data from JobsContext
 */}
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useJobs } from '../contexts/JobsContext'
 
 {/* 
   LEARNING COMMENT: Dashboard Component - The main dashboard page component
@@ -23,95 +25,40 @@ function Dashboard() {
   const navigate = useNavigate()
   
   {/* 
-    LEARNING COMMENT: Dashboard statistics state
-    - useState creates a state variable 'stats' with job application summary numbers
-    - Notice we only destructure 'stats' (not setStats) because this data doesn't change
-    - In a real app, this data would come from an API call to get current user stats
-    - These numbers drive the 4 colored cards at the top of the dashboard
+    LEARNING COMMENT: Access real job data from JobsContext
+    - useJobs() provides access to all job applications from global state
+    - This replaces the hardcoded mock data with real user data
   */}
-  const [stats] = useState({
+  const { jobs } = useJobs()
+  
+  {/* 
+    LEARNING COMMENT: Dashboard statistics calculated from real data
+    - Instead of hardcoded numbers, calculate stats from actual job applications
+    - totalApplications: total count of jobs array
+    - pending: count jobs with 'Applied' or 'Pending' status
+    - interviews: count jobs with interview-related statuses
+    - rejected: count jobs with 'Rejected' status
+  */}
+  const stats = {
     // Total number of job applications the user has submitted
-    totalApplications: 15,
+    totalApplications: jobs.length,
     // Applications still waiting for a response from the company  
-    pending: 6,
+    pending: jobs.filter(job => ['Applied', 'Pending'].includes(job.status)).length,
     // Applications that resulted in interview invitations
-    interviews: 5,
+    interviews: jobs.filter(job => job.status.includes('Interview')).length,
     // Applications that were unfortunately rejected
-    rejected: 2
-  })
+    rejected: jobs.filter(job => job.status === 'Rejected').length
+  }
 
   {/* 
-    LEARNING COMMENT: Recent job applications sample data
-    - useState creates state for storing recent job application data
-    - This is mock data for demonstration - in a real app, this would come from a database
-    - Each job object contains all the information needed to display in the table
-    - Properties explained:
-      * id: unique identifier for each job application
-      * title: the job position name
-      * company: name of the company
-      * status: current stage of the application process
-      * appliedDate: when the application was submitted (YYYY-MM-DD format)
-      * matchScore: percentage of how well your skills match the job (0-100)
-      * salary: the salary range offered for the position
+    LEARNING COMMENT: Recent job applications from real data
+    - Get the 5 most recent job applications from JobsContext
+    - Sort by application date (newest first) and take first 5
+    - This replaces the hardcoded mock data with actual user applications
   */}
-  const [recentJobs] = useState([
-    {
-      // Unique identifier for database lookups and React keys
-      id: 1,
-      // Job position title as listed in the job posting
-      title: 'Senior Frontend Developer',
-      // Company name where you applied
-      company: 'TechCorp Inc.',
-      // Current status of your application (drives the colored status badge)
-      status: 'Second Interview',
-      // Date when you submitted the application
-      appliedDate: '2024-01-20',
-      // Algorithm-calculated match between your skills and job requirements
-      matchScore: 85,
-      // Salary range as specified in the job posting
-      salary: '$120k - $150k'
-    },
-    {
-      id: 2,
-      title: 'React Developer',
-      company: 'StartupXYZ',
-      // Different status to show variety in the interface
-      status: 'Pending',
-      appliedDate: '2024-01-18',
-      // Higher match score indicates better skill alignment
-      matchScore: 92,
-      salary: '$100k - $130k'
-    },
-    {
-      id: 3,
-      title: 'Full Stack Engineer',
-      company: 'BigTech Solutions',
-      status: 'First Interview',
-      appliedDate: '2024-01-15',
-      matchScore: 78,
-      salary: '$130k - $160k'
-    },
-    {
-      id: 4,
-      title: 'UI/UX Developer',
-      company: 'DesignHub',
-      // Rejected status to demonstrate different styling
-      status: 'Rejected',
-      appliedDate: '2024-01-12',
-      // Lower match score indicates less ideal fit
-      matchScore: 65,
-      salary: '$90k - $110k'
-    },
-    {
-      id: 5,
-      title: 'Backend Engineer',
-      company: 'DataCorp',
-      status: 'Third Interview',
-      appliedDate: '2024-01-10',
-      matchScore: 88,
-      salary: '$140k - $170k'
-    }
-  ])
+  const recentJobs = jobs
+    .sort((a, b) => new Date(b.appliedDate || b.applicationDate) - new Date(a.appliedDate || a.applicationDate))
+    .slice(0, 5)
 
   // 🎨 LEARNING: Status Color Function - Returns different colors based on job application status
   // This function takes a status string and returns Tailwind CSS classes for styling
@@ -351,46 +298,66 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-slate-200 dark:divide-gray-600">
-                {recentJobs.slice(0, 3).map((job, index) => (
-                  <tr key={job.id} className="hover:bg-slate-100 dark:hover:bg-gray-700 transition-all duration-200 cursor-pointer group border-l-4 border-l-transparent hover:border-l-slate-400 dark:hover:border-l-gray-500"
-                      onClick={() => navigate('/jobs')}>
-                    <td className="px-4 py-4">
-                      <div className="font-medium text-slate-900 dark:text-slate-200 text-sm">{job.title}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{job.appliedDate}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="text-sm text-slate-700 dark:text-slate-300 font-medium">{job.company}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{job.salary}</div>
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(job.status)}`}>
-                        {job.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-12 bg-slate-200 dark:bg-gray-600 rounded-full h-1.5">
-                          <div 
-                            className="bg-slate-600 dark:bg-slate-400 h-1.5 rounded-full transition-all duration-500"
-                            style={{ width: `${job.matchScore}%` }}
-                          ></div>
+                {recentJobs.length > 0 ? (
+                  recentJobs.slice(0, 3).map((job, index) => (
+                    <tr key={job.id} className="hover:bg-slate-100 dark:hover:bg-gray-700 transition-all duration-200 cursor-pointer group border-l-4 border-l-transparent hover:border-l-slate-400 dark:hover:border-l-gray-500"
+                        onClick={() => navigate('/jobs')}>
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-slate-900 dark:text-slate-200 text-sm">{job.position || job.title}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{job.appliedDate || job.applicationDate}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="text-sm text-slate-700 dark:text-slate-300 font-medium">{job.company}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{job.salary}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(job.status)}`}>
+                          {job.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-12 bg-slate-200 dark:bg-gray-600 rounded-full h-1.5">
+                            <div 
+                              className="bg-slate-600 dark:bg-slate-400 h-1.5 rounded-full transition-all duration-500"
+                              style={{ width: `${job.matchScore || 0}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">{job.matchScore || 0}%</span>
                         </div>
-                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">{job.matchScore}%</span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/jobs');
+                          }}
+                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-md transition-all duration-200 text-xs font-medium border border-slate-200 dark:border-gray-600"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-4 py-8 text-center">
+                      <div className="text-slate-500 dark:text-slate-400">
+                        <svg className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd"></path>
+                        </svg>
+                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">No job applications yet</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-500 mb-4">Start tracking your job applications to see them here</p>
+                        <button
+                          onClick={() => navigate('/jobs')}
+                          className="bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                        >
+                          Add Your First Job
+                        </button>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate('/jobs');
-                        }}
-                        className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-md transition-all duration-200 text-xs font-medium border border-slate-200 dark:border-gray-600"
-                      >
-                        View Details
-                      </button>
-                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

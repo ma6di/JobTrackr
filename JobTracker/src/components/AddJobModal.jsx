@@ -16,7 +16,7 @@ import { useState } from 'react'
     * onSave: function called when user saves the job application
     * resumes: array of available resumes for user to select from (defaults to empty array)
 */
-function AddJobModal({ isOpen, onClose, onSave, resumes = [] }) {
+function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null, isEdit = false }) {
   /* 
     LEARNING COMMENT: Multi-step form state management
     - currentStep: tracks which step of the wizard the user is on (1-4)
@@ -29,29 +29,51 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [] }) {
     - Single state object containing all form fields across all steps
     - Organized by steps but stored together for easier data management
     - Includes default values and sensible defaults for better UX
+    - Uses initialData when editing existing job
   */
-  const [formData, setFormData] = useState({
-    // Step 1: Application Details
-    applicationDate: new Date().toISOString().split('T')[0],    // Today's date as default
-    source: 'manual',                                           // How user wants to enter data
-    jobLink: '',                                               // Optional job posting URL
+  const [formData, setFormData] = useState(() => {
+    if (isEdit && initialData) {
+      return {
+        applicationDate: initialData.appliedDate || new Date().toISOString().split('T')[0],
+        source: 'manual',
+        jobLink: initialData.jobLink || '',
+        company: initialData.company || '',
+        position: initialData.position || '',
+        location: initialData.location || '',
+        salary: initialData.salary || '',
+        type: initialData.type || 'Full-time',
+        remote: initialData.remote || 'On-site',
+        description: initialData.description || '',
+        requirements: initialData.requirements || '',
+        selectedResumeId: initialData.selectedResumeId || '',
+        notes: initialData.notes || '',
+        status: initialData.status || 'Applied'
+      }
+    }
     
-    // Step 2: Company & Position
-    company: '',                                               // Company name
-    position: '',                                              // Job title/position
-    location: '',                                              // Job location
-    salary: '',                                                // Salary range
-    type: 'Full-time',                                         // Employment type
-    remote: 'On-site',                                         // Remote work status
-    
-    // Step 3: Job Details
-    description: '',                                           // Job description
-    requirements: '',                                          // Job requirements
-    
-    // Step 4: Resume & Notes
-    selectedResumeId: '',                                      // Which resume was used
-    notes: '',                                                 // User notes
-    status: 'Applied'                                          // Initial application status
+    return {
+      // Step 1: Application Details
+      applicationDate: new Date().toISOString().split('T')[0],    // Today's date as default
+      source: 'manual',                                           // How user wants to enter data
+      jobLink: '',                                               // Optional job posting URL
+      
+      // Step 2: Company & Position
+      company: '',                                               // Company name
+      position: '',                                              // Job title/position
+      location: '',                                              // Job location
+      salary: '',                                                // Salary range
+      type: 'Full-time',                                         // Employment type
+      remote: 'On-site',                                         // Remote work status
+      
+      // Step 3: Job Details
+      description: '',                                           // Job description
+      requirements: '',                                          // Job requirements
+      
+      // Step 4: Resume & Notes
+      selectedResumeId: '',                                      // Which resume was used
+      notes: '',                                                 // User notes
+      status: 'Applied'                                          // Initial application status
+    }
   })
 
   const totalSteps = 4    // Total number of steps in the wizard
@@ -220,7 +242,9 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [] }) {
               - text-slate-800 dark:text-slate-200: Dark gray text with light theme in dark mode
               - Clearly identifies the modal's purpose
             */}
-            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">Add Job Application</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">
+              {isEdit ? 'Edit Job Application' : 'Add Job Application'}
+            </h2>
             
             {/* 
               LEARNING COMMENT: Step progress indicator
@@ -1009,11 +1033,11 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [] }) {
                       - resumes.map(): Iterates through available resumes array
                       - key={resume.id}: React key for efficient re-rendering
                       - value={resume.id}: Option value matches resume identifier
-                      - {resume.name}: Display text shows resume name to user
+                      - {resume.title}: Display text shows resume title to user
                     */}
                     {resumes.map((resume) => (
                       <option key={resume.id} value={resume.id}>
-                        {resume.name}
+                        {resume.title}
                       </option>
                     ))}
                   </select>

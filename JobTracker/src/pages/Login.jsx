@@ -1,21 +1,34 @@
 /* 
   LEARNING COMMENT: Import statements for Login component functionality
   - useState: React hook for managing form input state (email and password)
+  - useNavigate: React Router hook for programmatic navigation after login
   - Link: React Router component for client-side navigation without page refreshes
-  - This component creates a basic login interface for user authentication
+  - useAuth: Custom hook to access authentication context (login function, loading state, etc.)
+  - This component creates a login interface integrated with backend authentication
 */
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 
 /* 
   LEARNING COMMENT: Login Component - User authentication interface
   - This functional component creates a login form for user authentication
   - Features email/password form, validation, and navigation links
-  - Currently implemented as a demo interface (no actual authentication backend)
-  - Uses controlled components for form inputs and basic form validation
-  - Includes links to signup and demo mode for user convenience
+  - Integrated with backend API for real authentication
+  - Uses controlled components for form inputs and includes error handling
+  - Redirects to dashboard after successful login
 */
 function Login() {
+  /* 
+    LEARNING COMMENT: Authentication context integration
+    - useAuth() gives us access to the login function and loading/error states
+    - login: function to authenticate user (handles API call and state management)
+    - loading: boolean to show spinner during authentication
+    - error: string to display authentication error messages
+    - This connects our Login page to the global authentication system
+  */
+  const { login, loading, error: authError, clearError } = useAuth()
+
   /* 
     LEARNING COMMENT: Form data state management
     - useState hook manages form input values in a single object
@@ -29,16 +42,40 @@ function Login() {
   })
 
   /* 
-    LEARNING COMMENT: Form submission handler
+    LEARNING COMMENT: Local error state for form validation
+    - Separate from authError which comes from the authentication context
+    - Used for client-side validation errors (empty fields, format errors)
+  */
+  const [localError, setLocalError] = useState('')
+
+  /* 
+    LEARNING COMMENT: Async form submission handler
     - Handles login form submission when user clicks "Sign In"
     - e.preventDefault(): Prevents default browser form submission (page refresh)
-    - Currently logs form data to console (demo implementation)
-    - In production, this would send data to authentication API
+    - Uses login function from AuthContext which handles API call and navigation
+    - AuthContext will redirect to dashboard on successful login
   */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: Replace with actual authentication logic
-    console.log('Login attempt:', formData)
+    setLocalError('')
+    clearError() // Clear any previous auth errors
+
+    // Basic client-side validation
+    if (!formData.email || !formData.password) {
+      setLocalError('Please enter both email and password')
+      return
+    }
+
+    try {
+      // Call login function from AuthContext
+      // This handles the API call, state updates, and navigation
+      await login(formData.email, formData.password)
+      // No need to redirect here - AuthContext handles navigation
+      
+    } catch (err) {
+      // Error is already set in AuthContext, no need to handle here
+      console.error('Login failed:', err)
+    }
   }
 
   /* 
@@ -113,6 +150,18 @@ function Login() {
           - text-center: Centers heading above form
         */}
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Sign In</h2>
+        
+        {/* 
+          LEARNING COMMENT: Error display section
+          - Shows authentication errors from backend or local validation errors
+          - Only displays when there's an error to show
+          - Red styling to indicate error state
+        */}
+        {(authError || localError) && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {authError || localError}
+          </div>
+        )}
         
         {/* 
           LEARNING COMMENT: Login form element
@@ -207,22 +256,41 @@ function Login() {
           </div>
 
           {/* 
-            LEARNING COMMENT: Submit button
+            LEARNING COMMENT: Error Message Display
+            - Shows authentication errors to users
+            - Conditional rendering: only shows when error exists
+            - Red styling to indicate error state
+            - mb-4: margin bottom to separate from submit button
+          */}
+          {(authError || localError) && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+              <p className="text-red-700 text-sm">{authError || localError}</p>
+            </div>
+          )}
+
+          {/* 
+            LEARNING COMMENT: Submit button with loading state
             - type="submit": Triggers form submission and handleSubmit function
-            - w-full: Full width of form container for prominent appearance
-            - bg-blue-600 hover:bg-blue-700: Blue background with darker blue on hover
-            - text-white: White text for contrast on blue background
-            - font-bold: Bold font weight for button emphasis
-            - py-3 px-4: 0.75rem vertical, 1rem horizontal padding for generous click area
-            - rounded-lg: Large border radius matching form inputs
-            - transition-colors: Smooth color transitions for better UX
-            - duration-200: 200ms transition duration for responsive feel
+            - disabled when loading to prevent multiple submissions
+            - Shows loading spinner when authentication is in progress
+            - Button text changes based on loading state
           */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
           >
-            Sign In
+            {loading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing In...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </button>
         </form>
 
@@ -237,13 +305,13 @@ function Login() {
             LEARNING COMMENT: Sign up link text and link
             - text-gray-600: Medium gray for readable secondary text
             - Link component: React Router for client-side navigation
-            - to="/signup": Navigation destination (would need SignUp component)
+            - to="/register": Navigation destination to Register component
             - text-blue-600 hover:text-blue-800: Blue link color with darker hover
             - font-medium: Medium font weight for link emphasis
           */}
           <p className="text-gray-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-blue-600 hover:text-blue-800 font-medium">
+            <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium">
               Sign up here
             </Link>
           </p>

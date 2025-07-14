@@ -1,7 +1,8 @@
 /* 
   LEARNING COMMENT: Import statements for AddResumeModal functionality
-  - useState: React hook for managing component state (form data, drag state)
+  - useState: React hook for managing component state (form data, drag state, upload status)
   - This modal component handles file uploads with drag-and-drop functionality
+  - Now includes loading states and error handling for backend integration
 */
 import { useState } from 'react'
 
@@ -31,6 +32,22 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
   })
   
   /* 
+    LEARNING COMMENT: Upload status state management
+    - uploading: boolean indicating if file upload is in progress
+    - Used to show loading spinner and disable form during upload
+    - Prevents multiple simultaneous uploads
+  */
+  const [uploading, setUploading] = useState(false)
+
+  /* 
+    LEARNING COMMENT: Error state management
+    - uploadError: stores error message if upload fails
+    - Used to display helpful error messages to users
+    - Gets reset when user starts a new upload attempt
+  */
+  const [uploadError, setUploadError] = useState(null)
+
+  /* 
     LEARNING COMMENT: Drag-and-drop state management
     - dragActive: boolean indicating if user is currently dragging a file over the drop zone
     - Used to change visual styling during drag operations
@@ -54,15 +71,31 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
   }
 
   /* 
-    LEARNING COMMENT: File input change handler
+    LEARNING COMMENT: File input change handler with validation
     - Handles when user selects a file through the file input
-    - e.target.files[0]: gets the first (and only) selected file
+    - Validates file type and size before setting in state
     - Automatically sets the resume name from filename if user hasn't provided one
-    - file.name.replace(/\.[^/.]+$/, ""): removes file extension from filename
+    - Clears any previous upload errors
   */
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
+      /* Validate file type */
+      if (!isValidFileType(file)) {
+        setUploadError('Please select a PDF or Word document (.pdf, .doc, .docx)')
+        return
+      }
+      
+      /* Validate file size (10MB limit) */
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError('File size must be less than 10MB')
+        return
+      }
+      
+      /* Clear any previous errors */
+      setUploadError(null)
+      
+      /* Update form data with the valid file */
       setFormData(prev => ({
         ...prev,
         file: file,
@@ -70,6 +103,21 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
         name: prev.name || file.name.replace(/\.[^/.]+$/, "")
       }))
     }
+  }
+
+  /* 
+    LEARNING COMMENT: File validation helper function
+    - Checks if uploaded file is a supported document type
+    - Accepts PDF and Word documents (.pdf, .doc, .docx)
+    - Could be extended to support other formats as needed
+  */
+  const isValidFileType = (file) => {
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ]
+    return allowedTypes.includes(file.type)
   }
 
   /* 
@@ -91,10 +139,10 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
   }
 
   /* 
-    LEARNING COMMENT: File drop handler
+    LEARNING COMMENT: File drop handler with validation
     - Handles when user drops a file onto the drop zone
+    - Includes same validation as file input handler
     - e.dataTransfer.files: contains files that were dropped
-    - Same logic as handleFileChange but for dropped files
     - Sets dragActive to false since drop operation is complete
   */
   const handleDrop = (e) => {
@@ -104,6 +152,23 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
     
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0]
+      
+      /* Validate file type */
+      if (!isValidFileType(file)) {
+        setUploadError('Please select a PDF or Word document (.pdf, .doc, .docx)')
+        return
+      }
+      
+      /* Validate file size (10MB limit) */
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError('File size must be less than 10MB')
+        return
+      }
+      
+      /* Clear any previous errors */
+      setUploadError(null)
+      
+      /* Update form data with the valid file */
       setFormData(prev => ({
         ...prev,
         file: file,
@@ -113,29 +178,57 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
   }
 
   /* 
-    LEARNING COMMENT: Form submission handler
+    LEARNING COMMENT: Async form submission handler
     - Called when user clicks "Upload Resume" button
-    - e.preventDefault(): prevents form from refreshing the page
-    - Validates that both name and file are provided
-    - Calls onSave with form data, then resets form and closes modal
+    - Now handles asynchronous file upload to backend
+    - Shows loading state during upload and handles errors
+    - Uses try-catch for proper error handling
   */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (formData.name && formData.file) {
-      onSave(formData)                                                    // Send data to parent component
-      setFormData({ name: '', file: null, description: '' })            // Reset form
-      onClose()                                                          // Close modal
+    
+    /* Validate required fields */
+    if (!formData.name.trim()) {
+      setUploadError('Please enter a resume name')
+      return
+    }
+    
+    if (!formData.file) {
+      setUploadError('Please select a file to upload')
+      return
+    }
+    
+    try {
+      setUploading(true)               // Show loading spinner
+      setUploadError(null)             // Clear any previous errors
+      
+      /* Call onSave function (which will call API through ResumesContext) */
+      await onSave(formData)
+      
+      /* Reset form and close modal on success */
+      setFormData({ name: '', file: null, description: '' })
+      onClose()
+      
+    } catch (error) {
+      /* Display error message to user */
+      console.error('Upload failed:', error)
+      setUploadError(error.message || 'Failed to upload resume. Please try again.')
+    } finally {
+      setUploading(false)              // Hide loading spinner
     }
   }
 
   /* 
     LEARNING COMMENT: Form reset and close handler
     - Resets all form fields to empty values
+    - Clears upload status and error states
     - Closes the modal without saving
     - Used for Cancel button and X button
   */
   const resetForm = () => {
     setFormData({ name: '', file: null, description: '' })
+    setUploading(false)
+    setUploadError(null)
     onClose()
   }
 
@@ -351,6 +444,19 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
           </div>
 
           {/* 
+            LEARNING COMMENT: Error Message Display
+            - Shows validation errors and upload failures to users
+            - Conditional rendering: only shows when uploadError has a value
+            - Red styling to indicate error state
+            - mb-4: margin bottom to separate from buttons
+          */}
+          {uploadError && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
+              <p className="text-red-700 dark:text-red-300 text-sm">{uploadError}</p>
+            </div>
+          )}
+
+          {/* 
             LEARNING COMMENT: Form Action Buttons
             - Cancel and Submit buttons side by side
             - flex space-x-3: horizontal layout with spacing
@@ -373,19 +479,36 @@ function AddResumeModal({ isOpen, onClose, onSave }) {
             </button>
             
             {/* 
-              LEARNING COMMENT: Submit Button
+              LEARNING COMMENT: Submit Button with Loading State
               - type="submit": triggers form submission
-              - disabled={!formData.name || !formData.file}: button disabled if required fields empty
+              - disabled when: required fields empty OR currently uploading
+              - Shows loading spinner when uploading is in progress
+              - Button text changes based on upload state
               - Primary styling (dark background) indicates main action
-              - disabled:opacity-50: visual feedback when button is disabled
-              - disabled:cursor-not-allowed: cursor change when disabled
             */}
             <button
               type="submit"
-              disabled={!formData.name || !formData.file}
-              className="flex-1 px-4 py-2 bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!formData.name || !formData.file || uploading}
+              className="flex-1 px-4 py-2 bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              Upload Resume
+              {/* 
+                LEARNING COMMENT: Conditional rendering for button content
+                - Shows loading spinner when uploading
+                - Shows normal text when not uploading
+                - Loading spinner is an animated SVG
+              */}
+              {uploading ? (
+                <>
+                  {/* Loading spinner animation */}
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                'Upload Resume'
+              )}
             </button>
           </div>
         </form>

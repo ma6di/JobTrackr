@@ -4,9 +4,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 // 🎨 LEARNING: Context Providers - These wrap the entire app to share data globally
+// AuthProvider: Manages user authentication and login state across ALL components
 // ThemeProvider: Manages dark/light mode across ALL components
 // ResumesProvider: Manages resume data that any component can access
 // JobsProvider: Manages job application data globally
+import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { ResumesProvider } from './contexts/ResumesContext'
 import { JobsProvider } from './contexts/JobsContext'
@@ -15,6 +17,7 @@ import { JobsProvider } from './contexts/JobsContext'
 // Each import brings in a different page or reusable piece of UI
 import Navigation from './components/Navigation'  // Top navigation bar
 import Login from './pages/Login'                 // Login page
+import Register from './pages/Register'           // Registration page
 import Dashboard from './pages/Dashboard'         // Main dashboard page  
 import Resumes from './pages/Resumes'             // Resume management page
 import Jobs from './pages/Jobs'                   // Job applications page
@@ -34,31 +37,32 @@ function App() {
     /* 🌍 LEARNING: Context Provider Nesting - These provide global data to all child components
        Think of these like "wrappers" that give superpowers to everything inside them */
     
-    /* 🎨 ThemeProvider: Makes dark/light mode available everywhere
-       🔄 EFFECT: Remove this and dark mode won't work anywhere in the app */
-    <ThemeProvider>
-      
-      {/* 📁 ResumesProvider: Makes resume data available everywhere  
-          🔄 EFFECT: Remove this and components can't share resume data */}
-      <ResumesProvider>
+    /* 🔐 AuthProvider: Makes authentication state available everywhere
+       🔄 EFFECT: Remove this and login/logout won't work globally */
+    <Router>
+      <AuthProvider>
         
-        {/* 💼 JobsProvider: Makes job application data available everywhere
-            🔄 EFFECT: Remove this and job data won't be shared between components */}
-        <JobsProvider>
+        {/* 🎨 ThemeProvider: Makes dark/light mode available everywhere
+           🔄 EFFECT: Remove this and dark mode won't work anywhere in the app */}
+        <ThemeProvider>
           
-          {/* 🧭 Router: Enables navigation between different pages
-              🔄 EFFECT: Remove this and you'll only see one page, no navigation */}
-          <Router>
+          {/* 📁 ResumesProvider: Makes resume data available everywhere  
+              🔄 EFFECT: Remove this and components can't share resume data */}
+          <ResumesProvider>
             
-            {/* 🎨 LEARNING: Main Container Div - This wraps the entire visible app
-                📏 SIZING: "min-h-screen" = minimum height is full screen height
-                🎨 BACKGROUND: Complex gradient that changes based on light/dark mode
-                🔄 EFFECT: Change "min-h-screen" to "h-64" to see a shorter container */}
-            <div className="
-              min-h-screen
-              bg-gradient-to-br
-              from-slate-50 via-gray-50 to-neutral-100
-              dark:from-gray-900 dark:via-slate-900 dark:to-gray-800
+            {/* 💼 JobsProvider: Makes job application data available everywhere
+                🔄 EFFECT: Remove this and job data won't be shared between components */}
+            <JobsProvider>
+            
+              {/* 🎨 LEARNING: Main Container Div - This wraps the entire visible app
+                  📏 SIZING: "min-h-screen" = minimum height is full screen height
+                  🎨 BACKGROUND: Complex gradient that changes based on light/dark mode
+                  🔄 EFFECT: Change "min-h-screen" to "h-64" to see a shorter container */}
+              <div className="
+                min-h-screen
+                bg-gradient-to-br
+                from-slate-50 via-gray-50 to-neutral-100
+                dark:from-gray-900 dark:via-slate-900 dark:to-gray-800
               transition-colors duration-300
             ">
               
@@ -71,6 +75,8 @@ function App() {
                     element={} defines what component to show
                     🔄 EFFECT: Change path="/login" to see login page at /login instead of / */}
                 <Route path="/" element={<Login />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 
                 {/* 📊 Dashboard Route - Shows navigation + dashboard content
                     path="/dashboard" means website.com/dashboard
@@ -108,11 +114,12 @@ function App() {
                 } />
                 
               </Routes>
-            </div>
-          </Router>
-        </JobsProvider>
-      </ResumesProvider>
-    </ThemeProvider>
+              </div>
+            </JobsProvider>
+          </ResumesProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </Router>
   )
 }
 

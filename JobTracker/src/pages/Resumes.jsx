@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { useResumes } from '../contexts/ResumesContext'
 import AddResumeModal from '../components/AddResumeModal'
+import ResumePreviewModal from '../components/ResumePreviewModal'
 
 /* 
   LEARNING COMMENT: Resumes Component - Resume management page
@@ -19,11 +20,14 @@ function Resumes() {
   /* 
     LEARNING COMMENT: Resume context integration
     - useResumes() provides access to resume data and functions from global context
-    - resumes: array of resume objects with file information
-    - addResume: function to add new resume to the collection
-    - This connects the component to our global resume management system
+    - resumes: array of resume objects with file information from backend
+    - addResume: async function to upload new resume to backend
+    - downloadResume: function to download resume files
+    - deleteResume: function to delete resumes from backend
+    - loading: indicates if API operations are in progress
+    - error: contains error messages from failed operations
   */
-  const { resumes, addResume } = useResumes()
+  const { resumes, addResume, downloadResume, deleteResume, loading, error } = useResumes()
   
   /* 
     LEARNING COMMENT: Modal state management
@@ -35,16 +39,92 @@ function Resumes() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   /* 
-    LEARNING COMMENT: Resume submission handler
+    LEARNING COMMENT: Preview modal state management
+    - isPreviewModalOpen: boolean state for preview modal visibility
+    - selectedResume: stores the resume to be previewed
+    - Used to show resume content in a popup window
+  */
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false)
+  const [selectedResume, setSelectedResume] = useState(null)
+
+  /* 
+    LEARNING COMMENT: File size formatting utility function
+    - Converts bytes to human-readable format (B, KB, MB, GB)
+    - Takes raw file size in bytes and returns formatted string
+    - Used to display file sizes in a user-friendly way
+  */
+  const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return '0 B'
+    
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+  }
+
+  /* 
+    LEARNING COMMENT: Async resume submission handler
     - Called when user successfully uploads a new resume through the modal
     - resumeData: object containing new resume information (name, file, etc.)
-    - addResume(resumeData): adds the new resume to global state
-    - setIsAddModalOpen(false): closes the modal after successful upload
-    - This creates a smooth user experience: upload → save → close modal
+    - Now handles async file upload to backend with proper error handling
+    - Modal stays open if upload fails so user can retry
   */
-  const handleAddResume = (resumeData) => {
-    addResume(resumeData)
-    setIsAddModalOpen(false)
+  const handleAddResume = async (resumeData) => {
+    try {
+      await addResume(resumeData)           // Upload to backend
+      setIsAddModalOpen(false)              // Close modal on success
+    } catch (error) {
+      /* Error is handled by AddResumeModal and ResumesContext */
+      console.error('Failed to add resume:', error)
+      /* Modal stays open so user can see error and retry */
+    }
+  }
+
+  /* 
+    LEARNING COMMENT: Resume download handler
+    - Called when user clicks download button on a resume card
+    - Uses the downloadResume function from context to download file
+    - Handles errors gracefully with console logging
+  */
+  const handleDownloadResume = async (resume) => {
+    try {
+      await downloadResume(resume)
+    } catch (error) {
+      console.error('Failed to download resume:', error)
+      /* Error message is shown by ResumesContext */
+    }
+  }
+
+  /* 
+    LEARNING COMMENT: Resume deletion handler
+    - Called when user clicks delete button on a resume card
+    - Could be enhanced with confirmation dialog
+    - Removes resume file from S3 and database record
+  */
+  const handleDeleteResume = async (resumeId) => {
+    try {
+      await deleteResume(resumeId)
+    } catch (error) {
+      console.error('Failed to delete resume:', error)
+      /* Error message is shown by ResumesContext */
+    }
+  }
+
+  /* 
+    LEARNING COMMENT: Resume preview/view handler
+    - Called when user clicks the eye icon to view/preview a resume
+    - Opens a modal popup with the resume content
+    - Shows different content based on file type (PDF, text, etc.)
+  */
+  const handleViewResume = async (resume) => {
+    try {
+      setSelectedResume(resume)
+      setIsPreviewModalOpen(true)
+    } catch (error) {
+      console.error('Failed to view resume:', error)
+      /* Error message is shown by ResumesContext */
+    }
   }
 
   /* 
@@ -100,6 +180,42 @@ function Resumes() {
         </div>
 
         {/* 
+          LEARNING COMMENT: Error Message Display
+          - Shows API errors to users (upload failures, download failures, etc.)
+          - Conditional rendering: only shows when error exists
+          - Red styling to indicate error state
+          - mb-6: margin bottom to separate from content
+        */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-600 dark:text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"></path>
+              </svg>
+              <p className="text-red-700 dark:text-red-300">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* 
+          LEARNING COMMENT: Loading State Display
+          - Shows loading spinner when API operations are in progress
+          - Prevents user confusion during async operations
+          - Centers the spinner in the content area
+        */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="flex items-center space-x-3">
+              <svg className="animate-spin h-6 w-6 text-slate-600 dark:text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-slate-600 dark:text-slate-400">Loading resumes...</span>
+            </div>
+          </div>
+        )}
+
+        {/* 
           LEARNING COMMENT: Resume Grid Layout
           - Responsive grid that adapts to different screen sizes
           - grid-cols-1: single column on mobile devices
@@ -108,7 +224,39 @@ function Resumes() {
           - gap-4: 16px spacing between grid items
           - Creates a responsive layout that looks good on all devices
         */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* 
+          LEARNING COMMENT: Resume Grid Layout (only shown when not loading)
+          - Responsive grid that adapts to different screen sizes
+          - grid-cols-1: single column on mobile devices
+          - md:grid-cols-2: two columns on medium screens (768px+)
+          - lg:grid-cols-3: three columns on large screens (1024px+)
+          - gap-4: 16px spacing between grid items
+          - Creates a responsive layout that looks good on all devices
+        */}
+        {!loading && (
+          <>
+            {resumes.length === 0 ? (
+              /* 
+                LEARNING COMMENT: Empty state display
+                - Shows when user has no resumes yet
+                - Encourages users to upload their first resume
+                - Centered layout with helpful messaging
+              */
+              <div className="text-center py-12">
+                <svg className="w-16 h-16 text-slate-400 dark:text-gray-500 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path>
+                </svg>
+                <h3 className="text-xl font-medium text-slate-700 dark:text-slate-300 mb-2">No resumes yet</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-6">Upload your first resume to get started</p>
+                <button 
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300"
+                >
+                  Upload Resume
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
           {/* 
             LEARNING COMMENT: Dynamic resume cards rendering
@@ -150,12 +298,16 @@ function Resumes() {
                 <div className="flex space-x-1">
                   
                   {/* 
-                    LEARNING COMMENT: View/Preview button
+                    LEARNING COMMENT: View/Preview button with click handler
                     - Blue color theme indicates view/preview action
                     - Eye icon represents viewing functionality
+                    - onClick calls handleViewResume with current resume
                     - w-7 h-7: 28px square size for compact button
                   */}
-                  <button className="w-7 h-7 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 rounded-lg flex items-center justify-center transition-all duration-200">
+                  <button 
+                    onClick={() => handleViewResume(resume)}
+                    className="w-7 h-7 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 rounded-lg flex items-center justify-center transition-all duration-200"
+                  >
                     {/* Eye/view icon */}
                     <svg className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
@@ -164,12 +316,16 @@ function Resumes() {
                   </button>
                   
                   {/* 
-                    LEARNING COMMENT: Download button
+                    LEARNING COMMENT: Download button with click handler
                     - Green/emerald color theme indicates download action
+                    - onClick calls handleDownloadResume with current resume
                     - Download arrow icon represents downloading functionality
                     - Same compact sizing as other action buttons
                   */}
-                  <button className="w-7 h-7 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 rounded-lg flex items-center justify-center transition-all duration-200">
+                  <button 
+                    onClick={() => handleDownloadResume(resume)}
+                    className="w-7 h-7 bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 rounded-lg flex items-center justify-center transition-all duration-200"
+                  >
                     {/* Download arrow icon */}
                     <svg className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"></path>
@@ -177,12 +333,16 @@ function Resumes() {
                   </button>
                   
                   {/* 
-                    LEARNING COMMENT: Delete button
+                    LEARNING COMMENT: Delete button with click handler
                     - Red/rose color theme indicates destructive delete action
+                    - onClick calls handleDeleteResume with current resume ID
                     - Trash can icon represents deletion functionality
                     - Consistent sizing but different color signals danger
                   */}
-                  <button className="w-7 h-7 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 rounded-lg flex items-center justify-center transition-all duration-200">
+                  <button 
+                    onClick={() => handleDeleteResume(resume.id)}
+                    className="w-7 h-7 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 rounded-lg flex items-center justify-center transition-all duration-200"
+                  >
                     {/* Trash/delete icon */}
                     <svg className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd"></path>
@@ -193,12 +353,12 @@ function Resumes() {
               
               {/* 
                 LEARNING COMMENT: Resume name/title
-                - Displays the name of the resume file
-                - {resume.name}: dynamically shows the resume name from state
+                - Displays the title of the resume file
+                - {resume.title}: dynamically shows the resume title from state
                 - text-base: 16px font size, font-semibold: bold weight
                 - mb-2: adds bottom margin to separate from metadata below
               */}
-              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-2">{resume.name}</h3>
+              <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-2">{resume.title}</h3>
               
               {/* 
                 LEARNING COMMENT: Resume metadata section
@@ -220,7 +380,7 @@ function Resumes() {
                   <svg className="w-3.5 h-3.5 text-slate-500 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"></path>
                   </svg>
-                  <span>Uploaded: {resume.uploadDate}</span>
+                  <span>Uploaded: {new Date(resume.createdAt).toLocaleDateString('en-GB')}</span>
                 </div>
                 
                 {/* 
@@ -234,7 +394,7 @@ function Resumes() {
                   <svg className="w-3.5 h-3.5 text-slate-500 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15.586 13V12a1 1 0 011-1z" clipRule="evenodd"></path>
                   </svg>
-                  <span>Size: {resume.fileSize}</span>
+                  <span>Size: {formatFileSize(resume.fileSize)}</span>
                 </div>
                 
                 {/* 
@@ -248,62 +408,21 @@ function Resumes() {
                   <svg className="w-3.5 h-3.5 text-slate-500 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path>
                   </svg>
-                  <span>Format: {resume.format}</span>
-                </div>
-                
-                {/* 
-                  LEARNING COMMENT: Page count row
-                  - Shows number of pages in the resume
-                  - Pages/document stack icon represents page count
-                  - Helps users understand resume length
-                */}
-                <div className="flex items-center space-x-2">
-                  {/* Pages/document stack icon */}
-                  <svg className="w-3.5 h-3.5 text-slate-500 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clipRule="evenodd"></path>
-                    <path fillRule="evenodd" d="M15 7h1a2 2 0 012 2v8a2 2 0 01-2 2H8a2 2 0 01-2-2v-1h8a2 2 0 002-2V7z" clipRule="evenodd"></path>
-                  </svg>
-                  <span>Pages: {resume.pages}</span>
+                  <span>Format: {
+                    resume.mimeType === 'application/pdf' ? 'PDF' :
+                    resume.mimeType === 'application/msword' ? 'DOC' :
+                    resume.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? 'DOCX' :
+                    resume.mimeType === 'text/plain' ? 'TXT' :
+                    resume.originalName?.split('.').pop()?.toUpperCase() || 'Unknown'
+                  }</span>
                 </div>
               </div>
             </div>
           ))}
-          
-          {/* 
-            LEARNING COMMENT: "Add New Resume" Card
-            - Special card that acts as a button to open upload modal
-            - Appears at the end of the resume grid
-            - Uses dashed border to indicate it's an add/create action
-            - onClick opens the upload modal for easy access
-            - cursor-pointer: changes cursor to hand when hovering
-          */}
-          <div 
-            onClick={() => setIsAddModalOpen(true)}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-4 border-2 border-dashed border-slate-400 dark:border-gray-600 hover:border-slate-500 dark:hover:border-gray-500 transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer transform hover:-translate-y-1 hover:shadow-3xl"
-          >
-            {/* 
-              LEARNING COMMENT: Add button icon container
-              - Larger circular background with plus icon
-              - w-12 h-12: 48px size (larger than resume file icons)
-              - Centers the plus icon for clear "add" visual cue
-            */}
-            <div className="w-12 h-12 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3 transition-colors duration-300">
-              {/* Plus/add icon */}
-              <svg className="w-6 h-6 text-slate-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd"></path>
-              </svg>
-            </div>
-            
-            {/* 
-              LEARNING COMMENT: Add card text content
-              - Title and description explaining the action
-              - Consistent with resume card styling but centered
-              - Provides clear call-to-action for users
-            */}
-            <h3 className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-1">Upload New Resume</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-500">Click to add a new resume version</p>
-          </div>
-        </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* 
@@ -318,6 +437,22 @@ function Resumes() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleAddResume}
+      />
+
+      {/* 
+        LEARNING COMMENT: Resume Preview Modal Component
+        - Modal component for viewing resume content
+        - isOpen={isPreviewModalOpen}: controls modal visibility
+        - onClose: function to close modal and clear selected resume
+        - resume={selectedResume}: the resume object to preview
+      */}
+      <ResumePreviewModal 
+        isOpen={isPreviewModalOpen} 
+        onClose={() => {
+          setIsPreviewModalOpen(false)
+          setSelectedResume(null)
+        }} 
+        resume={selectedResume} 
       />
     </div>
   )
