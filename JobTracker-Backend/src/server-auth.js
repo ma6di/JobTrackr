@@ -31,6 +31,9 @@ import userRoutes from './routes/users.js'; // User management routes
 import jobRoutes from './routes/jobs.js'; // Job tracking routes
 import resumeRoutes from './routes/resumes.js'; // Resume management routes
 
+// Import file upload utilities
+import { ensureUploadDirectories, cleanupTempFiles } from './utils/fileUpload.js';
+
 // Initialize Express application
 const app = express();
 
@@ -196,6 +199,25 @@ app.use('*', (req, res) => {
 
 // Global error handler - catches all other errors
 app.use(errorHandler);
+
+/*
+ * STARTUP INITIALIZATION
+ * Initialize file upload directories and cleanup old temp files
+ */
+
+// Initialize upload directories and cleanup temp files
+async function initializeServer() {
+  try {
+    await ensureUploadDirectories()
+    await cleanupTempFiles(24) // Clean files older than 24 hours
+    console.log('🗂️ File upload system initialized')
+  } catch (error) {
+    console.error('❌ File upload initialization error:', error)
+  }
+}
+
+// Initialize file upload system
+await initializeServer()
 
 /*
  * SERVER STARTUP

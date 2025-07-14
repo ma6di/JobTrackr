@@ -285,8 +285,10 @@ router.get('/me', requireAuth, async (req, res) => {
         createdAt: true,
         updatedAt: true,
         _count: {
-          jobs: true,
-          resumes: true
+          select: {
+            jobs: true,
+            resumes: true
+          }
         }
       }
     })

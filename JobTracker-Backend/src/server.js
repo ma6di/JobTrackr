@@ -16,9 +16,10 @@ import rateLimit from 'express-rate-limit'
 import dotenv from 'dotenv'
 
 // Import custom modules (we'll create these)
-import { connectDatabase } from './config/database.js'
+import { connectDatabase, getPrismaClient } from './config/database.js'
 import { configureAWS } from './config/aws.js'
 import errorHandler from './middleware/errorHandler.js'
+import { requireAuth } from './middleware/auth.js'
 
 // Import route handlers (we'll create these)
 import authRoutes from './routes/auth.js'
@@ -64,7 +65,12 @@ app.use(helmet())
   - Essential for frontend-backend communication
 */
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174', 
+    'http://localhost:5175',
+    process.env.CORS_ORIGIN
+  ].filter(Boolean),
   credentials: true, // Allow cookies and auth headers
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -78,6 +84,16 @@ app.use(cors({
 */
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+
+/* 
+  LEARNING COMMENT: Prisma Middleware
+  - Adds Prisma client to req.prisma for use in routes
+  - Makes database operations available in all route handlers
+*/
+app.use((req, res, next) => {
+  req.prisma = getPrismaClient()
+  next()
+})
 
 /* 
   LEARNING COMMENT: Compression Middleware
@@ -134,10 +150,10 @@ app.get('/health', (req, res) => {
   - Organizes endpoints by functionality (auth, users, resumes, jobs)
   - RESTful API design pattern
 */
-app.use('/api/auth', authRoutes)      // Authentication: /api/auth/login, /api/auth/register
-app.use('/api/users', userRoutes)     // User management: /api/users/profile
-app.use('/api/resumes', resumeRoutes) // Resume CRUD: /api/resumes, /api/resumes/:id
-app.use('/api/jobs', jobRoutes)       // Job applications: /api/jobs, /api/jobs/:id
+app.use('/api/auth', authRoutes)                    // Authentication: /api/auth/login, /api/auth/register
+app.use('/api/users', requireAuth, userRoutes)     // User management: /api/users/profile (protected)
+app.use('/api/resumes', requireAuth, resumeRoutes) // Resume CRUD: /api/resumes, /api/resumes/:id (protected)
+app.use('/api/jobs', requireAuth, jobRoutes)       // Job applications: /api/jobs, /api/jobs/:id (protected)
 
 /* 
   LEARNING COMMENT: 404 Handler for Unknown Routes

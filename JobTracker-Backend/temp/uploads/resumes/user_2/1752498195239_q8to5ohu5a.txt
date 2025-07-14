@@ -1,0 +1,24 @@
+This is a test PDF content for preview testing
+
+RESUME - SOFTWARE ENGINEER
+
+Name: Test User
+Email: test@example.com
+Phone: (555) 123-4567
+
+Skills:
+- JavaScript/TypeScript
+- React & Node.js
+- Database Management
+- Problem Solving
+
+Experience:
+Senior Developer (2021-Present)
+- Led development of web applications
+- Mentored junior developers
+- Improved system performance by 40%
+
+Education:
+Computer Science Degree - 2020
+
+This resume is for testing the preview functionality in the JobTracker application.

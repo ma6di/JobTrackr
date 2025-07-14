@@ -138,4 +138,6 @@ function getDatabaseInfo() {
 */
 export { prisma }
 
+export const getPrismaClient = () => prisma
+
 export default prisma
