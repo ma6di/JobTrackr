@@ -33,7 +33,7 @@ function ResumePreviewModal({ isOpen, onClose, resume }) {
       
       console.log('Loading resume with ID:', resume.id)
       
-      // Use the API function instead of direct fetch
+      // Use the API function to get the response
       const response = await previewResume(resume.id)
 
       console.log('Response status:', response.status)

@@ -3,10 +3,14 @@
   - This modal component displays job information in read-only format
   - Shows all job details without edit capabilities
   - Provides a quick overview of job application details
+  - Shows resume information and allows resume preview
 */
-import React from 'react'
+import React, { useState } from 'react'
+import ResumePreviewModal from './ResumePreviewModal'
 
 function JobViewModal({ isOpen, onClose, job }) {
+  const [isResumePreviewOpen, setIsResumePreviewOpen] = useState(false)
+  
   // Don't render if modal is not open or no job is selected
   if (!isOpen || !job) return null
 
@@ -94,20 +98,9 @@ function JobViewModal({ isOpen, onClose, job }) {
               
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Applied Date</label>
-                <p className="text-gray-900 dark:text-gray-100">{job.appliedDate}</p>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Match Score</label>
-                <div className="flex items-center space-x-3 mt-1">
-                  <div className="w-32 bg-gray-300 dark:bg-gray-600 rounded-full h-2">
-                    <div 
-                      className="bg-emerald-600 dark:bg-emerald-500 h-2 rounded-full transition-all duration-700"
-                      style={{ width: `${job.matchScore}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">{job.matchScore}%</span>
-                </div>
+                <p className="text-gray-900 dark:text-gray-100">
+                  {job.appliedAt ? new Date(job.appliedAt).toLocaleDateString() : 'Not specified'}
+                </p>
               </div>
             </div>
           </div>
@@ -116,19 +109,42 @@ function JobViewModal({ isOpen, onClose, job }) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Salary</label>
-              <p className="text-gray-900 dark:text-gray-100">{job.salary}</p>
+              <p className="text-gray-900 dark:text-gray-100">{job.salary || 'Not specified'}</p>
             </div>
             
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Employment Type</label>
-              <p className="text-gray-900 dark:text-gray-100">{job.type}</p>
+              <p className="text-gray-900 dark:text-gray-100">{job.jobType || 'Not specified'}</p>
             </div>
             
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Remote Work</label>
-              <p className="text-gray-900 dark:text-gray-100">{job.remote}</p>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
+              <p className="text-gray-900 dark:text-gray-100 capitalize">{job.priority || 'Medium'}</p>
             </div>
           </div>
+
+          {/* Important Dates (if any exist) */}
+          {(job.interviewDate || job.followUpDate) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {job.interviewDate && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Interview Date</label>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {new Date(job.interviewDate).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+              
+              {job.followUpDate && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Follow-up Date</label>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {new Date(job.followUpDate).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Description */}
           {job.description && (
@@ -159,6 +175,67 @@ function JobViewModal({ isOpen, onClose, job }) {
               </p>
             </div>
           )}
+
+          {/* Job Posting URL */}
+          {job.applicationUrl && (
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Job Posting URL</label>
+              <div className="mt-1">
+                <a 
+                  href={job.applicationUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline break-all"
+                >
+                  {job.applicationUrl}
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Additional Information */}
+          {job.additionalInfo && (
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Additional Information</label>
+              <p className="mt-1 text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                {job.additionalInfo}
+              </p>
+            </div>
+          )}
+
+          {/* Resume Used for Application */}
+          {job.resume && (
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Resume Used</label>
+              <div className="mt-1 flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {job.resume.title}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {job.resume.resumeType} • {job.resume.originalName}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsResumePreviewOpen(true)}
+                  className="flex-shrink-0 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
+                  title="Preview Resume"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Modal Footer */}
@@ -171,6 +248,15 @@ function JobViewModal({ isOpen, onClose, job }) {
           </button>
         </div>
       </div>
+
+      {/* Resume Preview Modal */}
+      {job.resume && (
+        <ResumePreviewModal
+          isOpen={isResumePreviewOpen}
+          onClose={() => setIsResumePreviewOpen(false)}
+          resume={job.resume}
+        />
+      )}
     </div>
   )
 }

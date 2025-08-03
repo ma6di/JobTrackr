@@ -60,6 +60,18 @@ router.get('/', async (req, res) => {
     // Get jobs with filters and pagination
     const jobs = await req.prisma.job.findMany({
       where,
+      include: {
+        resume: {
+          select: {
+            id: true,
+            title: true,
+            originalName: true,
+            fileName: true,
+            resumeType: true,
+            mimeType: true
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' },
       skip,
       take: parseInt(limit)
@@ -112,11 +124,13 @@ router.post('/', async (req, res) => {
     appliedAt,
     jobType,
     requirements,
+    additionalInfo,
     applicationUrl,
     priority = 'medium',
     notes,
     interviewDate,
-    followUpDate
+    followUpDate,
+    resumeId
   } = req.body
 
     // Validate required fields
@@ -136,11 +150,12 @@ router.post('/', async (req, res) => {
 
     // Validate salary if provided
     if (salary !== undefined && salary !== null && salary !== '') {
-      // Just validate it's a reasonable number, but store as string
-      const salaryNum = parseFloat(salary)
-      if (isNaN(salaryNum) || salaryNum < 0) {
+      // Allow salary as string (e.g., "$75,000", "75k", "60000-80000")
+      // Just check that it's not completely empty after trimming
+      const trimmedSalary = salary.toString().trim()
+      if (trimmedSalary.length === 0) {
         return res.status(400).json({ 
-          error: 'Salary must be a positive number' 
+          error: 'Salary cannot be empty' 
         })
       }
     }
@@ -158,11 +173,13 @@ router.post('/', async (req, res) => {
         appliedAt: appliedAt ? new Date(appliedAt) : new Date(),
         jobType: jobType?.trim() || null,
         requirements: requirements?.trim() || null,
+        additionalInfo: additionalInfo?.trim() || null,
         applicationUrl: applicationUrl?.trim() || null,
         priority,
         notes: notes?.trim() || null,
         interviewDate: interviewDate ? new Date(interviewDate) : null,
-        followUpDate: followUpDate ? new Date(followUpDate) : null
+        followUpDate: followUpDate ? new Date(followUpDate) : null,
+        resumeId: resumeId ? parseInt(resumeId) : null
       }
     })
 
@@ -325,11 +342,13 @@ router.put('/:id', async (req, res) => {
       appliedAt,
       jobType,
       requirements,
+      additionalInfo,
       applicationUrl,
       priority,
       notes,
       interviewDate,
-      followUpDate
+      followUpDate,
+      resumeId
     } = req.body
 
     // Build update data (only include provided fields)
@@ -386,6 +405,10 @@ router.put('/:id', async (req, res) => {
       updateData.requirements = requirements?.trim() || null
     }
 
+    if (additionalInfo !== undefined) {
+      updateData.additionalInfo = additionalInfo?.trim() || null
+    }
+
     if (applicationUrl !== undefined) {
       updateData.applicationUrl = applicationUrl?.trim() || null
     }
@@ -412,10 +435,26 @@ router.put('/:id', async (req, res) => {
       updateData.followUpDate = followUpDate ? new Date(followUpDate) : null
     }
 
+    if (resumeId !== undefined) {
+      updateData.resumeId = resumeId ? parseInt(resumeId) : null
+    }
+
     // Update the job
     const updatedJob = await req.prisma.job.update({
       where: { id: jobId },
-      data: updateData
+      data: updateData,
+      include: {
+        resume: {
+          select: {
+            id: true,
+            title: true,
+            originalName: true,
+            fileName: true,
+            resumeType: true,
+            mimeType: true
+          }
+        }
+      }
     })
 
     res.json(updatedJob)

@@ -34,28 +34,27 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
   const [formData, setFormData] = useState(() => {
     if (isEdit && initialData) {
       return {
-        applicationDate: initialData.appliedDate || new Date().toISOString().split('T')[0],
-        source: 'manual',
-        jobLink: initialData.jobLink || '',
+        applicationDate: initialData.appliedAt ? initialData.appliedAt.split('T')[0] : new Date().toISOString().split('T')[0],
+        jobLink: initialData.applicationUrl || '',
         company: initialData.company || '',
         position: initialData.position || '',
         location: initialData.location || '',
         salary: initialData.salary || '',
-        type: initialData.type || 'Full-time',
-        remote: initialData.remote || 'On-site',
+        type: initialData.jobType || 'Full-time',
+        remote: 'On-site', // This field might need additional logic
         description: initialData.description || '',
         requirements: initialData.requirements || '',
-        selectedResumeId: initialData.selectedResumeId || '',
+        additionalInfo: initialData.additionalInfo || '',
+        selectedResumeId: initialData.resumeId || '', // Resume ID from job data
         notes: initialData.notes || '',
-        status: initialData.status || 'Applied'
+        status: initialData.status ? initialData.status.charAt(0).toUpperCase() + initialData.status.slice(1) : 'Applied'
       }
     }
     
     return {
       // Step 1: Application Details
       applicationDate: new Date().toISOString().split('T')[0],    // Today's date as default
-      source: 'manual',                                           // How user wants to enter data
-      jobLink: '',                                               // Optional job posting URL
+      jobLink: '',                                               // Job posting URL
       
       // Step 2: Company & Position
       company: '',                                               // Company name
@@ -68,6 +67,7 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
       // Step 3: Job Details
       description: '',                                           // Job description
       requirements: '',                                          // Job requirements
+      additionalInfo: '',                                        // Additional information
       
       // Step 4: Resume & Notes
       selectedResumeId: '',                                      // Which resume was used
@@ -112,12 +112,30 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
 
   /* 
     LEARNING COMMENT: Form submission handler
-    - Called when user completes all steps and submits
-    - Passes form data to parent component via onSave prop
+    - Called when user completes all steps and submits the form
+    - Maps frontend form fields to backend API field names
+    - Passes mapped data to parent component via onSave prop
     - Resets form and closes modal after successful submission
   */
   const handleSubmit = () => {
-    onSave(formData)
+    // Map frontend form fields to backend API fields
+    const mappedData = {
+      company: formData.company,
+      position: formData.position,
+      location: formData.location,
+      salary: formData.salary,
+      jobType: formData.type,
+      description: formData.description,
+      requirements: formData.requirements,
+      additionalInfo: formData.additionalInfo,
+      applicationUrl: formData.jobLink,
+      status: formData.status.toLowerCase(),
+      appliedAt: formData.applicationDate,
+      notes: formData.notes,
+      resumeId: formData.selectedResumeId || null // Include selected resume ID
+    }
+    
+    onSave(mappedData)
     resetForm()
   }
 
@@ -132,7 +150,6 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
     setCurrentStep(1)
     setFormData({
       applicationDate: new Date().toISOString().split('T')[0],
-      source: 'manual',
       jobLink: '',
       company: '',
       position: '',
@@ -142,6 +159,7 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
       remote: 'On-site',
       description: '',
       requirements: '',
+      additionalInfo: '',
       selectedResumeId: '',
       notes: '',
       status: 'Applied'
@@ -162,7 +180,7 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
-        return formData.applicationDate && (formData.source === 'manual' || formData.jobLink)
+        return formData.applicationDate // Only application date is required in step 1
       case 2:
         return formData.company && formData.position
       case 3:
@@ -426,218 +444,48 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
               </div>
 
               {/* 
-                LEARNING COMMENT: Data source selection section
-                - Allows user to choose between manual entry or link-based entry
-                - Important UX decision point that affects the rest of the form
+                LEARNING COMMENT: Job Link field section
+                - Always visible job posting URL field for reference and tracking
               */}
               <div>
                 {/* 
-                  LEARNING COMMENT: Source selection label
+                  LEARNING COMMENT: Job link field label
                   - Same styling pattern as other labels for consistency
                 */}
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  How do you want to add this job?
+                  Job Posting URL <span className="text-xs text-slate-500">(optional)</span>
                 </label>
                 
                 {/* 
-                  LEARNING COMMENT: Source option buttons container
-                  - grid grid-cols-2: Two-column grid layout
-                  - gap-4: 1rem gap between grid items
-                  - Creates side-by-side option buttons
+                  LEARNING COMMENT: URL input field
+                  - type="url": HTML5 URL validation and mobile keyboard optimization
+                  - name="jobLink": Form field identifier for handleInputChange
+                  - value={formData.jobLink}: Controlled component value
+                  - onChange={handleInputChange}: Updates formData when user types
+                  - placeholder: Helpful example of expected URL format
+                  - w-full: Full width of container
+                  - Same Tailwind styling pattern as other inputs for consistency
                 */}
-                <div className="grid grid-cols-2 gap-4">
-                  
-                  {/* 
-                    LEARNING COMMENT: Manual entry option button
-                    - type="button": Prevents form submission when clicked
-                    - onClick: Updates formData.source to 'manual' and clears jobLink
-                    - p-4: 1rem padding on all sides for clickable area
-                    - border-2: 2px border for strong visual definition
-                    - rounded-lg: Large border radius for modern appearance
-                    - text-left: Left-align text content inside button
-                    - transition-colors: Smooth color transitions on state changes
-                    - Conditional styling based on selection state:
-                      * formData.source === 'manual': If this option is selected
-                      * border-slate-500 bg-slate-50: Selected state styling
-                      * border-slate-300: Default border color
-                      * hover:border-slate-400: Hover state for better UX
-                      * dark: variants for all states in dark theme
-                  */}
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, source: 'manual', jobLink: '' }))}
-                    className={`p-4 border-2 rounded-lg text-left transition-colors ${
-                      formData.source === 'manual'
-                        ? 'border-slate-500 bg-slate-50 dark:border-slate-400 dark:bg-gray-700'
-                        : 'border-slate-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-gray-500'
-                    }`}
-                  >
-                    {/* 
-                      LEARNING COMMENT: Manual option content container
-                      - flex items-center: Horizontal layout with vertical centering
-                      - space-x-3: 0.75rem horizontal spacing between icon and text
-                    */}
-                    <div className="flex items-center space-x-3">
-                      {/* 
-                        LEARNING COMMENT: Edit/manual entry icon
-                        - w-6 h-6: 24px x 24px icon size
-                        - text-slate-600 dark:text-slate-400: Medium gray color
-                        - fill="currentColor": Uses parent's text color
-                        - SVG path creates pencil/edit icon representing manual entry
-                      */}
-                      <svg className="w-6 h-6 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
-                      </svg>
-                      
-                      {/* 
-                        LEARNING COMMENT: Manual option text content
-                        - Groups title and description for this option
-                      */}
-                      <div>
-                        {/* 
-                          LEARNING COMMENT: Option title
-                          - font-medium: Medium font weight for emphasis
-                          - text-slate-800 dark:text-slate-200: High contrast readable text
-                        */}
-                        <p className="font-medium text-slate-800 dark:text-slate-200">Fill Manually</p>
-                        
-                        {/* 
-                          LEARNING COMMENT: Option description
-                          - text-xs: Extra small text size (0.75rem/12px)
-                          - text-slate-600 dark:text-slate-400: Lower contrast for secondary info
-                          - Explains what this option does
-                        */}
-                        <p className="text-xs text-slate-600 dark:text-slate-400">Enter job details yourself</p>
-                      </div>
-                    </div>
-                  </button>
-                  
-                  {/* 
-                    LEARNING COMMENT: Link-based entry option button
-                    - Similar structure to manual option but for job link parsing
-                    - onClick: Updates formData.source to 'link' (keeps jobLink for user to fill)
-                    - Same conditional styling pattern as manual option
-                  */}
-                  <button
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, source: 'link' }))}
-                    className={`p-4 border-2 rounded-lg text-left transition-colors ${
-                      formData.source === 'link'
-                        ? 'border-slate-500 bg-slate-50 dark:border-slate-400 dark:bg-gray-700'
-                        : 'border-slate-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-gray-500'
-                    }`}
-                  >
-                    {/* 
-                      LEARNING COMMENT: Link option content container
-                      - Same layout structure as manual option for consistency
-                    */}
-                    <div className="flex items-center space-x-3">
-                      {/* 
-                        LEARNING COMMENT: Link icon
-                        - Same styling as manual icon but different SVG path
-                        - Creates chain link icon representing URL/link functionality
-                        - fillRule and clipRule: SVG rendering rules for complex paths
-                      */}
-                      <svg className="w-6 h-6 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd"></path>
-                      </svg>
-                      
-                      {/* 
-                        LEARNING COMMENT: Link option text content
-                        - Same structure as manual option for UI consistency
-                      */}
-                      <div>
-                        {/* 
-                          LEARNING COMMENT: Link option title
-                          - Same styling as manual option title
-                        */}
-                        <p className="font-medium text-slate-800 dark:text-slate-200">From Job Link</p>
-                        
-                        {/* 
-                          LEARNING COMMENT: Link option description
-                          - Explains that user will paste a job posting URL
-                        */}
-                        <p className="text-xs text-slate-600 dark:text-slate-400">Paste job posting URL</p>
-                      </div>
-                    </div>
-                  </button>
-                </div>
+                <input
+                  type="url"
+                  name="jobLink"
+                  value={formData.jobLink}
+                  onChange={handleInputChange}
+                  placeholder="https://company.com/jobs/position (e.g., LinkedIn, Indeed, company website)"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100"
+                />
+                
+                {/* 
+                  LEARNING COMMENT: Helper text for job link field
+                  - text-xs: Extra small text size for subtle information
+                  - text-slate-500: Medium gray for secondary information
+                  - mt-1: 0.25rem top margin for spacing from input
+                  - Explains the purpose of the job link field
+                */}
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  Save the original job posting URL for easy reference and follow-up
+                </p>
               </div>
-
-              {/* 
-                LEARNING COMMENT: Conditional job link input section
-                - Only renders when user selects 'link' option (formData.source === 'link')
-                - Provides URL input field and fetch button for future job parsing feature
-              */}
-              {formData.source === 'link' && (
-                <div>
-                  {/* 
-                    LEARNING COMMENT: Job link field label
-                    - Same styling pattern as other labels for consistency
-                  */}
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Job Posting URL
-                  </label>
-                  
-                  {/* 
-                    LEARNING COMMENT: URL input and fetch button container
-                    - flex: Horizontal layout for input and button
-                    - space-x-2: 0.5rem horizontal spacing between elements
-                  */}
-                  <div className="flex space-x-2">
-                    {/* 
-                      LEARNING COMMENT: URL input field
-                      - type="url": HTML5 URL validation and mobile keyboard optimization
-                      - name="jobLink": Form field identifier for handleInputChange
-                      - value={formData.jobLink}: Controlled component value
-                      - onChange={handleInputChange}: Updates formData when user types
-                      - placeholder: Helpful example of expected URL format
-                      - flex-1: Takes remaining space after button
-                      - required: HTML5 validation when this input is visible
-                      - Same Tailwind styling pattern as other inputs for consistency
-                    */}
-                    <input
-                      type="url"
-                      name="jobLink"
-                      value={formData.jobLink}
-                      onChange={handleInputChange}
-                      placeholder="https://company.com/jobs/position"
-                      className="flex-1 px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100"
-                      required
-                    />
-                    
-                    {/* 
-                      LEARNING COMMENT: Fetch job details button
-                      - type="button": Prevents form submission
-                      - onClick={fetchJobDetails}: Calls function to parse job URL (future feature)
-                      - px-4 py-2: 1rem horizontal, 0.5rem vertical padding
-                      - bg-slate-600 hover:bg-slate-700: Dark background with darker hover
-                      - dark:bg-slate-700 dark:hover:bg-slate-600: Dark theme variants
-                      - text-white: White text for contrast on dark background
-                      - rounded-lg: Large border radius matching other elements
-                      - transition-colors: Smooth color transitions on hover
-                    */}
-                    <button
-                      type="button"
-                      onClick={fetchJobDetails}
-                      className="px-4 py-2 bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg transition-colors"
-                    >
-                      Fetch
-                    </button>
-                  </div>
-                  
-                  {/* 
-                    LEARNING COMMENT: Helper text for fetch feature
-                    - text-xs: Extra small text size for subtle information
-                    - text-slate-500: Medium gray for secondary information
-                    - mt-1: 0.25rem top margin for spacing from input
-                    - Explains what the fetch button will do (future functionality)
-                  */}
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                    We'll try to extract job details automatically
-                  </p>
-                </div>
-              )}
             </div>
           )}
 
@@ -968,6 +816,49 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
                   className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
+
+              {/* 
+                LEARNING COMMENT: Additional Info field section
+                - Optional field for any extra information about the job
+                - Provides flexibility for storing company culture, benefits, interview notes, etc.
+              */}
+              <div>
+                {/* 
+                  LEARNING COMMENT: Additional Info field label
+                  - Same styling as other labels for consistency
+                */}
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Additional Information
+                </label>
+                
+                {/* 
+                  LEARNING COMMENT: Additional Info textarea
+                  - Same structure and styling as other textarea fields
+                  - name="additionalInfo": Maps to formData.additionalInfo
+                  - placeholder: Guides user on what content to include
+                  - rows="3": Slightly smaller than description/requirements for hierarchy
+                  - Optional field for extra details
+                */}
+                <textarea
+                  name="additionalInfo"
+                  value={formData.additionalInfo}
+                  onChange={handleInputChange}
+                  placeholder="Company culture, benefits, interview notes, or other relevant information..."
+                  rows="3"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100"
+                />
+                
+                {/* 
+                  LEARNING COMMENT: Helper text for additional info field
+                  - text-xs: Extra small text size for subtle information
+                  - text-slate-500: Medium gray for secondary information
+                  - mt-1: 0.25rem top margin for spacing from textarea
+                  - Explains the purpose and flexibility of this field
+                */}
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  Optional: Add any extra details like benefits, company culture, or interview feedback
+                </p>
+              </div>
             </div>
           )}
 
@@ -1230,7 +1121,7 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
                 onClick={handleSubmit}
                 className="px-4 py-2 bg-slate-600 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg transition-colors"
               >
-                Add Application
+                {isEdit ? 'Update Application' : 'Add Application'}
               </button>
             ) : (
               /* 

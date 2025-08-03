@@ -23,11 +23,13 @@ function Jobs() {
     LEARNING COMMENT: Context integration for job management
     - useJobs() provides access to job data and functions from global context
     - jobs: array of job application objects with detailed information
+    - loading: boolean indicating if jobs are being fetched from API
+    - error: error message if API calls fail
     - addJob: function to add new job application to the collection
     - updateJob: function to update existing job application
     - deleteJob: function to remove job application
   */
-  const { jobs, addJob, updateJob, deleteJob } = useJobs()
+  const { jobs, loading, error, addJob, updateJob, deleteJob } = useJobs()
   
   /* 
     LEARNING COMMENT: Resume context integration
@@ -58,12 +60,17 @@ function Jobs() {
     LEARNING COMMENT: Job submission handler
     - Called when user successfully adds a new job application through the modal
     - jobData: object containing new job application information
-    - addJob(jobData): adds the new job to global state
+    - addJob(jobData): adds the new job to backend API and global state
     - setIsAddModalOpen(false): closes the modal after successful submission
   */
-  const handleAddJob = (jobData) => {
-    addJob(jobData)
-    setIsAddModalOpen(false)
+  const handleAddJob = async (jobData) => {
+    try {
+      await addJob(jobData)
+      setIsAddModalOpen(false)
+    } catch (error) {
+      console.error('Failed to add job:', error)
+      // Modal will stay open so user can try again
+    }
   }
 
   /* 
@@ -82,15 +89,25 @@ function Jobs() {
     setIsEditModalOpen(true)
   }
 
-  const handleUpdateJob = (jobData) => {
-    updateJob(selectedJob.id, jobData)
-    setIsEditModalOpen(false)
-    setSelectedJob(null)
+  const handleUpdateJob = async (jobData) => {
+    try {
+      await updateJob(selectedJob.id, jobData)
+      setIsEditModalOpen(false)
+      setSelectedJob(null)
+    } catch (error) {
+      console.error('Failed to update job:', error)
+      // Modal will stay open so user can try again
+    }
   }
 
-  const handleDeleteJob = (job) => {
-    if (window.confirm(`Are you sure you want to delete the ${job.position} application at ${job.company}?`)) {
-      deleteJob(job.id)
+  const handleDeleteJob = async (job) => {
+    if (window.confirm(`Are you sure you want to delete the ${job.title} application at ${job.company}?`)) {
+      try {
+        await deleteJob(job.id)
+      } catch (error) {
+        console.error('Failed to delete job:', error)
+        alert('Failed to delete job application. Please try again.')
+      }
     }
   }
 
@@ -176,16 +193,78 @@ function Jobs() {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border-2 border-slate-300 dark:border-gray-600">
           
           {/* 
-            LEARNING COMMENT: Table Header Section
-            - Contains title and description for the table
-            - Uses gradient background to distinguish from table content
-            - px-8 py-6: generous padding for breathing room
-            - border-b-2: strong bottom border to separate from table
+            LEARNING COMMENT: Loading State
+            - Shows spinner while jobs are being fetched from API
+            - Only displays when loading is true
           */}
-          <div className="px-8 py-6 bg-gradient-to-r from-slate-100 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b-2 border-slate-300 dark:border-gray-600">
-            <h2 className="text-2xl font-light text-slate-700 dark:text-slate-300 mb-2">All Applications</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg font-light">Comprehensive details for each job application</p>
-          </div>
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
+              <span className="ml-3 text-slate-600 dark:text-slate-400">Loading jobs...</span>
+            </div>
+          )}
+
+          {/* 
+            LEARNING COMMENT: Error State
+            - Shows error message if API calls fail
+            - Only displays when there's an error and not loading
+          */}
+          {!loading && error && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="text-red-500 mb-2">
+                  <svg className="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd"></path>
+                  </svg>
+                </div>
+                <p className="text-red-500 font-medium">{error}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Please try refreshing the page</p>
+              </div>
+            </div>
+          )}
+
+          {/* 
+            LEARNING COMMENT: Empty State
+            - Shows when no jobs are available and not loading/error
+            - Provides guidance for users to add their first job
+          */}
+          {!loading && !error && jobs.length === 0 && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="text-slate-400 mb-4">
+                  <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path>
+                  </svg>
+                </div>
+                <h3 className="text-xl font-medium text-slate-700 dark:text-slate-300 mb-2">No job applications yet</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-4">Start tracking your job applications by adding your first one!</p>
+                <button 
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="bg-slate-600 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Add Your First Job
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 
+            LEARNING COMMENT: Jobs Table Content
+            - Only shows when not loading, no error, and jobs exist
+          */}
+          {!loading && !error && jobs.length > 0 && (
+            <div>
+              {/* 
+                LEARNING COMMENT: Table Header Section
+                - Contains title and description for the table
+                - Uses gradient background to distinguish from table content
+                - px-8 py-6: generous padding for breathing room
+                - border-b-2: strong bottom border to separate from table
+              */}
+              <div className="px-8 py-6 bg-gradient-to-r from-slate-100 to-gray-100 dark:from-gray-700 dark:to-gray-800 border-b-2 border-slate-300 dark:border-gray-600">
+                <h2 className="text-2xl font-light text-slate-700 dark:text-slate-300 mb-2">All Applications</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-lg font-light">Comprehensive details for each job application</p>
+              </div>
           
           {/* 
             LEARNING COMMENT: Table Container with Horizontal Scroll
@@ -335,7 +414,23 @@ function Jobs() {
                     */}
                     <td className="px-6 py-6">
                       {/* Job title with large, bold text */}
-                      <div className="text-lg font-semibold text-slate-800 dark:text-slate-200">{job.title}</div>
+                      <div className="flex items-center space-x-2">
+                        <div className="text-lg font-semibold text-slate-800 dark:text-slate-200">{job.title}</div>
+                        {/* Job posting link icon */}
+                        {job.applicationUrl && (
+                          <a
+                            href={job.applicationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                            title="View original job posting"
+                          >
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd"></path>
+                            </svg>
+                          </a>
+                        )}
+                      </div>
                       {/* Job description with medium, subdued text */}
                       <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">{job.description}</div>
                       {/* Requirements in a styled badge/pill */}
@@ -488,6 +583,8 @@ function Jobs() {
               </tbody>
             </table>
           </div>
+            </div>
+          )}
         </div>
       </div>
 
