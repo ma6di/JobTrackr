@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTracker API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { padding: 8px 16px; margin: 5px; }
+        input, textarea { width: 300px; padding: 5px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>JobTracker API Test</h1>
+    
+    <div>
+        <h2>Authentication</h2>
+        <div>
+            <h3>Login</h3>
+            <input type="email" id="email" placeholder="Email" value="debug@test.com">
+            <input type="password" id="password" placeholder="Password" value="DebugUser123!">
+            <button onclick="login()">Login</button>
+        </div>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div>
+        <h2>Job Management</h2>
+        <div>
+            <h3>Create Job</h3>
+            <input type="text" id="company" placeholder="Company" value="Test Company">
+            <input type="text" id="position" placeholder="Position" value="Frontend Developer">
+            <input type="text" id="location" placeholder="Location" value="Remote">
+            <input type="text" id="salary" placeholder="Salary" value="$80,000">
+            <input type="text" id="jobLink" placeholder="Job Link" value="https://example.com/job/456">
+            <textarea id="description" placeholder="Description">Great opportunity for a frontend developer</textarea>
+            <textarea id="requirements" placeholder="Requirements">React, JavaScript, TypeScript</textarea>
+            <textarea id="additionalInfo" placeholder="Additional Info">This is a remote position with flexible hours</textarea>
+            <button onclick="createJob()">Create Job</button>
+        </div>
+        <div id="createJobResult" class="result"></div>
+        
+        <div>
+            <h3>Get Jobs</h3>
+            <button onclick="getJobs()">Get All Jobs</button>
+        </div>
+        <div id="getJobsResult" class="result"></div>
+    </div>
+
+    <script>
+        let authToken = '';
+
+        async function apiRequest(endpoint, options = {}) {
+            const baseUrl = 'http://localhost:3001/api';
+            const url = `${baseUrl}${endpoint}`;
+            
+            const defaultHeaders = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (authToken) {
+                defaultHeaders['Authorization'] = `Bearer ${authToken}`;
+            }
+            
+            const config = {
+                ...options,
+                headers: {
+                    ...defaultHeaders,
+                    ...options.headers,
+                },
+            };
+            
+            try {
+                const response = await fetch(url, config);
+                const data = await response.json();
+                return { response, data };
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            const { response, data, error } = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password }),
+            });
+            
+            const resultDiv = document.getElementById('loginResult');
+            
+            if (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `Error: ${error}`;
+                return;
+            }
+            
+            if (response.ok && data.token) {
+                authToken = data.token;
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ Login successful! User: ${data.user.firstName} ${data.user.lastName}`;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Login failed: ${data.message || 'Unknown error'}`;
+            }
+        }
+
+        async function createJob() {
+            if (!authToken) {
+                alert('Please login first!');
+                return;
+            }
+            
+            const jobData = {
+                company: document.getElementById('company').value,
+                position: document.getElementById('position').value,
+                location: document.getElementById('location').value,
+                salary: document.getElementById('salary').value,
+                applicationUrl: document.getElementById('jobLink').value,
+                description: document.getElementById('description').value,
+                requirements: document.getElementById('requirements').value,
+                additionalInfo: document.getElementById('additionalInfo').value,
+                status: 'applied'
+            };
+            
+            const { response, data, error } = await apiRequest('/jobs', {
+                method: 'POST',
+                body: JSON.stringify(jobData),
+            });
+            
+            const resultDiv = document.getElementById('createJobResult');
+            
+            if (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `Error: ${error}`;
+                return;
+            }
+            
+            if (response.ok) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ Job created successfully! ID: ${data.id}<br>
+                    Company: ${data.company}<br>
+                    Position: ${data.position}<br>
+                    Additional Info: ${data.additionalInfo}`;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Job creation failed: ${data.error || 'Unknown error'}`;
+            }
+        }
+
+        async function getJobs() {
+            if (!authToken) {
+                alert('Please login first!');
+                return;
+            }
+            
+            const { response, data, error } = await apiRequest('/jobs');
+            
+            const resultDiv = document.getElementById('getJobsResult');
+            
+            if (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `Error: ${error}`;
+                return;
+            }
+            
+            if (response.ok) {
+                resultDiv.className = 'result success';
+                if (data.jobs && data.jobs.length > 0) {
+                    let jobsHtml = `✅ Found ${data.jobs.length} jobs:<br><br>`;
+                    data.jobs.forEach(job => {
+                        jobsHtml += `
+                            <strong>${job.position}</strong> at <strong>${job.company}</strong><br>
+                            Location: ${job.location}<br>
+                            Salary: ${job.salary}<br>
+                            Status: ${job.status}<br>
+                            ${job.additionalInfo ? `Additional Info: ${job.additionalInfo}<br>` : ''}
+                            Applied: ${new Date(job.appliedAt).toLocaleDateString()}<br><br>
+                        `;
+                    });
+                    resultDiv.innerHTML = jobsHtml;
+                } else {
+                    resultDiv.innerHTML = '✅ No jobs found.';
+                }
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Failed to get jobs: ${data.error || 'Unknown error'}`;
+            }
+        }
+    </script>
+</body>
+</html>
