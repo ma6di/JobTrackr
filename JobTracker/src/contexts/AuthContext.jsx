@@ -80,8 +80,8 @@ export const AuthProvider = ({ children }) => {
       try {
         if (isAuthenticated()) {
           // Token exists, verify it's still valid by fetching user data
-          const userData = await getCurrentUser()
-          setUser(userData)
+          const response = await getCurrentUser()
+          setUser(response.user)
         }
       } catch (error) {
         console.error('Auth check failed:', error)
