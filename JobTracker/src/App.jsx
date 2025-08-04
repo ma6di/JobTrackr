@@ -19,6 +19,7 @@ import Navigation from './components/Navigation'  // Top navigation bar
 import Login from './pages/Login'                 // Login page
 import Register from './pages/Register'           // Registration page
 import Dashboard from './pages/Dashboard'         // Main dashboard page  
+import DashboardSimple from './pages/DashboardSimple' // Simple dashboard for testing  
 import Resumes from './pages/Resumes'             // Resume management page
 import Jobs from './pages/Jobs'                   // Job applications page
 import TestJobs from './pages/TestJobs'           // Test Jobs page for debugging
