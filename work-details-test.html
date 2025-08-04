@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Details Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px; margin: 5px; background: #007cba; color: white; border: none; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        input, select { padding: 8px; margin: 5px; width: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Work Details Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Register User</h2>
+        <button onclick="registerUser()">Register Test User</button>
+        <div id="register-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Create Job with Work Details</h2>
+        <form onsubmit="createJob(event)">
+            <input type="text" id="company" placeholder="Company" value="Test Corp" required><br>
+            <input type="text" id="position" placeholder="Position" value="Senior Developer" required><br>
+            <select id="jobType">
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Internship">Internship</option>
+            </select><br>
+            <select id="remote">
+                <option value="On-site">On-site</option>
+                <option value="Remote" selected>Remote</option>
+                <option value="Hybrid">Hybrid</option>
+            </select><br>
+            <input type="text" id="salary" placeholder="Salary" value="$120,000"><br>
+            <input type="text" id="location" placeholder="Location" value="San Francisco, CA"><br>
+            <button type="submit">Create Job</button>
+        </form>
+        <div id="create-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Fetch Jobs</h2>
+        <button onclick="fetchJobs()">Fetch All Jobs</button>
+        <div id="fetch-result"></div>
+    </div>
+
+    <script>
+        let authToken = '';
+        const API_BASE = 'http://localhost:3001';
+
+        async function registerUser() {
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: `test-${Date.now()}@example.com`,
+                        password: 'TestUser123!',
+                        firstName: 'Test',
+                        lastName: 'User'
+                    })
+                });
+                
+                const result = await response.json();
+                authToken = result.token;
+                document.getElementById('register-result').innerHTML = 
+                    `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('register-result').innerHTML = 
+                    `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        async function createJob(event) {
+            event.preventDefault();
+            
+            if (!authToken) {
+                alert('Please register a user first');
+                return;
+            }
+
+            const jobData = {
+                company: document.getElementById('company').value,
+                position: document.getElementById('position').value,
+                jobType: document.getElementById('jobType').value,
+                remote: document.getElementById('remote').value,
+                salary: document.getElementById('salary').value,
+                location: document.getElementById('location').value,
+                status: 'applied'
+            };
+
+            console.log('Sending job data:', jobData);
+
+            try {
+                const response = await fetch(`${API_BASE}/api/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(jobData)
+                });
+                
+                const result = await response.json();
+                document.getElementById('create-result').innerHTML = 
+                    `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('create-result').innerHTML = 
+                    `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        async function fetchJobs() {
+            if (!authToken) {
+                alert('Please register a user first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/jobs`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                document.getElementById('fetch-result').innerHTML = 
+                    `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('fetch-result').innerHTML = 
+                    `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

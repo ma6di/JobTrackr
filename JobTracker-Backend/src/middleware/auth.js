@@ -268,6 +268,11 @@ export function createAuthRateLimit(options = {}) {
   }
   
   return function(req, res, next) {
+    // Skip rate limiting in development
+    if (process.env.NODE_ENV !== 'production') {
+      return next()
+    }
+    
     // Simple in-memory rate limiting (in production, use Redis)
     const key = req.ip + ':' + req.route?.path
     const now = Date.now()

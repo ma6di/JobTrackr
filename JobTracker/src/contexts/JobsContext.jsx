@@ -53,7 +53,7 @@ export const JobsProvider = ({ children }) => {
       return newJob;
     } catch (err) {
       console.error('Failed to add job:', err);
-      const errorMessage = err.response?.data?.message || 'Failed to add job';
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to add job';
       setError(errorMessage);
       throw new Error(errorMessage);
     }

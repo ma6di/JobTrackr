@@ -9,12 +9,12 @@
 /* 
   LEARNING COMMENT: Base API configuration
   - API_BASE_URL: The root URL of our backend server
-  - During development, backend runs on localhost:3001
-  - Frontend runs on localhost:5173 (Vite default)
-  - In production, this would be your deployed backend URL
+  - Uses environment variable or defaults to localhost:3001
+  - In development: VITE_API_URL or http://localhost:3001/api
+  - In production: Set VITE_API_URL to your deployed backend URL
   - This makes it easy to switch between dev and prod environments
 */
-const API_BASE_URL = 'http://localhost:3001/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 /* 
   LEARNING COMMENT: Authentication token management
@@ -88,11 +88,24 @@ const apiRequest = async (endpoint, options = {}) => {
     /* 
       Check if request was successful
       - response.ok: true for status codes 200-299
-      - If not ok, throw an error with status and message
+      - If not ok, throw an error with user-friendly message
     */
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Request failed' }))
-      throw new Error(`API Error ${response.status}: ${errorData.error || response.statusText}`)
+      
+      // Create user-friendly error messages
+      let errorMessage = errorData.error || response.statusText
+      
+      // Clean up common error messages
+      if (response.status === 401) {
+        errorMessage = errorData.error || 'Invalid credentials. Please check your email and password.'
+      } else if (response.status === 429) {
+        errorMessage = 'Too many requests. Please try again later.'
+      } else if (response.status === 500) {
+        errorMessage = 'Server error. Please try again later.'
+      }
+      
+      throw new Error(errorMessage)
     }
     
     /* 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -13,6 +13,16 @@ function Register() {
   })
   
   const [localError, setLocalError] = useState('')
+
+  /* 
+    LEARNING COMMENT: Clear errors when component mounts
+    - Prevents error messages from persisting when navigating between pages
+    - Ensures clean state when user visits register page
+  */
+  useEffect(() => {
+    clearError() // Clear any auth errors from context
+    setLocalError('') // Clear any local errors
+  }, [clearError])
 
   const handleChange = (e) => {
     setFormData({

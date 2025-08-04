@@ -40,14 +40,15 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
         position: initialData.position || '',
         location: initialData.location || '',
         salary: initialData.salary || '',
-        type: initialData.jobType || 'Full-time',
-        remote: 'On-site', // This field might need additional logic
+        type: initialData.jobType || '',
+        experienceLevel: initialData.experienceLevel || '',
+        remote: initialData.remote || '', // Work arrangement from job data
         description: initialData.description || '',
         requirements: initialData.requirements || '',
         additionalInfo: initialData.additionalInfo || '',
         selectedResumeId: initialData.resumeId || '', // Resume ID from job data
         notes: initialData.notes || '',
-        status: initialData.status ? initialData.status.charAt(0).toUpperCase() + initialData.status.slice(1) : 'Applied'
+        status: initialData.status ? initialData.status.charAt(0).toUpperCase() + initialData.status.slice(1) : ''
       }
     }
     
@@ -61,8 +62,9 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
       position: '',                                              // Job title/position
       location: '',                                              // Job location
       salary: '',                                                // Salary range
-      type: 'Full-time',                                         // Employment type
-      remote: 'On-site',                                         // Remote work status
+      type: '',                                              // Employment type
+      remote: '',                                            // Remote work status
+      experienceLevel: '',                                       // Job seniority level
       
       // Step 3: Job Details
       description: '',                                           // Job description
@@ -72,7 +74,7 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
       // Step 4: Resume & Notes
       selectedResumeId: '',                                      // Which resume was used
       notes: '',                                                 // User notes
-      status: 'Applied'                                          // Initial application status
+      status: ''                                             // Initial application status
     }
   })
 
@@ -125,11 +127,13 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
       location: formData.location,
       salary: formData.salary,
       jobType: formData.type,
+      experienceLevel: formData.experienceLevel,
+      remote: formData.remote, // Work arrangement field
       description: formData.description,
       requirements: formData.requirements,
       additionalInfo: formData.additionalInfo,
       applicationUrl: formData.jobLink,
-      status: formData.status.toLowerCase(),
+      status: formData.status || '',
       appliedAt: formData.applicationDate,
       notes: formData.notes,
       resumeId: formData.selectedResumeId || null // Include selected resume ID
@@ -155,14 +159,15 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
       position: '',
       location: '',
       salary: '',
-      type: 'Full-time',
-      remote: 'On-site',
+      type: '',
+      experienceLevel: '',
+      remote: '',
       description: '',
       requirements: '',
       additionalInfo: '',
       selectedResumeId: '',
       notes: '',
-      status: 'Applied'
+      status: ''
     })
     onClose()
   }
@@ -614,11 +619,11 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
 
               {/* 
                 LEARNING COMMENT: Additional job details container
-                - grid grid-cols-1 md:grid-cols-3: Single column mobile, three columns medium+ screens
+                - grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4: Single column mobile, two columns medium, four columns large+ screens
                 - gap-4: 1rem spacing between grid items
-                - Groups salary, job type, and work style for efficient space usage
+                - Groups salary, job type, work style, and experience level for efficient space usage
               */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 
                   LEARNING COMMENT: Salary range field section
                   - Optional field for compensation tracking
@@ -684,7 +689,9 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
                       - Pre-defined employment types for consistency
                       - value attributes must match exactly for controlled component
                       - Covers most common employment arrangements
+                      - Includes option to not specify
                     */}
+                    <option value="">Not specified</option>
                     <option value="Full-time">Full-time</option>
                     <option value="Part-time">Part-time</option>
                     <option value="Contract">Contract</option>
@@ -724,10 +731,62 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
                       LEARNING COMMENT: Work style options
                       - Covers the three main post-pandemic work arrangements
                       - value attributes must match formData.remote values
+                      - Includes option to not specify
                     */}
+                    <option value="">Not specified</option>
                     <option value="On-site">On-site</option>
                     <option value="Remote">Remote</option>
                     <option value="Hybrid">Hybrid</option>
+                  </select>
+                </div>
+
+                {/* 
+                  LEARNING COMMENT: Experience level field section
+                  - Dropdown for job seniority/experience level
+                  - Important for tracking career progression and appropriate roles
+                */}
+                <div>
+                  {/* 
+                    LEARNING COMMENT: Experience level field label
+                    - Consistent styling with other form labels
+                  */}
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Experience Level
+                  </label>
+                  
+                  {/* 
+                    LEARNING COMMENT: Experience level select dropdown
+                    - name="experienceLevel": Maps to formData.experienceLevel
+                    - value={formData.experienceLevel}: Controlled component
+                    - onChange={handleInputChange}: Updates state when selection changes
+                    - Same styling as other select dropdowns for consistency
+                    - Contains common experience levels from entry to executive
+                  */}
+                  <select
+                    name="experienceLevel"
+                    value={formData.experienceLevel}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100"
+                  >
+                    {/* 
+                      LEARNING COMMENT: Experience level options
+                      - Covers the full range of career levels
+                      - value attributes must match database enum values
+                      - Includes option to not specify
+                    */}
+                    <option value="">Not specified</option>
+                    <option value="Student">Student</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Entry Level">Entry Level</option>
+                    <option value="Junior">Junior</option>
+                    <option value="Associate">Associate</option>
+                    <option value="Mid-Senior">Mid-Senior</option>
+                    <option value="Senior">Senior</option>
+                    <option value="Staff">Staff</option>
+                    <option value="Principal">Principal</option>
+                    <option value="Director">Director</option>
+                    <option value="VP">VP</option>
+                    <option value="C-Level">C-Level</option>
                   </select>
                 </div>
               </div>
@@ -995,7 +1054,9 @@ function AddJobModal({ isOpen, onClose, onSave, resumes = [], initialData = null
                     - value attributes must match formData.status values
                     - Organized from initial application through final outcomes
                     - Includes multiple interview stages for comprehensive tracking
+                    - Includes option to not specify
                   */}
+                  <option value="">Not specified</option>
                   <option value="Applied">Applied</option>
                   <option value="Pending">Pending</option>
                   <option value="First Interview">First Interview</option>

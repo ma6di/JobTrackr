@@ -29,7 +29,19 @@ function Jobs() {
     - updateJob: function to update existing job application
     - deleteJob: function to remove job application
   */
-  const { jobs, loading, error, addJob, updateJob, deleteJob } = useJobs()
+  const { jobs: rawJobs, loading, error, addJob, updateJob, deleteJob } = useJobs()
+
+  /* 
+    LEARNING COMMENT: Sort jobs by applied date (newest first)
+    - Creates a sorted copy of jobs array
+    - Sorts by appliedAt date in descending order (newest applications first)
+    - Handles cases where appliedAt might be null/undefined
+  */
+  const sortedJobs = [...rawJobs].sort((a, b) => {
+    const dateA = a.appliedAt ? new Date(a.appliedAt) : new Date(0)
+    const dateB = b.appliedAt ? new Date(b.appliedAt) : new Date(0)
+    return dateB - dateA // Descending order (newest first)
+  })
   
   /* 
     LEARNING COMMENT: Resume context integration
@@ -69,6 +81,7 @@ function Jobs() {
       setIsAddModalOpen(false)
     } catch (error) {
       console.error('Failed to add job:', error)
+      alert(`Failed to add job: ${error.message}\n\nPlease try refreshing the page and logging in again.`)
       // Modal will stay open so user can try again
     }
   }
@@ -96,6 +109,7 @@ function Jobs() {
       setSelectedJob(null)
     } catch (error) {
       console.error('Failed to update job:', error)
+      alert(`Failed to update job: ${error.message}\n\nPlease try refreshing the page and logging in again.`)
       // Modal will stay open so user can try again
     }
   }
@@ -228,7 +242,7 @@ function Jobs() {
             - Shows when no jobs are available and not loading/error
             - Provides guidance for users to add their first job
           */}
-          {!loading && !error && jobs.length === 0 && (
+          {!loading && !error && sortedJobs.length === 0 && (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="text-slate-400 mb-4">
@@ -252,7 +266,7 @@ function Jobs() {
             LEARNING COMMENT: Jobs Table Content
             - Only shows when not loading, no error, and jobs exist
           */}
-          {!loading && !error && jobs.length > 0 && (
+          {!loading && !error && sortedJobs.length > 0 && (
             <div>
               {/* 
                 LEARNING COMMENT: Table Header Section
@@ -267,12 +281,11 @@ function Jobs() {
               </div>
           
           {/* 
-            LEARNING COMMENT: Table Container with Horizontal Scroll
-            - overflow-x-auto: allows horizontal scrolling on small screens
-            - Ensures table remains usable on mobile devices
-            - Table will scroll horizontally instead of breaking layout
+            LEARNING COMMENT: Table Container - Fixed Width Layout
+            - Removed horizontal scroll to fit all content within viewport
+            - Table columns are optimized for compact display
           */}
-          <div className="overflow-x-auto bg-white dark:bg-gray-800">
+          <div className="bg-white dark:bg-gray-800">
             
             {/* 
               LEARNING COMMENT: Main Data Table
@@ -296,90 +309,90 @@ function Jobs() {
                     LEARNING COMMENT: Position Details Column Header
                     - Contains job title, description, and requirements
                     - Briefcase icon represents job/position
-                    - px-6 py-4: padding for comfortable spacing
+                    - px-3 py-3: tighter padding for space efficiency
                     - text-left: left-aligns header text
                     - uppercase tracking-wider: makes text uppercase with letter spacing
                   */}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
+                  <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider min-w-[200px]">
+                    <div className="flex items-center space-x-1">
                       {/* Briefcase/job icon */}
-                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd"></path>
                       </svg>
-                      <span>Position Details</span>
+                      <span>Position</span>
                     </div>
                   </th>
                   
                   {/* 
-                    LEARNING COMMENT: Company & Salary Column Header
-                    - Contains company name, salary information, location
+                    LEARNING COMMENT: Company Info Column Header - Compressed
+                    - Contains company name and salary (location moved to work details)
                     - Building icon represents company/organization
                   */}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
+                  <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider min-w-[160px]">
+                    <div className="flex items-center space-x-1">
                       {/* Building/company icon */}
-                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd"></path>
                       </svg>
-                      <span>Company & Salary</span>
+                      <span>Company</span>
                     </div>
                   </th>
                   
                   {/* 
-                    LEARNING COMMENT: Status & Progress Column Header
-                    - Contains application status and progress notes
-                    - Chart/pie icon represents status and progress tracking
+                    LEARNING COMMENT: Job Details Column Header - Compressed
+                    - Contains job type, experience level, and work arrangement in compact format
+                    - Cog icon represents job configuration/details
                   */}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
+                  <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider min-w-[140px]">
+                    <div className="flex items-center space-x-1">
+                      {/* Cog/settings icon for job details */}
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd"></path>
+                      </svg>
+                      <span>Details</span>
+                    </div>
+                  </th>
+                  
+                  {/* 
+                    LEARNING COMMENT: Status Column Header - Compact
+                    - Contains application status with color coding
+                    - Chart/pie icon represents status tracking
+                  */}
+                  <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider min-w-[100px]">
+                    <div className="flex items-center space-x-1">
                       {/* Chart/progress icon */}
-                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
                         <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
                       </svg>
-                      <span>Status & Progress</span>
+                      <span>Status</span>
                     </div>
                   </th>
                   
                   {/* 
-                    LEARNING COMMENT: Work Details Column Header
-                    - Contains work type (full-time, contract, etc.) and remote status
-                    - Location pin icon represents work location/details
+                    LEARNING COMMENT: Applied Date Column Header - Compact
+                    - Contains application date for sorting and tracking
+                    - Calendar icon represents date/time
                   */}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      {/* Location/pin icon */}
-                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path>
+                  <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider min-w-[110px]">
+                    <div className="flex items-center space-x-1">
+                      {/* Calendar/date icon */}
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"></path>
                       </svg>
-                      <span>Work Details</span>
+                      <span>Applied</span>
                     </div>
                   </th>
                   
                   {/* 
-                    LEARNING COMMENT: Match & Date Column Header
-                    - Contains match score percentage and application date
-                    - Flag icon represents matching/ranking
-                  */}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      {/* Flag/ranking icon */}
-                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clipRule="evenodd"></path>
-                      </svg>
-                      <span>Match & Date</span>
-                    </div>
-                  </th>
-                  
-                  {/* 
-                    LEARNING COMMENT: Actions Column Header
+                    LEARNING COMMENT: Actions Column Header - Compact
                     - Contains action buttons for each job (view, edit, delete)
                     - Lightning bolt icon represents actions/operations
                   */}
-                  <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
+                  <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider min-w-[100px]">
+                    <div className="flex items-center space-x-1">
                       {/* Lightning/action icon */}
-                      <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"></path>
                       </svg>
                       <span>Actions</span>
@@ -398,25 +411,21 @@ function Jobs() {
                 
                 {/* 
                   LEARNING COMMENT: Dynamic job rows rendering
-                  - jobs.map(): creates a table row for each job in the array
+                  - sortedJobs.map(): creates a table row for each job
                   - key={job.id}: unique identifier required by React for list items
-                  - index parameter: position in array (could be used for numbering)
-                  - Each job object contains: title, company, status, salary, location, etc.
+                  - Removed match percentage feature for cleaner interface
                 */}
-                {jobs.map((job, index) => (
-                  <tr key={job.id} className="hover:bg-slate-50 dark:hover:bg-gray-700 transition-all duration-300 border-l-4 border-transparent hover:border-l-slate-400 dark:hover:border-l-gray-500">
+                {sortedJobs.map((job, index) => (
+                  <tr key={job.id} className="hover:bg-slate-50 dark:hover:bg-gray-700 transition-all duration-200 border-l-4 border-transparent hover:border-l-slate-400 dark:hover:border-l-gray-500">
                     
                     {/* 
-                      LEARNING COMMENT: Position Details Cell
-                      - Shows job title, description, and requirements
-                      - px-6 py-6: generous padding for readability
-                      - Hierarchical text sizing: large title, medium description, small requirements
+                      LEARNING COMMENT: Position Details Cell - Compact
+                      - Shows job title and link only
+                      - Reduced padding for space efficiency
                     */}
-                    <td className="px-6 py-6">
-                      {/* Job title with large, bold text */}
+                    <td className="px-3 py-4">
                       <div className="flex items-center space-x-2">
-                        <div className="text-lg font-semibold text-slate-800 dark:text-slate-200">{job.title}</div>
-                        {/* Job posting link icon */}
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-sm">{job.position}</div>
                         {job.applicationUrl && (
                           <a
                             href={job.applicationUrl}
@@ -425,154 +434,113 @@ function Jobs() {
                             className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
                             title="View original job posting"
                           >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd"></path>
                             </svg>
                           </a>
                         )}
                       </div>
-                      {/* Job description with medium, subdued text */}
-                      <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">{job.description}</div>
-                      {/* Requirements in a styled badge/pill */}
-                      <div className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-2 bg-slate-100 dark:bg-gray-700 px-2 py-1 rounded inline-block">
-                        {job.requirements}
+                    </td>
+                    
+                    {/* 
+                      LEARNING COMMENT: Company Info Cell - Compact
+                      - Shows company name and salary in minimal space
+                    */}
+                    <td className="px-3 py-4">
+                      <div className="font-medium text-slate-800 dark:text-slate-200 text-sm">{job.company}</div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">{job.salary || '-'}</div>
+                    </td>
+                    
+                    {/* 
+                      LEARNING COMMENT: Job Details Cell - Compact
+                      - Shows job type, experience level, location, and work arrangement stacked
+                    */}
+                    <td className="px-3 py-4">
+                      <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div><span className="font-medium">Type:</span> {job.jobType || '-'}</div>
+                        <div><span className="font-medium">Level:</span> {job.experienceLevel || '-'}</div>
+                        <div><span className="font-medium">Location:</span> {job.location || '-'}</div>
+                        <div><span className="font-medium">Work:</span> {job.remote || '-'}</div>
                       </div>
                     </td>
                     
                     {/* 
-                      LEARNING COMMENT: Company & Salary Cell
-                      - Shows company name, salary, and location
-                      - Company name gets prominence with larger, bold text
-                      - Salary and location use smaller, secondary styling
+                      LEARNING COMMENT: Status Cell - Compact
+                      - Shows colored status badge with progress notes
+                      - Compact padding for space efficiency
                     */}
-                    <td className="px-6 py-6">
-                      {/* Company name */}
-                      <div className="text-lg text-slate-800 dark:text-slate-200 font-semibold">{job.company}</div>
-                      {/* Salary information */}
-                      <div className="text-sm text-slate-700 dark:text-slate-300 font-medium mt-1">{job.salary}</div>
-                      {/* Location */}
-                      <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">{job.location}</div>
-                    </td>
-                    
-                    {/* 
-                      LEARNING COMMENT: Status & Progress Cell
-                      - Shows colored status badge and progress notes
-                      - getStatusColor(job.status): applies appropriate color based on status
-                      - Status badge uses rounded corners and consistent padding
-                    */}
-                    <td className="px-6 py-6">
+                    <td className="px-3 py-4">
                       {/* Status badge with dynamic coloring */}
-                      <span className={`px-3 py-1 text-sm font-medium rounded-lg ${getStatusColor(job.status)}`}>
-                        {job.status}
-                      </span>
+                      {job.status ? (
+                        <span className={`px-2 py-1 text-xs font-medium rounded-md ${getStatusColor(job.status)}`}>
+                          {job.status}
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs font-medium rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400">
+                          -
+                        </span>
+                      )}
                       {/* Progress notes */}
-                      <div className="text-xs text-slate-600 dark:text-slate-400 mt-2">{job.notes}</div>
-                    </td>
-                    
-                    {/* 
-                      LEARNING COMMENT: Work Details Cell
-                      - Shows employment type (full-time, contract, etc.) and remote status
-                      - Simple text information with consistent styling
-                    */}
-                    <td className="px-6 py-6">
-                      {/* Employment type */}
-                      <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{job.type}</div>
-                      {/* Remote work status */}
-                      <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">{job.remote}</div>
-                    </td>
-                    
-                    {/* 
-                      LEARNING COMMENT: Match Score & Date Cell
-                      - Shows visual progress bar for match percentage and application date
-                      - Progress bar provides immediate visual feedback on job fit
-                      - flex items-center space-x-3: aligns progress bar and percentage
-                    */}
-                    <td className="px-6 py-6">
-                      {/* Match score progress bar container */}
-                      <div className="flex items-center space-x-3 mb-2">
-                        {/* 
-                          LEARNING COMMENT: Progress bar track
-                          - w-20: 80px wide progress bar
-                          - bg-slate-300: light gray background for track
-                          - rounded-full: fully rounded ends
-                          - h-2: 8px height for thin progress bar
-                        */}
-                        <div className="w-20 bg-slate-300 dark:bg-gray-600 rounded-full h-2">
-                          {/* 
-                            LEARNING COMMENT: Progress bar fill
-                            - Dynamic width based on job.matchScore percentage
-                            - style={{ width: `${job.matchScore}%` }}: inline style for dynamic width
-                            - bg-emerald-600: green color indicates positive/good match
-                            - transition-all duration-700: smooth animation when percentage changes
-                          */}
-                          <div 
-                            className="bg-emerald-600 dark:bg-emerald-500 h-2 rounded-full transition-all duration-700"
-                            style={{ width: `${job.matchScore}%` }}
-                          ></div>
+                      {job.notes && (
+                        <div className="text-xs text-slate-600 dark:text-slate-400 mt-1 truncate" title={job.notes}>
+                          {job.notes.length > 20 ? `${job.notes.substring(0, 20)}...` : job.notes}
                         </div>
-                        {/* Match percentage text */}
-                        <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">{job.matchScore}%</span>
-                      </div>
-                      {/* Application date */}
-                      <div className="text-sm text-slate-600 dark:text-slate-400">{job.appliedDate}</div>
+                      )}
                     </td>
                     
                     {/* 
-                      LEARNING COMMENT: Actions Cell
-                      - Contains action buttons for job management
-                      - Three buttons: view, edit, delete
-                      - space-x-2: 8px spacing between buttons
-                      - Each button follows the same size and styling pattern
+                      LEARNING COMMENT: Applied Date Cell - Compact
+                      - Shows when the application was submitted
+                      - Compact formatting for space efficiency
                     */}
-                    <td className="px-6 py-6">
-                      <div className="flex space-x-2">
+                    <td className="px-3 py-4">
+                      <div className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                        {job.appliedAt ? new Date(job.appliedAt).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric' 
+                        }) : '-'}
+                      </div>
+                    </td>
+                    
+                    {/* 
+                      LEARNING COMMENT: Actions Cell - Compact
+                      - Contains action buttons for job management
+                      - Smaller buttons with minimal spacing for efficiency
+                    */}
+                    <td className="px-3 py-4">
+                      <div className="flex space-x-1">
                         
                         {/* 
-                          LEARNING COMMENT: View Job Button
-                          - Eye icon for viewing/previewing job details
-                          - onClick: opens view modal with job details
-                          - p-2: 8px padding on all sides
-                          - Neutral gray styling as it's a view-only action
+                          LEARNING COMMENT: View Job Button - Compact
+                          - Smaller padding for space efficiency
                         */}
                         <button 
                           onClick={() => handleViewJob(job)}
-                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-1.5 rounded-md transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                          title="View job details"
                         >
-                          {/* Eye/view icon */}
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
                             <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd"></path>
                           </svg>
                         </button>
                         
-                        {/* 
-                          LEARNING COMMENT: Edit Job Button
-                          - Pencil icon for editing job information
-                          - onClick: opens edit modal with job data pre-filled
-                          - Same neutral styling as view button
-                        */}
                         <button 
                           onClick={() => handleEditJob(job)}
-                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-1.5 rounded-md transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                          title="Edit job"
                         >
-                          {/* Pencil/edit icon */}
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path>
                           </svg>
                         </button>
                         
-                        {/* 
-                          LEARNING COMMENT: Delete Job Button
-                          - Trash can icon for deleting job application
-                          - onClick: shows confirmation dialog and deletes job
-                          - Same styling as other action buttons for consistency
-                        */}
                         <button 
                           onClick={() => handleDeleteJob(job)}
-                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-2 rounded-lg transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 p-1.5 rounded-md transition-all duration-300 border border-slate-300 dark:border-gray-600"
+                          title="Delete job"
                         >
-                          {/* Trash/delete icon */}
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd"></path>
                           </svg>
                         </button>

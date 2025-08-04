@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTracker Auth Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover { background: #2563eb; }
+        .result {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        .warning { border-left: 4px solid #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 JobTracker Authentication Debug</h1>
+        <p>Debug authentication state and test API calls.</p>
+        
+        <button onclick="checkLocalStorage()">Check LocalStorage</button>
+        <button onclick="testLoginAPI()">Test Login API</button>
+        <button onclick="testJobsAPI()">Test Jobs API</button>
+        <button onclick="clearAuthData()">Clear Auth Data</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function displayResult(title, data, type = 'info') {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `<strong>${title}</strong>\n${JSON.stringify(data, null, 2)}`;
+            results.appendChild(resultDiv);
+        }
+
+        function checkLocalStorage() {
+            const authToken = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            
+            displayResult('📦 LocalStorage Auth Data', {
+                authToken: authToken ? `${authToken.substring(0, 20)}...` : null,
+                userData: userData ? JSON.parse(userData) : null,
+                isAuthenticated: !!authToken
+            }, authToken ? 'success' : 'warning');
+        }
+
+        async function testLoginAPI() {
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayResult('✅ Login API Test - SUCCESS', data, 'success');
+                    // Store the token for testing
+                    if (data.token) {
+                        localStorage.setItem('authToken', data.token);
+                        displayResult('💾 Token Stored', { token: data.token.substring(0, 20) + '...' }, 'success');
+                    }
+                } else {
+                    displayResult('⚠️ Login API Test - Expected Error', data, 'warning');
+                }
+            } catch (error) {
+                displayResult('❌ Login API Test - FAILED', { error: error.message }, 'error');
+            }
+        }
+
+        async function testJobsAPI() {
+            const token = localStorage.getItem('authToken');
+            
+            if (!token) {
+                displayResult('⚠️ Jobs API Test - No Token', { 
+                    message: 'No auth token found. Try login first.' 
+                }, 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3001/api/jobs', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayResult('✅ Jobs API Test - SUCCESS', data, 'success');
+                } else {
+                    displayResult('❌ Jobs API Test - FAILED', data, 'error');
+                }
+            } catch (error) {
+                displayResult('❌ Jobs API Test - FAILED', { error: error.message }, 'error');
+            }
+        }
+
+        function clearAuthData() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            displayResult('🗑️ Auth Data Cleared', { message: 'All authentication data removed from localStorage' }, 'success');
+        }
+
+        // Auto-run localStorage check when page loads
+        window.addEventListener('load', () => {
+            checkLocalStorage();
+        });
+    </script>
+</body>
+</html>

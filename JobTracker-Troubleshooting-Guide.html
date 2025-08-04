@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTracker Jobs Page - Troubleshooting Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            background: #f1f5f9;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+        }
+        .success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+        }
+        .error {
+            background: #fecaca;
+            border-left-color: #ef4444;
+        }
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .command {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .check-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        .icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 JobTracker Jobs Page Troubleshooting Guide</h1>
+        
+        <div class="step warning">
+            <h3>🚨 Current Issue</h3>
+            <p>The Jobs page at <code>http://localhost:5173/jobs</code> is not loading properly. Let's debug this step by step.</p>
+        </div>
+
+        <h2>🔍 Step-by-Step Debugging Process</h2>
+
+        <div class="step">
+            <h3>1️⃣ Start Both Servers</h3>
+            <p>The JobTracker needs both backend and frontend servers running:</p>
+            
+            <h4>Option A: Use the startup script</h4>
+            <div class="command">cd "/Users/mahdicheraghali/Desktop/My Project"
+./start-jobtracker.sh</div>
+            
+            <h4>Option B: Start manually in separate terminals</h4>
+            <p><strong>Terminal 1 (Backend):</strong></p>
+            <div class="command">cd "/Users/mahdicheraghali/Desktop/My Project/JobTracker-Backend"
+npm start</div>
+            
+            <p><strong>Terminal 2 (Frontend):</strong></p>
+            <div class="command">cd "/Users/mahdicheraghali/Desktop/My Project/JobTracker"
+npm run dev</div>
+        </div>
+
+        <div class="step">
+            <h3>2️⃣ Test the Simple Version First</h3>
+            <p>I've created a simplified test page to isolate the issue:</p>
+            <ul>
+                <li>Start the frontend server</li>
+                <li>Navigate to: <code>http://localhost:5173/test-jobs</code></li>
+                <li>If this loads, the issue is in the complex Jobs component</li>
+                <li>If this doesn't load, there's a more fundamental issue</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>3️⃣ Check Browser Console</h3>
+            <p>Open your browser's developer tools and check for errors:</p>
+            <ul>
+                <li>Press F12 (or Cmd+Option+I on Mac)</li>
+                <li>Go to the "Console" tab</li>
+                <li>Look for red error messages</li>
+                <li>Common issues might be:
+                    <ul>
+                        <li>Import errors (file not found)</li>
+                        <li>Context provider issues</li>
+                        <li>API connection problems</li>
+                        <li>JavaScript syntax errors</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>4️⃣ Verify Backend Connection</h3>
+            <p>Check if the backend is running and accessible:</p>
+            <ul>
+                <li>Backend should be running on: <code>http://localhost:3001</code></li>
+                <li>Test API endpoint: <code>http://localhost:3001/api/health</code></li>
+                <li>Check if database file exists: <code>JobTracker-Backend/prisma/dev.db</code></li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>5️⃣ Test Individual Components</h3>
+            <p>Test different parts of the app to isolate the issue:</p>
+            <div class="checklist">
+                <div class="check-item">
+                    <h4>🏠 Dashboard</h4>
+                    <p>Test: <code>http://localhost:5173/dashboard</code></p>
+                    <p>If this works, routing is fine</p>
+                </div>
+                <div class="check-item">
+                    <h4>📄 Resumes</h4>
+                    <p>Test: <code>http://localhost:5173/resumes</code></p>
+                    <p>If this works, contexts are fine</p>
+                </div>
+                <div class="check-item">
+                    <h4>🧪 Test Jobs</h4>
+                    <p>Test: <code>http://localhost:5173/test-jobs</code></p>
+                    <p>Simple version without complex logic</p>
+                </div>
+                <div class="check-item">
+                    <h4>💼 Jobs</h4>
+                    <p>Test: <code>http://localhost:5173/jobs</code></p>
+                    <p>The problematic page</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>6️⃣ Common Solutions</h3>
+            <h4>If you see import errors:</h4>
+            <div class="command">cd "/Users/mahdicheraghali/Desktop/My Project/JobTracker"
+npm install</div>
+            
+            <h4>If the backend isn't starting:</h4>
+            <div class="command">cd "/Users/mahdicheraghali/Desktop/My Project/JobTracker-Backend"
+npm install
+npx prisma generate
+npx prisma db push</div>
+            
+            <h4>If context errors occur:</h4>
+            <p>Check that all providers are properly wrapped in App.jsx</p>
+            
+            <h4>Clear browser cache:</h4>
+            <p>Hard refresh: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows/Linux)</p>
+        </div>
+
+        <div class="step success">
+            <h3>✅ Expected Results</h3>
+            <p>When everything works correctly, you should see:</p>
+            <ul>
+                <li>✅ Jobs page loads without errors</li>
+                <li>✅ Table displays with proper columns</li>
+                <li>✅ "Add New Application" button works</li>
+                <li>✅ Match percentage column shows percentages</li>
+                <li>✅ Hover tooltips work on match scores</li>
+                <li>✅ No horizontal scrolling</li>
+            </ul>
+        </div>
+
+        <div class="step error">
+            <h3>🆘 If Nothing Works</h3>
+            <p>If you're still having issues, try these emergency fixes:</p>
+            <ol>
+                <li>Restart your computer (clears all processes)</li>
+                <li>Delete <code>node_modules</code> folders and reinstall:
+                    <div class="command">rm -rf node_modules package-lock.json
+npm install</div>
+                </li>
+                <li>Check for port conflicts (kill any process using ports 3001 or 5173)</li>
+                <li>Try a different browser</li>
+                <li>Temporarily disable browser extensions</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>📝 Report Back</h3>
+            <p>When testing, note which of these work and which don't:</p>
+            <ul>
+                <li>□ Backend starts successfully</li>
+                <li>□ Frontend starts successfully</li>
+                <li>□ Dashboard page loads</li>
+                <li>□ Test jobs page loads</li>
+                <li>□ Real jobs page loads</li>
+                <li>□ No console errors</li>
+                <li>□ API calls succeed</li>
+            </ul>
+            <p>This will help identify exactly where the problem is occurring.</p>
+        </div>
+    </div>
+</body>
+</html>

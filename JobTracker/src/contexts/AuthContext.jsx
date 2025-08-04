@@ -110,13 +110,13 @@ export const AuthProvider = ({ children }) => {
       const response = await apiLogin(email, password)
       setUser(response.user)
       
-      // Redirect to dashboard after successful login
-      navigate('/dashboard')
+      // Navigate to dashboard, replacing current history entry
+      navigate('/dashboard', { replace: true })
       
       return response
     } catch (err) {
       console.error('Login failed:', err)
-      setError(err.message || 'Login failed. Please try again.')
+      setError(err.message) // Set context error so Login component can display it
       throw err
     } finally {
       setLoading(false)

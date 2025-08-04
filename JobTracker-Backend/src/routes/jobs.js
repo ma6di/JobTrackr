@@ -114,15 +114,21 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const userId = req.user.id
+    
+    // Debug: Log the incoming request body
+    console.log('Received job creation request:', JSON.stringify(req.body, null, 2))
+    
   const { 
     company, 
     position, 
-    status = 'applied',
+    status = '',
     description = '',
     salary,
     location = '',
     appliedAt,
     jobType,
+    experienceLevel, // Experience level field
+    remote, // Work arrangement field
     requirements,
     additionalInfo,
     applicationUrl,
@@ -140,11 +146,14 @@ router.post('/', async (req, res) => {
       })
     }
 
-    // Validate status
-    const validStatuses = ['applied', 'interview', 'offer', 'rejected']
-    if (!validStatuses.includes(status)) {
+    // Validate status - allow all the status values from frontend
+    const validStatuses = [
+      '', 'Applied', 'Pending', 'First Interview', 'Second Interview', 
+      'Third Interview', 'Final Interview', 'Offer', 'Rejected'
+    ]
+    if (status && !validStatuses.includes(status)) {
       return res.status(400).json({ 
-        error: 'Status must be one of: ' + validStatuses.join(', ')
+        error: 'Invalid status value'
       })
     }
 
@@ -161,26 +170,33 @@ router.post('/', async (req, res) => {
     }
 
     // Create new job application
+    const jobData = {
+      userId,
+      company: company.trim(),
+      position: position.trim(),
+      status: status || null,
+      description: description.trim(),
+      salary: salary || null,  // Store as string or null
+      location: location.trim(),
+      appliedAt: appliedAt ? new Date(appliedAt) : new Date(),
+      jobType: jobType?.trim() || null,
+      experienceLevel: experienceLevel?.trim() || null, // Experience level
+      remote: remote?.trim() || null, // Work arrangement
+      requirements: requirements?.trim() || null,
+      additionalInfo: additionalInfo?.trim() || null,
+      applicationUrl: applicationUrl?.trim() || null,
+      priority,
+      notes: notes?.trim() || null,
+      interviewDate: interviewDate ? new Date(interviewDate) : null,
+      followUpDate: followUpDate ? new Date(followUpDate) : null,
+      resumeId: resumeId ? parseInt(resumeId) : null
+    }
+    
+    // Debug: Log the data being sent to Prisma
+    console.log('Creating job with data:', JSON.stringify(jobData, null, 2))
+    
     const newJob = await req.prisma.job.create({
-      data: {
-        userId,
-        company: company.trim(),
-        position: position.trim(),
-        status,
-        description: description.trim(),
-        salary: salary || null,  // Store as string or null
-        location: location.trim(),
-        appliedAt: appliedAt ? new Date(appliedAt) : new Date(),
-        jobType: jobType?.trim() || null,
-        requirements: requirements?.trim() || null,
-        additionalInfo: additionalInfo?.trim() || null,
-        applicationUrl: applicationUrl?.trim() || null,
-        priority,
-        notes: notes?.trim() || null,
-        interviewDate: interviewDate ? new Date(interviewDate) : null,
-        followUpDate: followUpDate ? new Date(followUpDate) : null,
-        resumeId: resumeId ? parseInt(resumeId) : null
-      }
+      data: jobData
     })
 
     res.status(201).json(newJob)
@@ -341,6 +357,8 @@ router.put('/:id', async (req, res) => {
       location,
       appliedAt,
       jobType,
+      experienceLevel, // Experience level field
+      remote, // Work arrangement field
       requirements,
       additionalInfo,
       applicationUrl,
@@ -369,13 +387,17 @@ router.put('/:id', async (req, res) => {
     }
     
     if (status !== undefined) {
-      const validStatuses = ['applied', 'interview', 'offer', 'rejected']
-      if (!validStatuses.includes(status)) {
+      // Validate status - allow all the status values from frontend
+      const validStatuses = [
+        '', 'Applied', 'Pending', 'First Interview', 'Second Interview', 
+        'Third Interview', 'Final Interview', 'Offer', 'Rejected'
+      ]
+      if (status && !validStatuses.includes(status)) {
         return res.status(400).json({ 
-          error: 'Status must be one of: ' + validStatuses.join(', ')
+          error: 'Invalid status value'
         })
       }
-      updateData.status = status
+      updateData.status = status || null
     }
     
     if (description !== undefined) {
@@ -383,8 +405,12 @@ router.put('/:id', async (req, res) => {
     }
     
     if (salary !== undefined) {
-      if (salary !== null && salary !== '' && (isNaN(salary) || parseFloat(salary) < 0)) {
-        return res.status(400).json({ error: 'Salary must be a positive number' })
+      // Allow salary as string (e.g., "$75,000", "75k", "60000-80000") or empty
+      if (salary !== null && salary !== '') {
+        const trimmedSalary = salary.toString().trim()
+        if (trimmedSalary.length === 0) {
+          return res.status(400).json({ error: 'Salary cannot be empty' })
+        }
       }
       updateData.salary = salary || null  // Store as string or null
     }
@@ -399,6 +425,14 @@ router.put('/:id', async (req, res) => {
 
     if (jobType !== undefined) {
       updateData.jobType = jobType?.trim() || null
+    }
+
+    if (experienceLevel !== undefined) {
+      updateData.experienceLevel = experienceLevel?.trim() || null
+    }
+
+    if (remote !== undefined) {
+      updateData.remote = remote?.trim() || null
     }
 
     if (requirements !== undefined) {

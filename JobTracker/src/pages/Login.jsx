@@ -6,7 +6,7 @@
   - useAuth: Custom hook to access authentication context (login function, loading state, etc.)
   - This component creates a login interface integrated with backend authentication
 */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -49,6 +49,16 @@ function Login() {
   const [localError, setLocalError] = useState('')
 
   /* 
+    LEARNING COMMENT: Clear errors when component mounts
+    - Prevents error messages from persisting when navigating between pages
+    - Ensures clean state when user visits login page
+  */
+  useEffect(() => {
+    clearError() // Clear any auth errors from context
+    setLocalError('') // Clear any local errors
+  }, [clearError])
+
+  /* 
     LEARNING COMMENT: Async form submission handler
     - Handles login form submission when user clicks "Sign In"
     - e.preventDefault(): Prevents default browser form submission (page refresh)
@@ -66,15 +76,40 @@ function Login() {
       return
     }
 
+
+    
     try {
       // Call login function from AuthContext
       // This handles the API call, state updates, and navigation
-      await login(formData.email, formData.password)
+      console.log('🚀 Starting login attempt...')
+      const result = await login(formData.email, formData.password)
+      console.log('✅ Login successful:', result)
       // No need to redirect here - AuthContext handles navigation
       
     } catch (err) {
-      // Error is already set in AuthContext, no need to handle here
-      console.error('Login failed:', err)
+      console.error('❌ Login failed:', err)
+      console.error('❌ Error message:', err.message)
+      console.error('❌ Error type:', typeof err.message)
+      
+      // Simple error messages for users
+      if (err.message.includes('Invalid credentials') || 
+          err.message.includes('Email or password is incorrect') ||
+          err.message.includes('User not found') ||
+          err.message.includes('401')) {
+        console.log('Setting error: Invalid email or password')
+        setLocalError('Invalid email or password')
+      } else if (err.message.includes('User does not exist')) {
+        console.log('Setting error: Account not found')
+        setLocalError('Account not found')
+      } else if (err.message.includes('Failed to fetch') || 
+                 err.message.includes('Network') ||
+                 err.message.includes('fetch')) {
+        console.log('Setting error: Connection error')
+        setLocalError('Connection error. Please try again.')
+      } else {
+        console.log('Setting error: Generic login failed')
+        setLocalError('Login failed. Please try again.')
+      }
     }
   }
 
@@ -86,6 +121,10 @@ function Login() {
     - Works with any input that has a 'name' attribute matching formData properties
   */
   const handleChange = (e) => {
+    // Clear any displayed errors when user modifies input
+    clearError()
+    setLocalError('')
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -157,11 +196,15 @@ function Login() {
           - Only displays when there's an error to show
           - Red styling to indicate error state
         */}
-        {(authError || localError) && (
+        {localError ? (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {authError || localError}
+            {localError}
           </div>
-        )}
+        ) : authError ? (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {authError}
+          </div>
+        ) : null}
         
         {/* 
           LEARNING COMMENT: Login form element
@@ -254,19 +297,6 @@ function Login() {
               required
             />
           </div>
-
-          {/* 
-            LEARNING COMMENT: Error Message Display
-            - Shows authentication errors to users
-            - Conditional rendering: only shows when error exists
-            - Red styling to indicate error state
-            - mb-4: margin bottom to separate from submit button
-          */}
-          {(authError || localError) && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-red-700 text-sm">{authError || localError}</p>
-            </div>
-          )}
 
           {/* 
             LEARNING COMMENT: Submit button with loading state

@@ -21,6 +21,8 @@ import Register from './pages/Register'           // Registration page
 import Dashboard from './pages/Dashboard'         // Main dashboard page  
 import Resumes from './pages/Resumes'             // Resume management page
 import Jobs from './pages/Jobs'                   // Job applications page
+import TestJobs from './pages/TestJobs'           // Test Jobs page for debugging
+import JobsMinimal from './pages/JobsMinimal'     // Minimal Jobs page for debugging
 import Profile from './pages/Profile'             // User profile/settings page
 
 // 🎨 LEARNING: CSS import - Global styles that apply to the entire app
@@ -102,6 +104,22 @@ function App() {
                   <>
                     <Navigation />       {/* 🧭 Navigation bar */}
                     <main><Jobs /></main>       {/* 💼 Job applications content */}
+                  </>
+                } />
+
+                {/* 🧪 Test Jobs Route - Simple test page for debugging */}
+                <Route path="/test-jobs" element={
+                  <>
+                    <Navigation />       {/* 🧭 Navigation bar */}
+                    <main><TestJobs /></main>   {/* 🧪 Test job applications content */}
+                  </>
+                } />
+
+                {/* 🧪 Minimal Jobs Route - Ultra simple test */}
+                <Route path="/jobs-minimal" element={
+                  <>
+                    <Navigation />       {/* 🧭 Navigation bar */}
+                    <main><JobsMinimal /></main>   {/* 🧪 Minimal job applications content */}
                   </>
                 } />
                 

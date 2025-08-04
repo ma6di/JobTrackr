@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTracker Update Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .step {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            font-weight: 500;
+        }
+        button:hover { background: #2563eb; }
+        button:disabled { 
+            background: #94a3b8; 
+            cursor: not-allowed; 
+        }
+        .result {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        .warning { border-left: 4px solid #f59e0b; }
+        .input-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .status {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 JobTracker Job Update Test</h1>
+        <p>Test the job update functionality after the status validation fix</p>
+        
+        <div class="status" id="status">
+            <strong>Status:</strong> Ready to test job updates
+        </div>
+
+        <div class="step">
+            <h3>Step 1: Get Authentication Token</h3>
+            <p>First, we need to get a valid auth token</p>
+            
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="email" value="testuser@example.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" value="testpass123">
+            </div>
+            
+            <button onclick="login()" id="loginBtn">Login</button>
+            <button onclick="checkAuth()">Check Auth</button>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Get Existing Jobs</h3>
+            <p>Get the list of jobs to find one to update</p>
+            
+            <button onclick="getJobs()" id="getJobsBtn" disabled>Get Jobs</button>
+            <div id="jobsList"></div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Update Job</h3>
+            <p>Update a job with new status and other fields</p>
+            
+            <div class="input-group">
+                <label>Job ID to Update</label>
+                <input type="number" id="jobId" placeholder="Enter job ID from the list above">
+            </div>
+            
+            <div class="input-group">
+                <label>New Status</label>
+                <select id="newStatus">
+                    <option value="">Not specified</option>
+                    <option value="Applied">Applied</option>
+                    <option value="Pending">Pending</option>
+                    <option value="First Interview">First Interview</option>
+                    <option value="Second Interview">Second Interview</option>
+                    <option value="Third Interview">Third Interview</option>
+                    <option value="Final Interview">Final Interview</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>New Salary</label>
+                <input type="text" id="newSalary" placeholder="e.g., $120,000">
+            </div>
+            
+            <div class="input-group">
+                <label>New Location</label>
+                <input type="text" id="newLocation" placeholder="e.g., New York, NY">
+            </div>
+            
+            <button onclick="updateJob()" id="updateJobBtn" disabled>Update Job</button>
+        </div>
+
+        <div class="step">
+            <h3>Test Results</h3>
+            <button onclick="clearResults()">Clear Results</button>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let authToken = null;
+
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = `<strong>Status:</strong> ${message}`;
+        }
+
+        function displayResult(title, data, type = 'info') {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `<strong>${title}</strong>\n${JSON.stringify(data, null, 2)}`;
+            results.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function login() {
+            try {
+                updateStatus('Logging in...');
+                
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    
+                    displayResult('✅ Login SUCCESS', { 
+                        user: data.user,
+                        tokenPreview: data.token.substring(0, 20) + '...'
+                    }, 'success');
+                    
+                    updateStatus('Logged in successfully. Ready to test job operations.');
+                    document.getElementById('getJobsBtn').disabled = false;
+                    document.getElementById('updateJobBtn').disabled = false;
+                } else {
+                    displayResult('❌ Login FAILED', data, 'error');
+                    updateStatus('Login failed.');
+                }
+            } catch (error) {
+                displayResult('❌ Login ERROR', { error: error.message }, 'error');
+                updateStatus('Login error occurred.');
+            }
+        }
+
+        async function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                authToken = token;
+                document.getElementById('getJobsBtn').disabled = false;
+                document.getElementById('updateJobBtn').disabled = false;
+                displayResult('✅ Auth Token Found', { tokenPreview: token.substring(0, 20) + '...' }, 'success');
+                updateStatus('Auth token found. Ready to test.');
+            } else {
+                displayResult('⚠️ No Auth Token', { message: 'Please login first' }, 'warning');
+            }
+        }
+
+        async function getJobs() {
+            if (!authToken) {
+                displayResult('❌ No Auth Token', { error: 'Please login first' }, 'error');
+                return;
+            }
+
+            try {
+                updateStatus('Fetching jobs...');
+                
+                const response = await fetch('http://localhost:3001/api/jobs', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResult('✅ Get Jobs SUCCESS', data, 'success');
+                    
+                    // Display jobs in a simpler format
+                    const jobsList = document.getElementById('jobsList');
+                    if (data.jobs && data.jobs.length > 0) {
+                        jobsList.innerHTML = `
+                            <h4>Available Jobs to Update:</h4>
+                            <ul>
+                                ${data.jobs.map(job => `
+                                    <li><strong>ID: ${job.id}</strong> - ${job.position} at ${job.company} (Status: ${job.status || 'Not specified'})</li>
+                                `).join('')}
+                            </ul>
+                        `;
+                    } else {
+                        jobsList.innerHTML = '<p>No jobs found. Create a job first.</p>';
+                    }
+                    
+                    updateStatus(`Found ${data.jobs ? data.jobs.length : 0} jobs. Ready to update.`);
+                } else {
+                    displayResult('❌ Get Jobs FAILED', data, 'error');
+                    updateStatus('Failed to fetch jobs.');
+                }
+            } catch (error) {
+                displayResult('❌ Get Jobs ERROR', { error: error.message }, 'error');
+                updateStatus('Get jobs error occurred.');
+            }
+        }
+
+        async function updateJob() {
+            if (!authToken) {
+                displayResult('❌ No Auth Token', { error: 'Please login first' }, 'error');
+                return;
+            }
+
+            const jobId = document.getElementById('jobId').value;
+            if (!jobId) {
+                displayResult('❌ Missing Job ID', { error: 'Please enter a job ID' }, 'error');
+                return;
+            }
+
+            try {
+                updateStatus('Updating job...');
+                
+                const updateData = {
+                    status: document.getElementById('newStatus').value,
+                    salary: document.getElementById('newSalary').value,
+                    location: document.getElementById('newLocation').value
+                };
+
+                // Remove empty fields
+                Object.keys(updateData).forEach(key => {
+                    if (updateData[key] === '') {
+                        delete updateData[key];
+                    }
+                });
+
+                const response = await fetch(`http://localhost:3001/api/jobs/${jobId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayResult('✅ Job Update SUCCESS', data, 'success');
+                    updateStatus('Job updated successfully!');
+                } else {
+                    displayResult('❌ Job Update FAILED', data, 'error');
+                    updateStatus('Job update failed. Check the error details.');
+                }
+            } catch (error) {
+                displayResult('❌ Job Update ERROR', { error: error.message }, 'error');
+                updateStatus('Job update error occurred.');
+            }
+        }
+
+        // Check auth status on page load
+        window.addEventListener('load', () => {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

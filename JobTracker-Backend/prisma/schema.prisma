@@ -37,12 +37,14 @@ model Job {
   position      String
   location      String?
   jobType       String?
+  experienceLevel String?  // Experience level: Student, Internship, Junior, Associate, Mid-Senior, Senior, Lead, Manager, Director
+  remote        String?  // Work arrangement: Remote, Hybrid, On-site
   salary        String?
   description   String?
   requirements  String?
   additionalInfo String?
   applicationUrl String?
-  status        String   @default("wishlist")
+  status        String?
   priority      String   @default("medium")
   notes         String?
   appliedAt     DateTime?

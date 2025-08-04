@@ -53,7 +53,8 @@
     "multer-s3": "^3.0.1",
     "passport": "^0.7.0",
     "passport-linkedin-oauth2": "^2.0.0",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "recharts": "^3.1.0"
   },
   "devDependencies": {
     "eslint": "^8.54.0",

@@ -81,7 +81,7 @@ function JobViewModal({ isOpen, onClose, job }) {
               
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
-                <p className="text-gray-900 dark:text-gray-100">{job.location}</p>
+                <p className="text-gray-900 dark:text-gray-100">{job.location || '-'}</p>
               </div>
             </div>
 
@@ -90,36 +90,45 @@ function JobViewModal({ isOpen, onClose, job }) {
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
                 <div className="mt-1">
-                  <span className={`px-3 py-1 text-sm font-medium rounded-lg ${getStatusColor(job.status)}`}>
-                    {job.status}
-                  </span>
+                  {job.status ? (
+                    <span className={`px-3 py-1 text-sm font-medium rounded-lg ${getStatusColor(job.status)}`}>
+                      {job.status}
+                    </span>
+                  ) : (
+                    <span className="text-gray-900 dark:text-gray-100">-</span>
+                  )}
                 </div>
               </div>
               
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Applied Date</label>
                 <p className="text-gray-900 dark:text-gray-100">
-                  {job.appliedAt ? new Date(job.appliedAt).toLocaleDateString() : 'Not specified'}
+                  {job.appliedAt ? new Date(job.appliedAt).toLocaleDateString() : '-'}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Employment Details */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Salary</label>
-              <p className="text-gray-900 dark:text-gray-100">{job.salary || 'Not specified'}</p>
+              <p className="text-gray-900 dark:text-gray-100">{job.salary || '-'}</p>
             </div>
             
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Employment Type</label>
-              <p className="text-gray-900 dark:text-gray-100">{job.jobType || 'Not specified'}</p>
+              <p className="text-gray-900 dark:text-gray-100">{job.jobType || '-'}</p>
             </div>
             
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
-              <p className="text-gray-900 dark:text-gray-100 capitalize">{job.priority || 'Medium'}</p>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Work Arrangement</label>
+              <p className="text-gray-900 dark:text-gray-100">{job.remote || '-'}</p>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Experience Level</label>
+              <p className="text-gray-900 dark:text-gray-100">{job.experienceLevel || '-'}</p>
             </div>
           </div>
 

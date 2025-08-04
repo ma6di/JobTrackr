@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience Level Field Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { padding: 10px 15px; margin: 5px; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Experience Level Field Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Create Job with Experience Level</h2>
+        <button onclick="testCreateJobWithExperienceLevel()">Create Senior Level Job</button>
+        <div id="create-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Fetch Jobs and Check Experience Level</h2>
+        <button onclick="testFetchJobs()">Fetch All Jobs</button>
+        <div id="fetch-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Update Job Experience Level</h2>
+        <input type="number" id="jobId" placeholder="Job ID to update">
+        <select id="newExperienceLevel">
+            <option value="">Not specified</option>
+            <option value="Student">Student</option>
+            <option value="Internship">Internship</option>
+            <option value="Entry Level">Entry Level</option>
+            <option value="Junior">Junior</option>
+            <option value="Associate">Associate</option>
+            <option value="Mid-Senior">Mid-Senior</option>
+            <option value="Senior">Senior</option>
+            <option value="Staff">Staff</option>
+            <option value="Principal">Principal</option>
+            <option value="Director">Director</option>
+            <option value="VP">VP</option>
+            <option value="C-Level">C-Level</option>
+        </select>
+        <button onclick="testUpdateExperienceLevel()">Update Experience Level</button>
+        <div id="update-result"></div>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        const authToken = localStorage.getItem('authToken') || 'test-token';
+        
+        async function makeRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`,
+                        ...options.headers
+                    }
+                });
+                
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function testCreateJobWithExperienceLevel() {
+            const resultDiv = document.getElementById('create-result');
+            resultDiv.innerHTML = '<div class="info">Creating job with Senior experience level...</div>';
+            
+            const jobData = {
+                company: 'Test Company',
+                position: 'Senior Software Engineer',
+                location: 'San Francisco, CA',
+                salary: '$150k - $180k',
+                jobType: 'Full-time',
+                experienceLevel: 'Senior',
+                remote: 'Hybrid',
+                description: 'Test job description',
+                requirements: 'Senior-level requirements',
+                additionalInfo: 'Additional info for senior role',
+                applicationUrl: 'https://example.com/job',
+                status: 'Applied',
+                appliedAt: new Date().toISOString(),
+                notes: 'Test job with experience level'
+            };
+            
+            const result = await makeRequest(`${API_BASE}/jobs`, {
+                method: 'POST',
+                body: JSON.stringify(jobData)
+            });
+            
+            if (result.success) {
+                resultDiv.innerHTML = `
+                    <div class="success">✓ Job created successfully!</div>
+                    <div><strong>Job ID:</strong> ${result.data.id}</div>
+                    <div><strong>Experience Level:</strong> ${result.data.experienceLevel}</div>
+                    <div><strong>Position:</strong> ${result.data.position}</div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">✗ Error creating job:</div>
+                    <div>${JSON.stringify(result.data || result.error, null, 2)}</div>
+                `;
+            }
+        }
+        
+        async function testFetchJobs() {
+            const resultDiv = document.getElementById('fetch-result');
+            resultDiv.innerHTML = '<div class="info">Fetching all jobs...</div>';
+            
+            const result = await makeRequest(`${API_BASE}/jobs`);
+            
+            if (result.success) {
+                const jobsWithExperienceLevel = result.data.filter(job => job.experienceLevel);
+                
+                resultDiv.innerHTML = `
+                    <div class="success">✓ Fetched ${result.data.length} jobs</div>
+                    <div><strong>Jobs with Experience Level:</strong> ${jobsWithExperienceLevel.length}</div>
+                    <div style="max-height: 200px; overflow-y: auto; margin-top: 10px;">
+                        ${result.data.map(job => `
+                            <div style="border: 1px solid #eee; padding: 10px; margin: 5px 0;">
+                                <strong>ID ${job.id}:</strong> ${job.position} at ${job.company}<br>
+                                <strong>Experience Level:</strong> ${job.experienceLevel || 'Not specified'}<br>
+                                <strong>Status:</strong> ${job.status || 'No status'}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">✗ Error fetching jobs:</div>
+                    <div>${JSON.stringify(result.data || result.error, null, 2)}</div>
+                `;
+            }
+        }
+        
+        async function testUpdateExperienceLevel() {
+            const resultDiv = document.getElementById('update-result');
+            const jobId = document.getElementById('jobId').value;
+            const newExperienceLevel = document.getElementById('newExperienceLevel').value;
+            
+            if (!jobId) {
+                resultDiv.innerHTML = '<div class="error">Please enter a Job ID</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info">Updating experience level...</div>';
+            
+            const updateData = {
+                experienceLevel: newExperienceLevel
+            };
+            
+            const result = await makeRequest(`${API_BASE}/jobs/${jobId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updateData)
+            });
+            
+            if (result.success) {
+                resultDiv.innerHTML = `
+                    <div class="success">✓ Job updated successfully!</div>
+                    <div><strong>Job ID:</strong> ${result.data.id}</div>
+                    <div><strong>New Experience Level:</strong> ${result.data.experienceLevel || 'Not specified'}</div>
+                    <div><strong>Position:</strong> ${result.data.position}</div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">✗ Error updating job:</div>
+                    <div>${JSON.stringify(result.data || result.error, null, 2)}</div>
+                `;
+            }
+        }
+        
+        // Auto-fetch jobs on page load
+        window.addEventListener('load', () => {
+            setTimeout(testFetchJobs, 1000);
+        });
+    </script>
+</body>
+</html>

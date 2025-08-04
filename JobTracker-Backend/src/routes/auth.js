@@ -184,7 +184,7 @@ router.post('/login', createAuthRateLimit({ max: 5 }), async (req, res) => {
     if (!user) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        message: 'Email or password is incorrect'
+        message: 'Invalid email or password'
       })
     }
     
@@ -194,7 +194,7 @@ router.post('/login', createAuthRateLimit({ max: 5 }), async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         error: 'Invalid credentials',
-        message: 'Email or password is incorrect'
+        message: 'Invalid email or password'
       })
     }
     

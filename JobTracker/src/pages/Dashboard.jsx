@@ -3,10 +3,12 @@
   - useState: React hook that allows us to store and update changing data in our component
   - useNavigate: React Router hook that enables programmatic navigation (like clicking links but in code)
   - useJobs: Custom hook to access real job data from JobsContext
+  - Recharts components: For rendering the bar chart (BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer)
 */}
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useJobs } from '../contexts/JobsContext'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 {/* 
   LEARNING COMMENT: Dashboard Component - The main dashboard page component
@@ -59,6 +61,17 @@ function Dashboard() {
   const recentJobs = jobs
     .sort((a, b) => new Date(b.appliedDate || b.applicationDate) - new Date(a.appliedDate || a.applicationDate))
     .slice(0, 5)
+
+  // Prepare monthly application counts for the current year
+  const currentYear = new Date().getFullYear()
+  const monthlyCounts = Array(12).fill(0)
+  jobs.forEach(job => {
+    const applied = job.appliedAt ? new Date(job.appliedAt) : null
+    if (!applied || applied.getFullYear() !== currentYear) return
+    monthlyCounts[applied.getMonth()] += 1
+  })
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const chartData = months.map((month, idx) => ({ month, applications: monthlyCounts[idx] }))
 
   // 🎨 LEARNING: Status Color Function - Returns different colors based on job application status
   // This function takes a status string and returns Tailwind CSS classes for styling
@@ -189,48 +202,21 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 border-2 border-slate-300 dark:border-gray-600 backdrop-blur-sm w-fit">
-            <h2 className="text-3xl font-light text-slate-700 dark:text-slate-300 mb-8 text-center">Quick Actions</h2>
-            <div className="grid grid-cols-3 gap-6">
-              <button 
-                onClick={() => navigate('/resumes')}
-                className="bg-gradient-to-br from-white to-slate-50 dark:from-gray-700 dark:to-gray-800 hover:from-slate-100 hover:to-slate-150 dark:hover:from-gray-600 dark:hover:to-gray-700 text-slate-700 dark:text-slate-300 font-medium py-8 px-8 rounded-xl transition-all duration-300 flex flex-col items-center justify-center space-y-3 min-h-[140px] shadow-lg hover:shadow-xl transform hover:-translate-y-1 border-2 border-slate-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-gray-500 w-64"
-              >
-                <div className="w-12 h-12 bg-slate-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-slate-600 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd"></path>
-                  </svg>
-                </div>
-                <span className="text-lg font-medium">Upload Resume</span>
-              </button>
-              
-              <button 
-                onClick={() => navigate('/jobs')}
-                className="bg-gradient-to-br from-white to-emerald-50 dark:from-gray-700 dark:to-emerald-900/20 hover:from-emerald-100 hover:to-emerald-150 dark:hover:from-gray-600 dark:hover:to-emerald-900/30 text-slate-700 dark:text-slate-300 font-medium py-8 px-8 rounded-xl transition-all duration-300 flex flex-col items-center justify-center space-y-3 min-h-[140px] shadow-lg hover:shadow-xl transform hover:-translate-y-1 border-2 border-emerald-300 dark:border-emerald-800/50 hover:border-emerald-400 dark:hover:border-emerald-700 w-64"
-              >
-                <div className="w-12 h-12 bg-emerald-200 dark:bg-emerald-900/40 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-emerald-700 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd"></path>
-                  </svg>
-                </div>
-                <span className="text-lg font-medium">Add Job Application</span>
-              </button>
-              
-              <button 
-                onClick={() => navigate('/jobs')}
-                className="bg-gradient-to-br from-white to-violet-50 dark:from-gray-700 dark:to-violet-900/20 hover:from-violet-100 hover:to-violet-150 dark:hover:from-gray-600 dark:hover:to-violet-900/30 text-slate-700 dark:text-slate-300 font-medium py-8 px-8 rounded-xl transition-all duration-300 flex flex-col items-center justify-center space-y-3 min-h-[140px] shadow-lg hover:shadow-xl transform hover:-translate-y-1 border-2 border-violet-300 dark:border-violet-800/50 hover:border-violet-400 dark:hover:border-violet-700 w-64"
-              >
-                <div className="w-12 h-12 bg-violet-200 dark:bg-violet-900/40 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6 text-violet-700 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                  </svg>
-                </div>
-                <span className="text-lg font-medium">View Analytics</span>
-              </button>
-            </div>
+        {/* Applications Chart */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-light text-slate-700 dark:text-slate-300 mb-2 text-center">Applications in {currentYear}</h2>
+          {/* Chart Title Year */}
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-4">Year Overview</p>
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" interval={0} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="applications" fill="#8884d8" barSize={30} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

@@ -112,22 +112,28 @@ app.use(compression())
 app.use(morgan('combined'))
 
 /* 
-  LEARNING COMMENT: Rate Limiting Middleware
-  - Prevents API abuse by limiting requests per IP
-  - 15 minutes window, max 100 requests per IP
-  - Protects against DDoS and brute force attacks
+  LEARNING COMMENT: Rate Limiting Middleware - Development Mode
+  - More lenient rate limiting for development
+  - 1 minute window, max 1000 requests per IP
+  - Can be tightened for production deployment
 */
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 1000, // Limit each IP to 1000 requests per minute (very lenient for dev)
   message: {
     error: 'Too many requests from this IP, please try again later.',
-    retryAfter: '15 minutes'
+    retryAfter: '1 minute'
   },
   standardHeaders: true, // Return rate limit info in headers
   legacyHeaders: false   // Disable X-RateLimit-* headers
 })
-app.use('/api/', limiter)
+
+// Only apply rate limiting in production
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api/', limiter)
+} else {
+  console.log('🔧 Rate limiting disabled in development mode')
+}
 
 /* 
   LEARNING COMMENT: Health Check Endpoint

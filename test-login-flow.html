@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Flow Test</title>
+</head>
+<body>
+    <h1>Login Flow Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testLogout()">Test Logout</button>
+    <button onclick="checkAuthState()">Check Auth State</button>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001/api';
+
+        // Token management functions (copied from api.js)
+        const getToken = () => localStorage.getItem('authToken');
+        const setToken = (token) => localStorage.setItem('authToken', token);
+        const removeToken = () => localStorage.removeItem('authToken');
+        const isAuthenticated = () => !!getToken();
+
+        // Generic API request function
+        const apiRequest = async (endpoint, options = {}) => {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            const token = getToken();
+            if (token) {
+                headers.Authorization = `Bearer ${token}`;
+            }
+
+            const config = {
+                method: 'GET',
+                headers,
+                ...options,
+            };
+
+            if (options.headers) {
+                config.headers = { ...config.headers, ...options.headers };
+            }
+
+            try {
+                const response = await fetch(url, config);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Request failed' }));
+                    let errorMessage = errorData.error || response.statusText;
+                    
+                    if (response.status === 401) {
+                        errorMessage = errorData.error || 'Invalid credentials. Please check your email and password.';
+                    } else if (response.status === 429) {
+                        errorMessage = 'Too many requests. Please try again later.';
+                    } else if (response.status === 500) {
+                        errorMessage = 'Server error. Please try again later.';
+                    }
+                    
+                    throw new Error(errorMessage);
+                }
+                
+                return await response.json();
+                
+            } catch (error) {
+                console.error('API Request failed:', error);
+                throw error;
+            }
+        };
+
+        // Login function
+        const login = async (email, password) => {
+            console.log('Starting login...');
+            const response = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password }),
+            });
+            
+            console.log('Login response:', response);
+            
+            if (response.token) {
+                setToken(response.token);
+                console.log('Token stored');
+            }
+            
+            return response;
+        };
+
+        // Logout function
+        const logout = async () => {
+            try {
+                await apiRequest('/auth/logout', {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.warn('Backend logout failed:', error);
+            } finally {
+                removeToken();
+                console.log('Token removed');
+            }
+        };
+
+        // Test functions
+        async function testLogin() {
+            const results = document.getElementById('results');
+            try {
+                results.innerHTML = '<p>Testing login...</p>';
+                const response = await login('test@example.com', 'TestPassword123!');
+                results.innerHTML = '<p style="color: green;">Login successful!</p><pre>' + JSON.stringify(response, null, 2) + '</pre>';
+            } catch (error) {
+                results.innerHTML = '<p style="color: red;">Login failed: ' + error.message + '</p>';
+            }
+        }
+
+        async function testLogout() {
+            const results = document.getElementById('results');
+            try {
+                results.innerHTML = '<p>Testing logout...</p>';
+                await logout();
+                results.innerHTML = '<p style="color: green;">Logout successful!</p>';
+            } catch (error) {
+                results.innerHTML = '<p style="color: red;">Logout failed: ' + error.message + '</p>';
+            }
+        }
+
+        function checkAuthState() {
+            const results = document.getElementById('results');
+            const token = getToken();
+            const authenticated = isAuthenticated();
+            results.innerHTML = `
+                <p><strong>Authentication State:</strong></p>
+                <p>Is Authenticated: ${authenticated}</p>
+                <p>Token: ${token ? token.substring(0, 50) + '...' : 'None'}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
