@@ -52,13 +52,38 @@ function Dashboard() {
     rejected: safeJobs.filter(job => job.status === 'Rejected').length
   }
 
-  // Prepare monthly application counts for the current year
+  // Prepare monthly application counts for available years
   const currentYear = new Date().getFullYear()
+  
+  // Get all available years from job data
+  const availableYears = [...new Set(
+    safeJobs
+      .map(job => {
+        try {
+          const applied = job.appliedAt ? new Date(job.appliedAt) : null
+          return applied ? applied.getFullYear() : null
+        } catch (err) {
+          return null
+        }
+      })
+      .filter(year => year !== null)
+      .sort((a, b) => b - a) // Sort descending (newest first)
+  )]
+  
+  // If no jobs with dates, default to current year
+  if (availableYears.length === 0) {
+    availableYears.push(currentYear)
+  }
+  
+  // State for selected year
+  const [selectedYear, setSelectedYear] = useState(availableYears[0] || currentYear)
+  
+  // Prepare monthly counts for selected year
   const monthlyCounts = Array(12).fill(0)
   safeJobs.forEach(job => {
     try {
       const applied = job.appliedAt ? new Date(job.appliedAt) : null
-      if (!applied || applied.getFullYear() !== currentYear) return
+      if (!applied || applied.getFullYear() !== selectedYear) return
       monthlyCounts[applied.getMonth()] += 1
     } catch (err) {
       console.warn('Error processing job date:', job, err)
@@ -200,8 +225,35 @@ function Dashboard() {
 
         {/* Applications Chart */}
         <div className="mb-12">
-          <h2 className="text-2xl font-light text-slate-700 dark:text-slate-300 mb-2 text-center">Applications in {currentYear}</h2>
-          <p className="text-center text-gray-500 dark:text-gray-400 mb-4">Year Overview</p>
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <h2 className="text-2xl font-light text-slate-700 dark:text-slate-300">Applications in</h2>
+            
+            {/* Year Selector */}
+            <div className="relative">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className="appearance-none bg-white dark:bg-gray-800 border border-slate-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 text-lg font-medium text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors duration-200"
+              >
+                {availableYears.map(year => (
+                  <option key={year} value={year} className="text-slate-700 dark:text-slate-300">
+                    {year}
+                  </option>
+                ))}
+              </select>
+              
+              {/* Custom dropdown arrow */}
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg className="w-4 h-4 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+          
+          <p className="text-center text-gray-500 dark:text-gray-400 mb-4">
+            Monthly Overview • {monthlyCounts.reduce((sum, count) => sum + count, 0)} total applications
+          </p>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
               <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%">
