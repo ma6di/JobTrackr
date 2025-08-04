@@ -204,13 +204,52 @@ function Dashboard() {
           <p className="text-center text-gray-500 dark:text-gray-400 mb-4">Year Overview</p>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
-              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%">
+              <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" interval={0} />
                 <YAxis allowDecimals={false} />
                 <Bar dataKey="applications" fill="#8884d8" barSize={30}>
-                  {/* Add labels directly on the bars */}
-                  <LabelList dataKey="applications" position="top" style={{ fontSize: '12px', fill: '#374151' }} />
+                  {/* Add labels with background for better visibility */}
+                  <LabelList 
+                    dataKey="applications" 
+                    position="top" 
+                    style={{ 
+                      fontSize: '12px', 
+                      fill: 'var(--label-color)', 
+                      fontWeight: '600' 
+                    }} 
+                    className="[--label-color:#1e293b] dark:[--label-color:#f1f5f9]"
+                    content={(props) => {
+                      const { x, y, value } = props;
+                      if (value === 0) return null; // Don't show label for zero values
+                      return (
+                        <g>
+                          {/* Background circle for better visibility */}
+                          <circle 
+                            cx={x} 
+                            cy={y - 8} 
+                            r="10" 
+                            fill="rgba(255, 255, 255, 0.9)" 
+                            stroke="rgba(0, 0, 0, 0.1)" 
+                            strokeWidth="1"
+                            className="dark:fill-gray-800/90 dark:stroke-gray-600/30"
+                          />
+                          {/* The number text */}
+                          <text 
+                            x={x} 
+                            y={y - 5} 
+                            textAnchor="middle" 
+                            fontSize="12" 
+                            fontWeight="600"
+                            fill="var(--label-color)"
+                            className="[--label-color:#1e293b] dark:[--label-color:#f1f5f9]"
+                          >
+                            {value}
+                          </text>
+                        </g>
+                      );
+                    }}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
