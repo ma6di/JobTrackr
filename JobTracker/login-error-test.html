@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Error Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .error {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #a00;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #efe;
+            border: 1px solid #cfc;
+            color: #060;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #005a8b;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>JobTracker Login Error Test</h1>
+    <p>This page tests the login error handling flow to ensure error messages display correctly.</p>
+
+    <div class="test-section">
+        <h2>Test 1: API Error Response</h2>
+        <p>Testing direct API call with wrong credentials:</p>
+        <button onclick="testAPICall()">Test API Error</button>
+        <div id="api-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Full App Login</h2>
+        <p>To test the full app login flow:</p>
+        <ol>
+            <li>Go to: <a href="http://localhost:5173/login" target="_blank">http://localhost:5173/login</a></li>
+            <li>Enter email: test@test.com</li>
+            <li>Enter password: wrongpassword</li>
+            <li>Click "Sign In"</li>
+            <li>Verify error message appears in red box</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Check Error State Flow</h2>
+        <p>Open browser dev tools (F12) and watch the console and network tabs while testing login.</p>
+        <ul>
+            <li>Network tab should show POST request to /api/auth/login</li>
+            <li>Response should be 401 with error message</li>
+            <li>Console should show AuthContext setting error state</li>
+            <li>Login component should display the error</li>
+        </ul>
+    </div>
+
+    <script>
+        async function testAPICall() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@test.com',
+                        password: 'wrongpassword'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    resultDiv.innerHTML = `<div class="error">
+                        <strong>Expected Error Response:</strong><br>
+                        Status: ${response.status}<br>
+                        Message: ${data.error || data.message}
+                    </div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="success">
+                        <strong>Unexpected Success:</strong><br>
+                        ${JSON.stringify(data, null, 2)}
+                    </div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <strong>Network Error:</strong><br>
+                    ${error.message}
+                </div>`;
+            }
+        }
+    </script>
+</body>
+</html>

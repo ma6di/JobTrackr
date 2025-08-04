@@ -6,7 +6,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useJobs } from '../contexts/JobsContext'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 
 // Dashboard component definition
 function Dashboard() {
@@ -208,8 +208,10 @@ function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" interval={0} />
                 <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="applications" fill="#8884d8" barSize={30} />
+                <Bar dataKey="applications" fill="#8884d8" barSize={30}>
+                  {/* Add labels directly on the bars */}
+                  <LabelList dataKey="applications" position="top" style={{ fontSize: '12px', fill: '#374151' }} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -17,6 +17,7 @@ import { JobsProvider } from './contexts/JobsContext'
 // Each import brings in a different page or reusable piece of UI
 import Navigation from './components/Navigation'  // Top navigation bar
 import Login from './pages/Login'                 // Login page
+import DebugLogin from './pages/DebugLogin'       // Debug Login page for testing
 import Register from './pages/Register'           // Registration page
 import Dashboard from './pages/Dashboard'         // Main dashboard page  
 import DashboardSimple from './pages/DashboardSimple' // Simple dashboard for testing  
@@ -79,6 +80,7 @@ function App() {
                     🔄 EFFECT: Change path="/login" to see login page at /login instead of / */}
                 <Route path="/" element={<Login />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/debug-login" element={<DebugLogin />} />
                 <Route path="/register" element={<Register />} />
                 
                 {/* 📊 Dashboard Route - Shows navigation + dashboard content

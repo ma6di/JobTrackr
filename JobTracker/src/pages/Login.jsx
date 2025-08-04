@@ -54,9 +54,10 @@ function Login() {
     - Ensures clean state when user visits login page
   */
   useEffect(() => {
-    clearError() // Clear any auth errors from context
-    setLocalError('') // Clear any local errors
-  }, [clearError])
+    // Only clear errors on initial mount, not on every render
+    clearError()
+    setLocalError('')
+  }, []) // Empty dependency array = only run once on mount
 
   /* 
     LEARNING COMMENT: Async form submission handler
@@ -68,7 +69,6 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLocalError('')
-    clearError() // Clear any previous auth errors
 
     // Basic client-side validation
     if (!formData.email || !formData.password) {
@@ -76,55 +76,37 @@ function Login() {
       return
     }
 
+    // Clear previous errors only when we're about to make a new attempt
+    clearError()
 
-    
     try {
       // Call login function from AuthContext
       // This handles the API call, state updates, and navigation
-      console.log('🚀 Starting login attempt...')
-      const result = await login(formData.email, formData.password)
-      console.log('✅ Login successful:', result)
+      await login(formData.email, formData.password)
       // No need to redirect here - AuthContext handles navigation
       
     } catch (err) {
-      console.error('❌ Login failed:', err)
-      console.error('❌ Error message:', err.message)
-      console.error('❌ Error type:', typeof err.message)
-      
-      // Simple error messages for users
-      if (err.message.includes('Invalid credentials') || 
-          err.message.includes('Email or password is incorrect') ||
-          err.message.includes('User not found') ||
-          err.message.includes('401')) {
-        console.log('Setting error: Invalid email or password')
-        setLocalError('Invalid email or password')
-      } else if (err.message.includes('User does not exist')) {
-        console.log('Setting error: Account not found')
-        setLocalError('Account not found')
-      } else if (err.message.includes('Failed to fetch') || 
-                 err.message.includes('Network') ||
-                 err.message.includes('fetch')) {
-        console.log('Setting error: Connection error')
-        setLocalError('Connection error. Please try again.')
-      } else {
-        console.log('Setting error: Generic login failed')
-        setLocalError('Login failed. Please try again.')
-      }
+      console.error('Login failed:', err)
+      // Don't set localError here - let AuthContext handle the error message
+      // The authError will be displayed instead
     }
   }
 
   /* 
-    LEARNING COMMENT: Input change handler
-    - Updates formData state when user types in form fields
-    - Uses computed property names [e.target.name] for dynamic field updates
-    - Spread operator (...formData) preserves other form fields when updating one
-    - Works with any input that has a 'name' attribute matching formData properties
+    LEARNING COMMENT: Input focus handler
+    - Only clears errors when user starts typing, not just focusing
+    - Provides better UX by keeping errors visible until user takes action
   */
-  const handleChange = (e) => {
-    // Clear any displayed errors when user modifies input
-    clearError()
-    setLocalError('')
+  const handleInputFocus = () => {
+    // Don't clear errors on focus, only when user starts typing
+    // This way errors remain visible until user actively tries to fix them
+  }
 
+  const handleChange = (e) => {
+    // Clear errors when user starts typing (not just focusing)
+    if (localError) setLocalError('')
+    if (authError) clearError()
+    
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -196,15 +178,11 @@ function Login() {
           - Only displays when there's an error to show
           - Red styling to indicate error state
         */}
-        {localError ? (
+        {(localError || authError) && (
           <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {localError}
+            {localError || authError}
           </div>
-        ) : authError ? (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            {authError}
-          </div>
-        ) : null}
+        )}
         
         {/* 
           LEARNING COMMENT: Login form element
@@ -257,6 +235,7 @@ function Login() {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onFocus={handleInputFocus}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your email"
               required
@@ -292,6 +271,7 @@ function Login() {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onFocus={handleInputFocus}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your password"
               required

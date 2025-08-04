@@ -1,0 +1,30 @@
+// Alternative Option 2: Custom minimal tooltip
+// Replace the chart section with this if you prefer a subtle tooltip:
+
+{/* Applications Chart with Custom Tooltip */}
+<div className="mb-12">
+  <h2 className="text-2xl font-light text-slate-700 dark:text-slate-300 mb-2 text-center">Applications in {currentYear}</h2>
+  <p className="text-center text-gray-500 dark:text-gray-400 mb-4">Year Overview</p>
+  <div style={{ width: '100%', height: 300 }}>
+    <ResponsiveContainer>
+      <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%">
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="month" interval={0} />
+        <YAxis allowDecimals={false} />
+        <Tooltip 
+          content={({ active, payload, label }) => {
+            if (active && payload && payload.length) {
+              return (
+                <div className="bg-gray-800 text-white px-2 py-1 rounded text-sm shadow-lg">
+                  {payload[0].value} {payload[0].value === 1 ? 'application' : 'applications'}
+                </div>
+              );
+            }
+            return null;
+          }}
+        />
+        <Bar dataKey="applications" fill="#8884d8" barSize={30} />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>

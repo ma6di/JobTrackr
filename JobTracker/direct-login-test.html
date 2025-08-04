@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Login Error Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .error {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #a00;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005a8b;
+        }
+        .loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Direct Login Test</h1>
+    <p>This tests the login error flow directly to the JobTracker backend.</p>
+
+    <div id="error-display" style="display: none;"></div>
+
+    <form id="login-form">
+        <input type="email" id="email" placeholder="Email (try: test@test.com)" value="test@test.com" />
+        <input type="password" id="password" placeholder="Password (try: wrongpassword)" value="wrongpassword" />
+        <button type="submit" id="submit-btn">Sign In</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submit-btn');
+            const errorDisplay = document.getElementById('error-display');
+            const resultDiv = document.getElementById('result');
+            
+            // Hide previous error
+            errorDisplay.style.display = 'none';
+            
+            // Show loading state
+            submitBtn.textContent = 'Signing In...';
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            
+            try {
+                console.log('🚀 Attempting login with:', { email, password });
+                
+                const response = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                console.log('📦 Response:', { status: response.status, data });
+                
+                if (!response.ok) {
+                    // Show error message
+                    const errorMessage = data.error || data.message || 'Login failed';
+                    errorDisplay.innerHTML = `<div class="error">${errorMessage}</div>`;
+                    errorDisplay.style.display = 'block';
+                    
+                    resultDiv.innerHTML = `<strong>Error Response:</strong><br>
+                        Status: ${response.status}<br>
+                        Message: ${errorMessage}`;
+                } else {
+                    resultDiv.innerHTML = `<strong>Success:</strong><br>
+                        Token received: ${data.token ? 'Yes' : 'No'}<br>
+                        User: ${data.user ? data.user.email : 'No user data'}`;
+                }
+                
+            } catch (error) {
+                console.error('❌ Network error:', error);
+                errorDisplay.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
+                errorDisplay.style.display = 'block';
+                
+                resultDiv.innerHTML = `<strong>Network Error:</strong><br>${error.message}`;
+            } finally {
+                // Reset button
+                submitBtn.textContent = 'Sign In';
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
