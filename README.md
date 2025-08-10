@@ -2,9 +2,21 @@
 
 A modern, full-stack web application for tracking job applications, managing resumes, and organizing your job search process.
 
-![JobTracker](https://img.shields.io/badge/Status-Production%20Ready-green)
+![JobTracker](https://img.shields.io/badge/Status-Live-brightgreen)
 ![Tech Stack](https://img.shields.io/badge/Stack-React%20%7C%20Node.js%20%7C%20PostgreSQL-blue)
-![Deployment](https://img.shields.io/badge/Deployed-Railway-purple)
+![Frontend](https://img.shields.io/badge/Frontend-Vercel-black)
+![Backend](https://img.shields.io/badge/Backend-Railway-purple)
+
+## 🌐 **Live Application**
+
+**🎯 Try it now:** **[https://job-trackr-murex.vercel.app](https://job-trackr-murex.vercel.app)**
+
+### Demo Credentials
+Create your own account or use these for testing:
+- **Email:** demo@jobtracker.com
+- **Password:** DemoPassword123!
+
+---
 
 ## ✨ Features
 
@@ -125,11 +137,21 @@ A modern, full-stack web application for tracking job applications, managing res
 
 ## 📱 Usage
 
-1. **Register** a new account or **login** with existing credentials
-2. **Create job applications** with company details and application status
-3. **Upload resumes** and link them to specific applications
-4. **Track your progress** through the job search process
-5. **Manage your profile** and account settings
+### 🔐 **Password Requirements**
+When creating an account, ensure your password meets these security requirements:
+- ✅ **Minimum 8 characters**
+- ✅ **At least one uppercase letter (A-Z)**
+- ✅ **At least one lowercase letter (a-z)**
+- ✅ **At least one number (0-9)**
+- ✅ **At least one special character (!@#$%^&*)**
+
+### 🚀 **Getting Started**
+1. **Visit:** https://job-trackr-murex.vercel.app
+2. **Register** a new account with a strong password
+3. **Create job applications** with company details and application status
+4. **Upload resumes** and link them to specific applications
+5. **Track your progress** through the job search process
+6. **Manage your profile** and account settings
 
 ## 🏗️ Project Structure
 
@@ -175,15 +197,33 @@ JobTracker/
 
 ## 🚀 Deployment
 
-### Backend (Railway)
-1. Connect your GitHub repository to Railway
-2. Set environment variables in Railway dashboard
-3. Deploy automatically on push to main branch
+### Live Production URLs
+- **Frontend:** https://job-trackr-murex.vercel.app
+- **Backend API:** https://jobtrackr-production.up.railway.app
 
-### Frontend (Vercel/Netlify)
-1. Build the frontend: `npm run build`
-2. Deploy the `dist` folder to your hosting platform
-3. Update `VITE_API_URL` to point to your production backend
+### Frontend (Vercel)
+✅ **Currently Deployed**
+- Automatic deployments on push to main branch
+- Environment variables configured for production backend
+- Optimized build with Vite
+
+### Backend (Railway)
+✅ **Currently Deployed**
+- PostgreSQL database hosted on Railway
+- Environment variables configured
+- Automatic schema migration on startup
+- SSL/TLS encryption enabled
+
+### Environment Configuration
+**Production Backend Environment:**
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - Secure token for authentication
+- `NODE_ENV=production`
+- `CORS_ORIGIN=https://job-trackr-murex.vercel.app`
+
+**Production Frontend Environment:**
+- `VITE_API_URL=https://jobtrackr-production.up.railway.app/api`
+- `VITE_NODE_ENV=production`
 
 ## 🔧 Development
 
