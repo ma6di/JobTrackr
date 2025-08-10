@@ -23,34 +23,32 @@
 ### 2. Add PostgreSQL Database 
 - [x] **PostgreSQL deployed successfully** ✅ 
 - [x] **Database provisioned** ✅
-- [ ] **Add DATABASE_URL to backend service** ⚠️ **DO THIS NOW**
+- [x] **DATABASE_URL added to backend service** ✅
 
-**NEXT STEP:** Add DATABASE_URL variable to your JobTrackr backend service:
-```
-Variable Name: DATABASE_URL
-Value: ${{ Postgres.DATABASE_URL }}
-```
+**✅ COMPLETED:** DATABASE_URL variable added successfully!
+- Variable: `DATABASE_URL`
+- Value: `${{ Postgres.DATABASE_URL }}` (private network - no egress fees)
+- Application code: Already configured to use `env("DATABASE_URL")`
+
+**⚠️ Important:** Ensure you're using the **private network** connection to avoid egress fees:
+- ✅ **Correct**: `${{ Postgres.DATABASE_URL }}` (private)
+- ❌ **Avoid**: Direct public URL (causes fees)
 
 ### 3. Configure Environment Variables
 - [x] **Environment variables added** ✅
 - [x] **Railway auto-redeployed** ✅
-- [ ] **Need PostgreSQL DATABASE_URL** ⚠️
+- [x] **DATABASE_URL configured** ✅
 
-**Status:** API returning 502 error - need database connection
+**Current Status:** API still returning 502 - investigating OpenSSL/Prisma compatibility
 
-In Railway dashboard → Your Service → Variables tab, add:
-
+All required environment variables are now configured:
 ```
-✅ NODE_ENV=production (ADDED)
-✅ JWT_SECRET=f5018c249217a61757acda8a0c2c0c3bf5a08dea2f1c2e77473775115d19615d84d5aee15e3a3ef21564c506d393c1bdbe81ffd6f0b2ba837589a50f7ca3c9ef (ADDED)
-✅ JWT_EXPIRES_IN=7d (ADDED)
-✅ PORT=3001 (ADDED)
-⚠️ DATABASE_URL=automatically provided when PostgreSQL is added
+✅ NODE_ENV=production
+✅ JWT_SECRET=f5018c249217a61757acda8a0c2c0c3bf5a08dea2f1c2e77473775115d19615d84d5aee15e3a3ef21564c506d393c1bdbe81ffd6f0b2ba837589a50f7ca3c9ef
+✅ JWT_EXPIRES_IN=7d
+✅ PORT=3001
+✅ DATABASE_URL=postgresql://postgres:...@postgres.railway.internal:5432/railway
 ```
-
-**Next:** Add PostgreSQL database service to get DATABASE_URL
-
-**Note:** DATABASE_URL is automatically provided by Railway when you add PostgreSQL
 
 ### 🚨 CURRENT ISSUE: Prisma OpenSSL Compatibility ⚠️ **CRITICAL**
 
