@@ -83,28 +83,105 @@ npx prisma db push
 
 ## 🔧 Troubleshooting
 
-### ⚠️ CURRENT ERROR: "Error creating build plan with Railpack"
+### ✅ PROGRESS: Root Directory Fixed, JSON Error Resolved!
 
-**IMMEDIATE SOLUTION - Try these steps in order:**
+**GOOD NEWS:** You found the root directory setting and Railway detected the Node.js project!
 
-1. **Check Root Directory Setting:**
-   - In Railway dashboard → Your Service → Settings
-   - Under "Source" section, ensure "Root Directory" is set to: `JobTracker-Backend`
-   - Click "Update" if needed
+**LATEST ERROR FIXED:** "duplicate field engines at line 75" in package.json
+- ✅ **Removed duplicate engines field**
+- ✅ **JSON is now valid**
+- ✅ **Changes pushed to GitHub**
 
-2. **Force Builder Selection:**
-   - In Railway dashboard → Settings → "Build"
-   - Set "Builder" to "Nixpacks" (not Auto-detect)
-   - Save and redeploy
+**NEXT STEP:** Try Railway deployment again!
 
-3. **Use Updated Config Files:**
-   - Ensure you've pushed the latest changes (updated `railway.json`, `nixpacks.toml`)
-   - Both files have been optimized for Railway
+🚀 **Go to Railway Dashboard:**
+1. Your Service → **Deployments**
+2. Click **"Deploy Now"**
+3. Should now proceed past the JSON parsing stage
 
-4. **Clean Redeploy:**
-   - Delete current Railway service
-   - Create new service: "Deploy from GitHub repo"
-   - Select repository and set root directory to `JobTracker-Backend`
+**Expected Next Steps in Build:**
+- ✅ JSON parsing (should work now)
+- 🔄 Installing dependencies (`npm ci`)
+- 🔄 Building project (`npm run build`)
+- 🔄 Starting server (`npm start`)
+
+### ⚠️ PREVIOUS ERROR: "Railpack could not determine how to build the app"
+
+**ROOT CAUSE:** Railway is still scanning the wrong directory and can't detect the Node.js project structure.
+
+**NUCLEAR OPTION - DELETE & RECREATE SERVICE (RECOMMENDED):**
+
+This is the most reliable fix when Railway gets confused:
+
+🚨 **Step 1: Delete Current Service**
+1. Railway Dashboard → Your Service
+2. Go to **"Settings"** tab
+3. Scroll to bottom → **"Danger Zone"**
+4. Click **"Delete Service"** → Confirm deletion
+
+🚀 **Step 2: Create Fresh Service with Correct Setup**
+1. Railway Dashboard → **"New Project"** 
+2. Choose **"Deploy from GitHub repo"**
+3. Select your repository
+4. **CRITICAL:** Look for deployment options:
+   - **"Service Name"**: `jobtracker-backend`
+   - **"Build Command"**: `cd JobTracker-Backend && npm ci && npm run build`
+   - **"Start Command"**: `cd JobTracker-Backend && npm start`
+   - **"Working Directory"** (if shown): `JobTracker-Backend`
+
+🎯 **Step 3: Add PostgreSQL Separately**
+1. In the new project → **"New Service"**
+2. Choose **"Database"** → **"PostgreSQL"**
+3. Wait for provisioning (2-3 minutes)
+
+🎯 **Step 4: Configure Environment Variables**
+Add to your backend service (not database):
+```
+NODE_ENV=production
+JWT_SECRET=f5018c249217a61757acda8a0c2c0c3bf5a08dea2f1c2e77473775115d19615d84d5aee15e3a3ef21564c506d393c1bdbe81ffd6f0b2ba837589a50f7ca3c9ef
+JWT_EXPIRES_IN=7d
+PORT=3001
+```
+
+**Alternative if UI doesn't allow custom commands during setup:**
+
+🎯 **Method 2: Create railway.json in Repository Root (RECOMMENDED)**
+This tells Railway exactly what to do:
+
+**Action needed:** Create this file at repository root level
+
+✅ **I've created `/railway.json` (at project root) with proper config!**
+
+🎯 **Method 3: Delete & Recreate Service (Nuclear Option)**
+Since Railway interface varies, sometimes easier to start fresh:
+
+1. **Delete current Railway service completely**
+2. Create **"New Service"** 
+3. Choose **"Deploy from GitHub repo"**
+4. Select your repository
+5. During setup, if you see ANY directory options, set to `JobTracker-Backend`
+6. Complete setup normally
+
+🎯 **Quick Fix Option: Root package.json (JUST CREATED)**
+✅ **I've created `/package.json` at repository root that:**
+- Makes Railway detect it as Node.js project
+- Redirects all commands to `JobTracker-Backend/`
+- Should work with default Railway setup
+
+**Try this immediately:**
+1. Go to Railway → Deployments
+2. Click **"Deploy Now"**
+3. Railway should now detect Node.js and use the root package.json
+
+🎯 **Method 4: Railway CLI (Most Reliable)**
+```bash
+# Install Railway CLI
+npm install -g @railway/cli
+# Login and link project with correct directory
+railway login
+railway link
+railway up --service backend --source JobTracker-Backend
+```
 
 ### Build Failures ("Error creating build plan with Railpack"):
 
