@@ -1,15 +1,15 @@
-# Simplified Nixpacks configuration for Railway deployment
+# Nixpacks configuration for Railway deployment
 [variables]
 NODE_ENV = "production"
 
-# Install phase - use standard npm install
+# Install phase - install all dependencies first
 [phases.install]
 cmds = ["npm ci"]
 
-# Build phase - generate Prisma client  
+# Build phase - generate Prisma client after install
 [phases.build]
 cmds = ["npx prisma generate"]
 
-# Start phase - run the application
+# Start phase - run migrations then start the application
 [phases.start]
-cmd = "npm start"
+cmd = "npx prisma migrate deploy && npm start"

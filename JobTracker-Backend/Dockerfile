@@ -4,16 +4,19 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first
 COPY package*.json ./
 
-# Install dependencies
+# Copy Prisma schema (needed for postinstall script)
+COPY prisma ./prisma/
+
+# Install dependencies (this will run prisma generate via postinstall)
 RUN npm ci --only=production
 
-# Copy application code
+# Copy rest of application code
 COPY . .
 
-# Generate Prisma client
+# Ensure Prisma client is generated
 RUN npx prisma generate
 
 # Expose port
