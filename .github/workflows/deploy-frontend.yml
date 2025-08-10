@@ -1,0 +1,41 @@
+name: Deploy Frontend to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'JobTracker/**' ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'JobTracker/package-lock.json'
+        
+    - name: Install dependencies
+      run: |
+        cd JobTracker
+        npm ci
+        
+    - name: Build
+      run: |
+        cd JobTracker
+        npm run build
+      env:
+        VITE_API_URL: https://jobtrackr-production.up.railway.app/api
+        VITE_NODE_ENV: production
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./JobTracker/dist
