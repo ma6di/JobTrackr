@@ -2,16 +2,17 @@
 [variables]
 NODE_ENV = "production"
 OPENSSL_CONF = "/dev/null"
+PRISMA_CLI_BINARY_TARGETS = "native,debian-openssl-1.1.x,linux-musl"
 
-# Setup phase - install system dependencies
+# Setup phase - install system dependencies including OpenSSL 1.1
 [phases.setup]
-nixPkgs = ["openssl"]
+nixPkgs = ["nodejs-18_x", "openssl_1_1"]
 
 # Install phase - install all dependencies first
 [phases.install]
 cmds = ["npm ci"]
 
-# Build phase - generate Prisma client after install
+# Build phase - generate Prisma client with correct binary targets
 [phases.build]
 cmds = ["npx prisma generate"]
 

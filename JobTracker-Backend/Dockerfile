@@ -1,5 +1,13 @@
-# Use Node.js LTS version
-FROM node:18-alpine
+# Use Node.js on Debian (not Alpine) for OpenSSL 1.1 compatibility
+FROM node:18-bullseye-slim
+
+# Install OpenSSL 1.1 and other required system dependencies
+RUN apt-get update && apt-get install -y \
+    openssl \
+    libssl1.1 \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -16,8 +24,11 @@ RUN npm ci --only=production
 # Copy rest of application code
 COPY . .
 
-# Ensure Prisma client is generated
+# Ensure Prisma client is generated with correct binary targets
 RUN npx prisma generate
+
+# Set environment variables
+ENV OPENSSL_CONF=/dev/null
 
 # Expose port
 EXPOSE $PORT
