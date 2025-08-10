@@ -3,20 +3,58 @@
 // - useNavigate: React Router hook that enables programmatic navigation (like clicking links but in code)
 // - useJobs: Custom hook to access real job data from JobsContext
 // - Recharts components: For rendering the bar chart (BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer)
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useJobs } from '../contexts/JobsContext'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts'
 
 // Dashboard component definition
 function Dashboard() {
+  // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY CONDITIONAL RETURNS
+  const navigate = useNavigate()
+  const { jobs, loading, error } = useJobs()
+  
+  // Safety check - ensure jobs is an array
+  const safeJobs = Array.isArray(jobs) ? jobs : []
+  
+  // Prepare monthly application counts for available years
+  const currentYear = new Date().getFullYear()
+  
+  // Get all available years from job data (with safety checks)
+  const availableYears = React.useMemo(() => {
+    const years = [...new Set(
+      safeJobs
+        .map(job => {
+          try {
+            const applied = job.appliedAt ? new Date(job.appliedAt) : null
+            return applied ? applied.getFullYear() : null
+          } catch (err) {
+            return null
+          }
+        })
+        .filter(year => year !== null)
+        .sort((a, b) => b - a) // Sort descending (newest first)
+    )]
+    
+    // If no jobs with dates, default to current year
+    if (years.length === 0) {
+      years.push(currentYear)
+    }
+    
+    return years
+  }, [safeJobs, currentYear])
+  
+  // State for selected year - THIS HOOK MUST BE CALLED BEFORE ANY RETURNS
+  const [selectedYear, setSelectedYear] = useState(() => availableYears[0] || currentYear)
+
+  // Update selectedYear if availableYears changes and current selection is no longer valid
+  React.useEffect(() => {
+    if (availableYears.length > 0 && !availableYears.includes(selectedYear)) {
+      setSelectedYear(availableYears[0])
+    }
+  }, [availableYears, selectedYear])
+
   try {
-    const navigate = useNavigate()
-    const { jobs, loading, error } = useJobs()
-  
-    // Safety check - ensure jobs is an array
-    const safeJobs = Array.isArray(jobs) ? jobs : []
-  
     // Show loading state
     if (loading) {
       return (
@@ -52,32 +90,6 @@ function Dashboard() {
     rejected: safeJobs.filter(job => job.status === 'Rejected').length
   }
 
-  // Prepare monthly application counts for available years
-  const currentYear = new Date().getFullYear()
-  
-  // Get all available years from job data
-  const availableYears = [...new Set(
-    safeJobs
-      .map(job => {
-        try {
-          const applied = job.appliedAt ? new Date(job.appliedAt) : null
-          return applied ? applied.getFullYear() : null
-        } catch (err) {
-          return null
-        }
-      })
-      .filter(year => year !== null)
-      .sort((a, b) => b - a) // Sort descending (newest first)
-  )]
-  
-  // If no jobs with dates, default to current year
-  if (availableYears.length === 0) {
-    availableYears.push(currentYear)
-  }
-  
-  // State for selected year
-  const [selectedYear, setSelectedYear] = useState(availableYears[0] || currentYear)
-  
   // Prepare monthly counts for selected year
   const monthlyCounts = Array(12).fill(0)
   safeJobs.forEach(job => {

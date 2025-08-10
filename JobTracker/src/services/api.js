@@ -186,6 +186,38 @@ export const getCurrentUser = async () => {
   return await apiRequest('/auth/me')
 }
 
+/* Update user profile */
+export const updateProfile = async (profileData) => {
+  return await apiRequest('/users/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData),
+  })
+}
+
+/* Change user password */
+export const changePassword = async (passwordData) => {
+  return await apiRequest('/users/change-password', {
+    method: 'PUT',
+    body: JSON.stringify(passwordData),
+  })
+}
+
+/* Request password reset code */
+export const forgotPassword = async (email) => {
+  return await apiRequest('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+}
+
+/* Reset password with code */
+export const resetPassword = async (resetData) => {
+  return await apiRequest('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify(resetData),
+  })
+}
+
 /* 
   LEARNING COMMENT: Resume API functions
   - getResumes(): Fetch all user's resumes
@@ -390,6 +422,9 @@ export default {
   register,
   logout,
   getCurrentUser,
+  changePassword,
+  forgotPassword,
+  resetPassword,
   isAuthenticated,
   getToken,
   setToken,
@@ -411,4 +446,8 @@ export default {
   
   /* Dashboard */
   getDashboardStats,
+  
+  /* Password Reset */
+  forgotPassword,
+  resetPassword,
 }

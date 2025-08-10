@@ -19,6 +19,7 @@ import Navigation from './components/Navigation'  // Top navigation bar
 import Login from './pages/Login'                 // Login page
 import DebugLogin from './pages/DebugLogin'       // Debug Login page for testing
 import Register from './pages/Register'           // Registration page
+import ForgotPassword from './pages/ForgotPassword' // Password reset page
 import Dashboard from './pages/Dashboard'         // Main dashboard page  
 import DashboardSimple from './pages/DashboardSimple' // Simple dashboard for testing  
 import Resumes from './pages/Resumes'             // Resume management page
@@ -82,6 +83,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/debug-login" element={<DebugLogin />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 
                 {/* 📊 Dashboard Route - Shows navigation + dashboard content
                     path="/dashboard" means website.com/dashboard

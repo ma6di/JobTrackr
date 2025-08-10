@@ -305,8 +305,23 @@ function Login() {
         </form>
 
         {/* 
+          LEARNING COMMENT: Forgot password link section
+          - mt-4: 1rem top margin for separation from form
+          - text-center: Centers content horizontally
+          - Provides password recovery option for users
+        */}
+        <div className="mt-4 text-center">
+          <Link 
+            to="/forgot-password" 
+            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          >
+            Forgot your password?
+          </Link>
+        </div>
+
+        {/* 
           LEARNING COMMENT: Sign up link section
-          - mt-6: 1.5rem top margin for separation from form
+          - mt-6: 1.5rem top margin for separation from forgot password link
           - text-center: Centers content horizontally
           - Provides path for users who don't have accounts
         */}
