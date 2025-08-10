@@ -1,0 +1,38 @@
+🔧 Railway Environment Variables Setup Guide
+===============================================
+
+STEP 1: Find Your Backend Service
+- Railway Dashboard
+- Look for service showing "Deployed" status  
+- Click on your BACKEND service (NOT the database)
+
+STEP 2: Go to Variables Tab
+- Inside your backend service
+- Click "Variables" tab
+
+STEP 3: Add Variables (one by one)
+Click "+ Add Variable" for each:
+
+Variable 1:
+Name: NODE_ENV
+Value: production
+
+Variable 2: 
+Name: JWT_SECRET
+Value: your_production_jwt_secret_256_bits
+
+Variable 3:
+Name: JWT_EXPIRES_IN  
+Value: 7d
+
+Variable 4:
+Name: PORT
+Value: 3001
+
+STEP 4: Wait for Auto-Redeploy
+- Railway will automatically redeploy
+- Wait 2-3 minutes for completion
+
+✅ IMPORTANT: Add to BACKEND service, NOT database!
+✅ Railway will auto-redeploy after adding variables
+✅ DATABASE_URL is added automatically when you add PostgreSQL
