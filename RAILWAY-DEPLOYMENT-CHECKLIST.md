@@ -83,29 +83,33 @@ npx prisma db push
 
 ## 🔧 Troubleshooting
 
-### ✅ PROGRESS: Root Directory Fixed, JSON Error Resolved!
+### ✅ PROGRESS: npm ci Error Fixed!
 
-**GOOD NEWS:** You found the root directory setting and Railway detected the Node.js project!
+**EXCELLENT PROGRESS:** Railway is now building! We've fixed multiple issues:
 
-**LATEST ERROR FIXED:** "duplicate field engines at line 75" in package.json
-- ✅ **Removed duplicate engines field**
-- ✅ **JSON is now valid**
-- ✅ **Changes pushed to GitHub**
+- ✅ **Root Directory**: Set correctly to `JobTracker-Backend`
+- ✅ **JSON Parsing**: Duplicate engines field removed  
+- ✅ **Package Lock Sync**: Updated package-lock.json for PostgreSQL deps
+
+**LATEST ERROR FIXED:** `npm ci` package-lock.json sync error
+- ✅ **Missing pg packages**: Added to package-lock.json
+- ✅ **Lock file synced**: package.json and package-lock.json now match
+- ✅ **Changes pushed**: Ready for Railway retry
 
 **NEXT STEP:** Try Railway deployment again!
 
 🚀 **Go to Railway Dashboard:**
 1. Your Service → **Deployments**
 2. Click **"Deploy Now"**
-3. Should now proceed past the JSON parsing stage
+3. Should now complete `npm ci` successfully
 
 **Expected Next Steps in Build:**
-- ✅ JSON parsing (should work now)
-- 🔄 Installing dependencies (`npm ci`)
-- 🔄 Building project (`npm run build`)
+- ✅ JSON parsing (fixed)
+- ✅ Installing dependencies (`npm ci` - should work now!)
+- 🔄 Building project (`npm run build` - Prisma generate)
 - 🔄 Starting server (`npm start`)
 
-### ⚠️ PREVIOUS ERROR: "Railpack could not determine how to build the app"
+### ⚠️ PREVIOUS ERRORS (ALL FIXED):
 
 **ROOT CAUSE:** Railway is still scanning the wrong directory and can't detect the Node.js project structure.
 
