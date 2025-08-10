@@ -36,7 +36,7 @@ function LinkedInIntegration({ onAutoFill, isJobForm = false }) {
       setIsConnecting(true)
       
       // Get LinkedIn authorization URL from backend
-      const response = await axios.get('http://localhost:3001/api/auth/linkedin', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'https://jobtrackr-production.up.railway.app/api'}/auth/linkedin`, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -68,7 +68,7 @@ function LinkedInIntegration({ onAutoFill, isJobForm = false }) {
     try {
       setIsParsingJob(true)
       
-      const response = await axios.post('http://localhost:3001/api/auth/linkedin/parse-job', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL || 'https://jobtrackr-production.up.railway.app/api'}/auth/linkedin/parse-job`, {
         jobUrl: jobUrl
       }, {
         headers: {
