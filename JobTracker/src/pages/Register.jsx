@@ -46,6 +46,27 @@ function Register() {
       return
     }
 
+    // Enhanced password validation to match backend
+    if (!/[A-Z]/.test(formData.password)) {
+      setLocalError('Password must contain at least one uppercase letter')
+      return
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      setLocalError('Password must contain at least one lowercase letter')
+      return
+    }
+
+    if (!/\d/.test(formData.password)) {
+      setLocalError('Password must contain at least one number')
+      return
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+      setLocalError('Password must contain at least one special character (!@#$%^&*)')
+      return
+    }
+
     await register(formData)
   }
 
@@ -136,7 +157,7 @@ function Register() {
                 placeholder="Password"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Password must be at least 8 characters with uppercase, lowercase, and special characters
+                Password must be at least 8 characters with uppercase, lowercase, number, and special character (!@#$%^&*)
               </p>
             </div>
           </div>
