@@ -52,6 +52,40 @@ In Railway dashboard → Your Service → Variables tab, add:
 
 **Note:** DATABASE_URL is automatically provided by Railway when you add PostgreSQL
 
+### 🚨 CURRENT ISSUE: Prisma OpenSSL Compatibility ⚠️ **CRITICAL**
+
+**Status:** API returning 502 - Prisma engine failing to load due to OpenSSL version mismatch
+
+**Error:** `Error loading shared library libssl.so.1.1: No such file or directory`
+
+**✅ ATTEMPTED FIXES:**
+- ✅ Updated Prisma binary targets to include `debian-openssl-1.1.x`
+- ✅ Changed Dockerfile from Alpine to Debian bullseye-slim
+- ✅ Added explicit OpenSSL 1.1 dependencies (`libssl1.1`)
+- ✅ Updated nixpacks.toml to use `openssl_1_1` package
+- ✅ Set `OPENSSL_CONF="/dev/null"` environment variable
+
+**🎯 NEXT STEPS TO TRY:**
+
+**Option 1: Force Docker Build (Recommended)**
+1. Railway Dashboard → Your Service → Settings
+2. Change "Builder" from "Nixpacks" to "Dockerfile"
+3. This will use our Debian-based Dockerfile instead of nixpacks
+
+**Option 2: Try Different Prisma Version**
+```bash
+cd JobTracker-Backend
+npm install prisma@5.18.0 @prisma/client@5.18.0
+```
+
+**Option 3: Railway CLI Deployment**
+```bash
+# Install Railway CLI (after fixing sudo password issue)
+railway login
+railway link your-project-id
+railway up
+```
+
 ### 4. Deploy Application
 - [x] **Railway deployment SUCCESSFUL!** ✅
 - [x] Monitor deployment logs for errors
