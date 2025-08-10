@@ -1,0 +1,14 @@
+# Nixpacks configuration for Railway deployment
+[variables]
+NODE_ENV = "production"
+
+# Build phase - install dependencies and generate Prisma client
+[phases.build]
+cmds = [
+  "npm ci --only=production",
+  "npx prisma generate"
+]
+
+# Start phase - run the application
+[phases.start]
+cmd = "npm start"
