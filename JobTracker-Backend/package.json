@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
+    "debug-env": "node debug-env.js",
     "dev": "nodemon src/server.js",
     "build": "OPENSSL_CONF=/dev/null prisma generate",
     "postinstall": "OPENSSL_CONF=/dev/null prisma generate",
