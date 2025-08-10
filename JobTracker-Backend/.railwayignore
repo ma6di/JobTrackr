@@ -1,0 +1,17 @@
+# Railway ignore file - exclude from build
+node_modules
+npm-debug.log*
+.npm
+.env.local
+.env.development
+.env.test
+.DS_Store
+*.log
+temp/
+uploads/
+dev.db
+*.db-journal
+.vscode/
+.idea/
+coverage/
+.nyc_output/
