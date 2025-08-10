@@ -54,6 +54,24 @@ export async function connectDatabase() {
     console.log('✅ PostgreSQL database connected successfully')
     console.log(`📍 Database: ${getDatabaseInfo()}`)
     
+    // Run database schema setup for production
+    if (process.env.NODE_ENV === 'production') {
+      console.log('🔧 Setting up database schema...')
+      try {
+        // Import child_process dynamically to avoid issues
+        const { execSync } = await import('child_process')
+        execSync('OPENSSL_CONF=/dev/null npx prisma db push', { 
+          stdio: 'inherit',
+          cwd: process.cwd(),
+          timeout: 30000 // 30 second timeout
+        })
+        console.log('✅ Database schema setup complete')
+      } catch (schemaError) {
+        console.log('⚠️  Schema setup failed (tables may already exist):', schemaError.message)
+        // Continue anyway - tables might already exist
+      }
+    }
+    
     return prisma
   } catch (error) {
     console.error('❌ Database connection failed:', error.message)
