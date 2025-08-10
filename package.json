@@ -1,0 +1,16 @@
+{
+  "name": "jobtracker-monorepo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "cd JobTracker-Backend && npm ci && npm run build",
+    "start": "cd JobTracker-Backend && npm start",
+    "postinstall": "cd JobTracker-Backend && npm install"
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  },
+  "dependencies": {},
+  "private": true
+}

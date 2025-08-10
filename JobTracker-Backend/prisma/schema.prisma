@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -19,6 +19,8 @@ model User {
   phone          String?
   location       String?
   profilePicture String?
+  resetCode      String?   // 6-digit password reset code
+  resetCodeExpiry DateTime? // Expiry time for reset code
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

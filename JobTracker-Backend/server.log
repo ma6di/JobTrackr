@@ -966,3 +966,466 @@ prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`r
 prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
 prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
 ::1 - - [04/Aug/2025:18:04:44 +0000] "GET /api/jobs HTTP/1.1" 200 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:05:49 +0000] "POST /api/auth/logout HTTP/1.1" 200 79 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:05:53 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:13 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:14 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:15 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:27 +0000] "POST /api/auth/login HTTP/1.1" 200 628 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT 1
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:26:27 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:27 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:31 +0000] "POST /api/auth/logout HTTP/1.1" 200 79 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:41 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:41 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:26:57 +0000] "POST /api/auth/logout HTTP/1.1" 401 108 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:27:00 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:27:00 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:29:37 +0000] "GET /api/health HTTP/1.1" 404 208 "-" "curl/8.7.1"
+::1 - - [04/Aug/2025:18:29:45 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "-" "curl/8.7.1"
+::1 - - [04/Aug/2025:18:29:55 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:29:56 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:29:57 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:32:19 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:33:38 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:33:39 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:33:39 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:35:56 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:41:43 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:41:53 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:41:54 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:41:55 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:41:57 +0000] "POST /api/auth/login HTTP/1.1" 200 628 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:41:57 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:41:57 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Received job creation request: {
+  "company": "ae",
+  "position": "aer",
+  "location": "",
+  "salary": "",
+  "jobType": "",
+  "experienceLevel": "",
+  "remote": "",
+  "description": "",
+  "requirements": "",
+  "additionalInfo": "",
+  "applicationUrl": "",
+  "status": "",
+  "appliedAt": "2025-08-23",
+  "notes": "",
+  "resumeId": null
+}
+Creating job with data: {
+  "userId": 25,
+  "company": "ae",
+  "position": "aer",
+  "status": null,
+  "description": "",
+  "salary": null,
+  "location": "",
+  "appliedAt": "2025-08-23T00:00:00.000Z",
+  "jobType": null,
+  "experienceLevel": null,
+  "remote": null,
+  "requirements": null,
+  "additionalInfo": null,
+  "applicationUrl": null,
+  "priority": "medium",
+  "notes": null,
+  "interviewDate": null,
+  "followUpDate": null,
+  "resumeId": null
+}
+prisma:query SELECT 1
+prisma:query INSERT INTO `main`.`jobs` (`userId`, `resumeId`, `company`, `position`, `location`, `jobType`, `experienceLevel`, `remote`, `salary`, `description`, `requirements`, `additionalInfo`, `applicationUrl`, `status`, `priority`, `notes`, `appliedAt`, `interviewDate`, `followUpDate`, `createdAt`, `updatedAt`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING `id` AS `id`, `userId` AS `userId`, `resumeId` AS `resumeId`, `company` AS `company`, `position` AS `position`, `location` AS `location`, `jobType` AS `jobType`, `experienceLevel` AS `experienceLevel`, `remote` AS `remote`, `salary` AS `salary`, `description` AS `description`, `requirements` AS `requirements`, `additionalInfo` AS `additionalInfo`, `applicationUrl` AS `applicationUrl`, `status` AS `status`, `priority` AS `priority`, `notes` AS `notes`, `appliedAt` AS `appliedAt`, `interviewDate` AS `interviewDate`, `followUpDate` AS `followUpDate`, `createdAt` AS `createdAt`, `updatedAt` AS `updatedAt`
+::1 - - [04/Aug/2025:18:46:05 +0000] "POST /api/jobs HTTP/1.1" 201 435 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:46:05 +0000] "GET /api/jobs HTTP/1.1" 200 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Received job creation request: {
+  "company": "eQWqw",
+  "position": "sdfaewq",
+  "location": "",
+  "salary": "",
+  "jobType": "",
+  "experienceLevel": "",
+  "remote": "",
+  "description": "",
+  "requirements": "",
+  "additionalInfo": "",
+  "applicationUrl": "",
+  "status": "",
+  "appliedAt": "2025-08-28",
+  "notes": "",
+  "resumeId": null
+}
+Creating job with data: {
+  "userId": 25,
+  "company": "eQWqw",
+  "position": "sdfaewq",
+  "status": null,
+  "description": "",
+  "salary": null,
+  "location": "",
+  "appliedAt": "2025-08-28T00:00:00.000Z",
+  "jobType": null,
+  "experienceLevel": null,
+  "remote": null,
+  "requirements": null,
+  "additionalInfo": null,
+  "applicationUrl": null,
+  "priority": "medium",
+  "notes": null,
+  "interviewDate": null,
+  "followUpDate": null,
+  "resumeId": null
+}
+prisma:query INSERT INTO `main`.`jobs` (`userId`, `resumeId`, `company`, `position`, `location`, `jobType`, `experienceLevel`, `remote`, `salary`, `description`, `requirements`, `additionalInfo`, `applicationUrl`, `status`, `priority`, `notes`, `appliedAt`, `interviewDate`, `followUpDate`, `createdAt`, `updatedAt`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING `id` AS `id`, `userId` AS `userId`, `resumeId` AS `resumeId`, `company` AS `company`, `position` AS `position`, `location` AS `location`, `jobType` AS `jobType`, `experienceLevel` AS `experienceLevel`, `remote` AS `remote`, `salary` AS `salary`, `description` AS `description`, `requirements` AS `requirements`, `additionalInfo` AS `additionalInfo`, `applicationUrl` AS `applicationUrl`, `status` AS `status`, `priority` AS `priority`, `notes` AS `notes`, `appliedAt` AS `appliedAt`, `interviewDate` AS `interviewDate`, `followUpDate` AS `followUpDate`, `createdAt` AS `createdAt`, `updatedAt` AS `updatedAt`
+::1 - - [04/Aug/2025:18:46:14 +0000] "POST /api/jobs HTTP/1.1" 201 442 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:46:14 +0000] "GET /api/jobs HTTP/1.1" 200 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Received job creation request: {
+  "company": "awse",
+  "position": "asd",
+  "location": "",
+  "salary": "",
+  "jobType": "",
+  "experienceLevel": "",
+  "remote": "",
+  "description": "",
+  "requirements": "",
+  "additionalInfo": "",
+  "applicationUrl": "",
+  "status": "",
+  "appliedAt": "2025-08-04",
+  "notes": "",
+  "resumeId": null
+}
+Creating job with data: {
+  "userId": 25,
+  "company": "awse",
+  "position": "asd",
+  "status": null,
+  "description": "",
+  "salary": null,
+  "location": "",
+  "appliedAt": "2025-08-04T00:00:00.000Z",
+  "jobType": null,
+  "experienceLevel": null,
+  "remote": null,
+  "requirements": null,
+  "additionalInfo": null,
+  "applicationUrl": null,
+  "priority": "medium",
+  "notes": null,
+  "interviewDate": null,
+  "followUpDate": null,
+  "resumeId": null
+}
+prisma:query SELECT 1
+prisma:query INSERT INTO `main`.`jobs` (`userId`, `resumeId`, `company`, `position`, `location`, `jobType`, `experienceLevel`, `remote`, `salary`, `description`, `requirements`, `additionalInfo`, `applicationUrl`, `status`, `priority`, `notes`, `appliedAt`, `interviewDate`, `followUpDate`, `createdAt`, `updatedAt`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING `id` AS `id`, `userId` AS `userId`, `resumeId` AS `resumeId`, `company` AS `company`, `position` AS `position`, `location` AS `location`, `jobType` AS `jobType`, `experienceLevel` AS `experienceLevel`, `remote` AS `remote`, `salary` AS `salary`, `description` AS `description`, `requirements` AS `requirements`, `additionalInfo` AS `additionalInfo`, `applicationUrl` AS `applicationUrl`, `status` AS `status`, `priority` AS `priority`, `notes` AS `notes`, `appliedAt` AS `appliedAt`, `interviewDate` AS `interviewDate`, `followUpDate` AS `followUpDate`, `createdAt` AS `createdAt`, `updatedAt` AS `updatedAt`
+::1 - - [04/Aug/2025:18:46:27 +0000] "POST /api/jobs HTTP/1.1" 201 437 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:46:27 +0000] "GET /api/jobs HTTP/1.1" 200 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Received job creation request: {
+  "company": "ada",
+  "position": "dasdas",
+  "location": "",
+  "salary": "",
+  "jobType": "",
+  "experienceLevel": "",
+  "remote": "",
+  "description": "",
+  "requirements": "",
+  "additionalInfo": "",
+  "applicationUrl": "",
+  "status": "",
+  "appliedAt": "2025-08-04",
+  "notes": "",
+  "resumeId": null
+}
+Creating job with data: {
+  "userId": 25,
+  "company": "ada",
+  "position": "dasdas",
+  "status": null,
+  "description": "",
+  "salary": null,
+  "location": "",
+  "appliedAt": "2025-08-04T00:00:00.000Z",
+  "jobType": null,
+  "experienceLevel": null,
+  "remote": null,
+  "requirements": null,
+  "additionalInfo": null,
+  "applicationUrl": null,
+  "priority": "medium",
+  "notes": null,
+  "interviewDate": null,
+  "followUpDate": null,
+  "resumeId": null
+}
+prisma:query INSERT INTO `main`.`jobs` (`userId`, `resumeId`, `company`, `position`, `location`, `jobType`, `experienceLevel`, `remote`, `salary`, `description`, `requirements`, `additionalInfo`, `applicationUrl`, `status`, `priority`, `notes`, `appliedAt`, `interviewDate`, `followUpDate`, `createdAt`, `updatedAt`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING `id` AS `id`, `userId` AS `userId`, `resumeId` AS `resumeId`, `company` AS `company`, `position` AS `position`, `location` AS `location`, `jobType` AS `jobType`, `experienceLevel` AS `experienceLevel`, `remote` AS `remote`, `salary` AS `salary`, `description` AS `description`, `requirements` AS `requirements`, `additionalInfo` AS `additionalInfo`, `applicationUrl` AS `applicationUrl`, `status` AS `status`, `priority` AS `priority`, `notes` AS `notes`, `appliedAt` AS `appliedAt`, `interviewDate` AS `interviewDate`, `followUpDate` AS `followUpDate`, `createdAt` AS `createdAt`, `updatedAt` AS `updatedAt`
+::1 - - [04/Aug/2025:18:46:41 +0000] "POST /api/jobs HTTP/1.1" 201 439 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:46:41 +0000] "GET /api/jobs HTTP/1.1" 200 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:47:01 +0000] "POST /api/auth/logout HTTP/1.1" 200 79 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:47:06 +0000] "POST /api/auth/login HTTP/1.1" 401 74 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:50:00 +0000] "POST /api/auth/login HTTP/1.1" 200 628 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT 1
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:50:00 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:18:50:00 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+Received job creation request: {
+  "company": "ae",
+  "position": "sgf",
+  "location": "",
+  "salary": "",
+  "jobType": "",
+  "experienceLevel": "",
+  "remote": "",
+  "description": "",
+  "requirements": "",
+  "additionalInfo": "",
+  "applicationUrl": "",
+  "status": "",
+  "appliedAt": "2024-01-04",
+  "notes": "",
+  "resumeId": null
+}
+Creating job with data: {
+  "userId": 25,
+  "company": "ae",
+  "position": "sgf",
+  "status": null,
+  "description": "",
+  "salary": null,
+  "location": "",
+  "appliedAt": "2024-01-04T00:00:00.000Z",
+  "jobType": null,
+  "experienceLevel": null,
+  "remote": null,
+  "requirements": null,
+  "additionalInfo": null,
+  "applicationUrl": null,
+  "priority": "medium",
+  "notes": null,
+  "interviewDate": null,
+  "followUpDate": null,
+  "resumeId": null
+}
+prisma:query SELECT 1
+prisma:query INSERT INTO `main`.`jobs` (`userId`, `resumeId`, `company`, `position`, `location`, `jobType`, `experienceLevel`, `remote`, `salary`, `description`, `requirements`, `additionalInfo`, `applicationUrl`, `status`, `priority`, `notes`, `appliedAt`, `interviewDate`, `followUpDate`, `createdAt`, `updatedAt`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) RETURNING `id` AS `id`, `userId` AS `userId`, `resumeId` AS `resumeId`, `company` AS `company`, `position` AS `position`, `location` AS `location`, `jobType` AS `jobType`, `experienceLevel` AS `experienceLevel`, `remote` AS `remote`, `salary` AS `salary`, `description` AS `description`, `requirements` AS `requirements`, `additionalInfo` AS `additionalInfo`, `applicationUrl` AS `applicationUrl`, `status` AS `status`, `priority` AS `priority`, `notes` AS `notes`, `appliedAt` AS `appliedAt`, `interviewDate` AS `interviewDate`, `followUpDate` AS `followUpDate`, `createdAt` AS `createdAt`, `updatedAt` AS `updatedAt`
+::1 - - [04/Aug/2025:18:55:34 +0000] "POST /api/jobs HTTP/1.1" 201 435 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:18:55:34 +0000] "GET /api/jobs HTTP/1.1" 200 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:19:03:27 +0000] "GET /api/auth/me HTTP/1.1" 200 300 "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:19:03:27 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:19:03:27 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:19:03:27 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:22:28:08 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:22:28:08 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [04/Aug/2025:22:28:08 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [04/Aug/2025:22:28:08 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [05/Aug/2025:20:49:10 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [05/Aug/2025:20:49:10 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+::1 - - [05/Aug/2025:20:49:11 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [05/Aug/2025:20:49:11 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [05/Aug/2025:20:51:09 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [05/Aug/2025:20:51:09 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [05/Aug/2025:20:51:12 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [05/Aug/2025:20:51:12 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:08:45:48 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:08:45:48 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [06/Aug/2025:08:45:48 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:08:45:48 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:11:00:09 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:11:00:09 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [06/Aug/2025:11:00:09 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [06/Aug/2025:11:00:09 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:11:00:14 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:11:00:14 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [06/Aug/2025:11:00:14 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [06/Aug/2025:11:00:14 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:10:45:00 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:10:45:00 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:10:45:02 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:10:45:02 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:11:04:54 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:11:04:54 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:11:04:54 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:11:04:54 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:11:45:42 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:11:45:42 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:11:45:42 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:11:45:42 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:13:46:41 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:13:46:41 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:13:46:41 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:13:46:41 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:14:50:18 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:14:50:18 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:14:50:18 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:14:50:18 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:18:52:38 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:18:52:38 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:18:52:38 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:18:52:38 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:21:13:31 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:21:13:31 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [07/Aug/2025:21:13:32 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [07/Aug/2025:21:13:32 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [08/Aug/2025:08:11:31 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [08/Aug/2025:08:11:31 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [08/Aug/2025:08:11:31 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [08/Aug/2025:08:11:31 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [08/Aug/2025:10:15:12 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [08/Aug/2025:10:15:12 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+::1 - - [08/Aug/2025:10:15:13 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [08/Aug/2025:10:15:13 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [08/Aug/2025:11:06:27 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+::1 - - [08/Aug/2025:11:06:27 +0000] "GET /api/auth/me HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT `main`.`jobs`.`id`, `main`.`jobs`.`userId`, `main`.`jobs`.`resumeId`, `main`.`jobs`.`company`, `main`.`jobs`.`position`, `main`.`jobs`.`location`, `main`.`jobs`.`jobType`, `main`.`jobs`.`experienceLevel`, `main`.`jobs`.`remote`, `main`.`jobs`.`salary`, `main`.`jobs`.`description`, `main`.`jobs`.`requirements`, `main`.`jobs`.`additionalInfo`, `main`.`jobs`.`applicationUrl`, `main`.`jobs`.`status`, `main`.`jobs`.`priority`, `main`.`jobs`.`notes`, `main`.`jobs`.`appliedAt`, `main`.`jobs`.`interviewDate`, `main`.`jobs`.`followUpDate`, `main`.`jobs`.`createdAt`, `main`.`jobs`.`updatedAt` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? ORDER BY `main`.`jobs`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`userId`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`s3Url`, `main`.`resumes`.`fileSize`, `main`.`resumes`.`mimeType`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`description`, `main`.`resumes`.`isActive`, `main`.`resumes`.`downloadCount`, `main`.`resumes`.`createdAt`, `main`.`resumes`.`updatedAt` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? ORDER BY `main`.`resumes`.`createdAt` DESC LIMIT ? OFFSET ?
+prisma:query SELECT `main`.`resumes`.`id`, `main`.`resumes`.`title`, `main`.`resumes`.`originalName`, `main`.`resumes`.`fileName`, `main`.`resumes`.`resumeType`, `main`.`resumes`.`mimeType` FROM `main`.`resumes` WHERE `main`.`resumes`.`id` IN (?) LIMIT ? OFFSET ?
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`resumes`.`id` FROM `main`.`resumes` WHERE `main`.`resumes`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [08/Aug/2025:11:06:27 +0000] "GET /api/resumes HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+prisma:query SELECT COUNT(*) FROM (SELECT `main`.`jobs`.`id` FROM `main`.`jobs` WHERE `main`.`jobs`.`userId` = ? LIMIT ? OFFSET ?) AS `sub`
+::1 - - [08/Aug/2025:11:06:27 +0000] "GET /api/jobs HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"

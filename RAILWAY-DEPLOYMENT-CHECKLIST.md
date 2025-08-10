@@ -20,20 +20,35 @@
 - [ ] Select your JobTracker repository
 - [ ] Set source directory to `JobTracker-Backend`
 
-### 2. Add PostgreSQL Database
-- [ ] In Railway dashboard, click "New Service"
-- [ ] Choose "Database" → "PostgreSQL"
-- [ ] Wait for database to provision (2-3 minutes)
+### 2. Add PostgreSQL Database 
+- [x] **PostgreSQL deployed successfully** ✅ 
+- [x] **Database provisioned** ✅
+- [ ] **Add DATABASE_URL to backend service** ⚠️ **DO THIS NOW**
+
+**NEXT STEP:** Add DATABASE_URL variable to your JobTrackr backend service:
+```
+Variable Name: DATABASE_URL
+Value: ${{ Postgres.DATABASE_URL }}
+```
 
 ### 3. Configure Environment Variables
+- [x] **Environment variables added** ✅
+- [x] **Railway auto-redeployed** ✅
+- [ ] **Need PostgreSQL DATABASE_URL** ⚠️
+
+**Status:** API returning 502 error - need database connection
+
 In Railway dashboard → Your Service → Variables tab, add:
 
 ```
-NODE_ENV=production
-JWT_SECRET=f5018c249217a61757acda8a0c2c0c3bf5a08dea2f1c2e77473775115d19615d84d5aee15e3a3ef21564c506d393c1bdbe81ffd6f0b2ba837589a50f7ca3c9ef
-JWT_EXPIRES_IN=7d
-PORT=3001
+✅ NODE_ENV=production (ADDED)
+✅ JWT_SECRET=f5018c249217a61757acda8a0c2c0c3bf5a08dea2f1c2e77473775115d19615d84d5aee15e3a3ef21564c506d393c1bdbe81ffd6f0b2ba837589a50f7ca3c9ef (ADDED)
+✅ JWT_EXPIRES_IN=7d (ADDED)
+✅ PORT=3001 (ADDED)
+⚠️ DATABASE_URL=automatically provided when PostgreSQL is added
 ```
+
+**Next:** Add PostgreSQL database service to get DATABASE_URL
 
 **Note:** DATABASE_URL is automatically provided by Railway when you add PostgreSQL
 

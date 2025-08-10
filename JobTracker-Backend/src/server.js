@@ -48,7 +48,7 @@ const app = express()
   - Cloud platforms (AWS, Heroku) inject PORT automatically
   - Allows flexible deployment across different environments
 */
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 3001
 
 /* 
   LEARNING COMMENT: Security Middleware Setup

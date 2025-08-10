@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Troubleshooting</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 10px 5px 0 0; }
+        input { margin: 5px 0; padding: 8px; width: 300px; }
+        .results { white-space: pre-wrap; font-family: monospace; background: #f5f5f5; padding: 10px; margin: 10px 0; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Login Troubleshooting for Existing Users</h1>
+    
+    <p><strong>Found these users in your database:</strong></p>
+    <ul>
+        <li>testuser2@jobtracker.com (John Doe)</li>
+        <li>mahdi.cheraghali@gmail.com (Mahdi Cheraghali)</li>
+    </ul>
+    
+    <div class="section">
+        <h2>Test Login with Different Passwords</h2>
+        <p>Try different common passwords that might have been used:</p>
+        
+        <select id="userSelect">
+            <option value="testuser2@jobtracker.com">testuser2@jobtracker.com</option>
+            <option value="mahdi.cheraghali@gmail.com">mahdi.cheraghali@gmail.com</option>
+        </select><br>
+        
+        <input type="password" id="password" placeholder="Try different passwords"><br>
+        
+        <button onclick="testPassword('password')">password</button>
+        <button onclick="testPassword('password123')">password123</button>
+        <button onclick="testPassword('123456')">123456</button>
+        <button onclick="testPassword('Password123!')">Password123!</button>
+        <button onclick="testPassword('TestPass123!')">TestPass123!</button>
+        <br>
+        <button onclick="testCustomPassword()">Test Custom Password</button>
+    </div>
+    
+    <div class="section">
+        <h2>Reset Password for Existing User</h2>
+        <p>If you can't remember the password, reset it:</p>
+        
+        <select id="resetUserSelect">
+            <option value="testuser2@jobtracker.com">testuser2@jobtracker.com</option>
+            <option value="mahdi.cheraghali@gmail.com">mahdi.cheraghali@gmail.com</option>
+        </select><br>
+        
+        <button onclick="resetUserPassword()">Get Reset Code</button><br>
+        
+        <input type="text" id="resetCode" placeholder="Enter reset code (will be shown above)"><br>
+        <input type="password" id="newPassword" placeholder="New password (e.g., MyNewPass123!)" value="MyNewPass123!"><br>
+        <button onclick="completePasswordReset()">Reset Password</button>
+    </div>
+    
+    <div class="results" id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3001/api';
+        const resultsDiv = document.getElementById('results');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            resultsDiv.innerHTML += `<span class="${className}">${timestamp}: ${message}</span>\n`;
+        }
+        
+        async function testLogin(email, password) {
+            log(`Testing login: ${email} with password: ${password}`);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ LOGIN SUCCESS for ${email}!`, 'success');
+                    log(`User: ${data.user.firstName} ${data.user.lastName}`, 'success');
+                    return true;
+                } else {
+                    log(`❌ Login failed: ${data.error}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log(`❌ Network error: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        function testPassword(password) {
+            const email = document.getElementById('userSelect').value;
+            testLogin(email, password);
+        }
+        
+        function testCustomPassword() {
+            const email = document.getElementById('userSelect').value;
+            const password = document.getElementById('password').value;
+            if (!password) {
+                log('Please enter a password to test', 'error');
+                return;
+            }
+            testLogin(email, password);
+        }
+        
+        async function resetUserPassword() {
+            const email = document.getElementById('resetUserSelect').value;
+            log(`Requesting password reset for: ${email}`);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Reset code sent!`, 'success');
+                    if (data.resetCode) {
+                        log(`Reset code: ${data.resetCode}`, 'success');
+                        document.getElementById('resetCode').value = data.resetCode;
+                    }
+                } else {
+                    log(`❌ Reset failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function completePasswordReset() {
+            const email = document.getElementById('resetUserSelect').value;
+            const resetCode = document.getElementById('resetCode').value;
+            const newPassword = document.getElementById('newPassword').value;
+            
+            if (!resetCode || !newPassword) {
+                log('Please enter reset code and new password', 'error');
+                return;
+            }
+            
+            log(`Resetting password for: ${email}`);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, resetCode, newPassword })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Password reset successful!`, 'success');
+                    log(`You can now login with: ${email} / ${newPassword}`, 'success');
+                    
+                    // Test the new login
+                    setTimeout(() => testLogin(email, newPassword), 1000);
+                } else {
+                    log(`❌ Password reset failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-check server connection
+        fetch(`${API_BASE_URL}/auth/me`)
+            .then(() => log('✅ Backend server is running'))
+            .catch(() => log('❌ Backend server is not running! Please start it first.', 'error'));
+    </script>
+</body>
+</html>

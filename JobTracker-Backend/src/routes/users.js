@@ -13,7 +13,7 @@
 */
 
 import express from 'express'
-import { validateEmail, hashPassword, verifyPassword } from '../utils/auth.js'
+import { validateEmail, hashPassword, verifyPassword, validatePassword } from '../utils/auth.js'
 
 const router = express.Router()
 
@@ -186,7 +186,7 @@ router.put('/change-password', async (req, res) => {
 
     // Validate new password
     const passwordValidation = validatePassword(newPassword)
-    if (!passwordValidation.valid) {
+    if (!passwordValidation.isValid) {
       return res.status(400).json({ 
         error: 'Password validation failed',
         details: passwordValidation.errors 

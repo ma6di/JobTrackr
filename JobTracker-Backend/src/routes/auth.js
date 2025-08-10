@@ -487,4 +487,133 @@ router.get('/check-email/:email', async (req, res) => {
   }
 })
 
+/*
+  🔐 POST /api/auth/forgot-password - Request password reset
+  ========================================================
+  
+  For demo purposes, this generates a simple 6-digit code
+  In production, you'd send this via email
+*/
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' })
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' })
+    }
+
+    // Check if user exists
+    const user = await req.prisma.user.findUnique({
+      where: { email: email.toLowerCase() }
+    })
+
+    // Always return success (don't reveal if user exists)
+    // In production, you'd send email only if user exists
+    if (user) {
+      // Generate 6-digit reset code
+      const resetCode = Math.floor(100000 + Math.random() * 900000).toString()
+      const resetExpiry = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
+
+      // Save reset code to database
+      await req.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetCode: resetCode,
+          resetCodeExpiry: resetExpiry
+        }
+      })
+
+      console.log(`Password reset code for ${email}: ${resetCode}`)
+      // In production: send email with resetCode
+    }
+
+    res.json({ 
+      message: 'If your email exists in our system, you will receive a password reset code.',
+      // For demo purposes, include the code in response
+      ...(user && { resetCode: await req.prisma.user.findUnique({ where: { email: email.toLowerCase() }, select: { resetCode: true } }).then(u => u?.resetCode) })
+    })
+
+  } catch (error) {
+    console.error('Forgot password error:', error)
+    res.status(500).json({ 
+      error: 'Failed to process password reset request',
+      details: error.message 
+    })
+  }
+})
+
+/*
+  🔐 POST /api/auth/reset-password - Reset password with code
+  =========================================================
+  
+  Validates reset code and updates password
+*/
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, resetCode, newPassword } = req.body
+
+    if (!email || !resetCode || !newPassword) {
+      return res.status(400).json({ 
+        error: 'Email, reset code, and new password are required' 
+      })
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' })
+    }
+
+    // Validate new password
+    const passwordValidation = validatePassword(newPassword)
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({ 
+        error: 'Password validation failed',
+        details: passwordValidation.errors 
+      })
+    }
+
+    // Find user with valid reset code
+    const user = await req.prisma.user.findFirst({
+      where: {
+        email: email.toLowerCase(),
+        resetCode: resetCode,
+        resetCodeExpiry: {
+          gt: new Date() // Code not expired
+        }
+      }
+    })
+
+    if (!user) {
+      return res.status(400).json({ 
+        error: 'Invalid or expired reset code' 
+      })
+    }
+
+    // Hash new password
+    const hashedPassword = await hashPassword(newPassword)
+
+    // Update password and clear reset code
+    await req.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetCode: null,
+        resetCodeExpiry: null
+      }
+    })
+
+    res.json({ message: 'Password reset successfully' })
+
+  } catch (error) {
+    console.error('Reset password error:', error)
+    res.status(500).json({ 
+      error: 'Failed to reset password',
+      details: error.message 
+    })
+  }
+})
+
 export default router
