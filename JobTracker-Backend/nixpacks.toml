@@ -1,6 +1,11 @@
 # Nixpacks configuration for Railway deployment
 [variables]
 NODE_ENV = "production"
+OPENSSL_CONF = "/dev/null"
+
+# Setup phase - install system dependencies
+[phases.setup]
+nixPkgs = ["openssl"]
 
 # Install phase - install all dependencies first
 [phases.install]
