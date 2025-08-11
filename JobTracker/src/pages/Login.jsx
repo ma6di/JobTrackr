@@ -341,25 +341,6 @@ function Login() {
             </Link>
           </p>
         </div>
-
-        {/* 
-          LEARNING COMMENT: Demo mode link section
-          - mt-4: 1rem top margin for spacing from sign up link
-          - text-center: Centers demo link
-          - Provides skip option for demonstration purposes
-        */}
-        <div className="mt-4 text-center">
-          {/* 
-            LEARNING COMMENT: Demo mode skip link
-            - Link to="/dashboard": Direct navigation to main app (bypasses authentication)
-            - text-sm: Small text size for less prominent secondary option
-            - text-gray-500 hover:text-gray-700: Light gray with darker hover
-            - Useful for demos, testing, or when authentication isn't fully implemented
-          */}
-          <Link to="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">
-            Skip for now (Demo Mode)
-          </Link>
-        </div>
       </div>
     </div>
   )
