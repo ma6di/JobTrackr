@@ -16,6 +16,7 @@ import { JobsProvider } from './contexts/JobsContext'
 // 🧩 LEARNING: Component imports - These are our custom React components
 // Each import brings in a different page or reusable piece of UI
 import Navigation from './components/Navigation'  // Top navigation bar
+import LandingPage from './pages/LandingPage'     // Landing page explaining JobTrackr
 import Login from './pages/Login'                 // Login page
 import DebugLogin from './pages/DebugLogin'       // Debug Login page for testing
 import Register from './pages/Register'           // Registration page
@@ -79,7 +80,7 @@ function App() {
                     path="/" means the home page (website.com/)
                     element={} defines what component to show
                     🔄 EFFECT: Change path="/login" to see login page at /login instead of / */}
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/debug-login" element={<DebugLogin />} />
                 <Route path="/register" element={<Register />} />
