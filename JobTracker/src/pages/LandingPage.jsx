@@ -1,7 +1,8 @@
 // 🏠 Landing Page - Explains JobTrackr and provides sign in/sign up options
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
+import { useAuth } from '../contexts/AuthContext'
 
 // 🎨 Icons for features
 const CheckIcon = () => (
@@ -30,7 +31,16 @@ const ChartIcon = () => (
 
 export default function LandingPage() {
   const { darkMode, toggleDarkMode } = useTheme()
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [showFeatures, setShowFeatures] = useState(false)
+
+  // 🔄 Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-neutral-100 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800">
