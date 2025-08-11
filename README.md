@@ -11,11 +11,6 @@ A modern, full-stack web application for tracking job applications, managing res
 
 **🎯 Try it now:** **[https://job-trackr-murex.vercel.app](https://job-trackr-murex.vercel.app)**
 
-### Demo Credentials
-Create your own account or use these for testing:
-- **Email:** demo@jobtracker.com
-- **Password:** DemoPassword123!
-
 ---
 
 ## ✨ Features
