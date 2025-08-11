@@ -11,6 +11,13 @@ A modern, full-stack web application for tracking job applications, managing res
 
 **🎯 Try it now:** **[https://job-trackr-murex.vercel.app](https://job-trackr-murex.vercel.app)**
 
+**🏠 Features a beautiful landing page that explains:**
+- What JobTrackr is and how it helps job seekers
+- Key benefits: stay organized, manage resumes, track progress
+- Complete feature list with visual indicators
+- How the 3-step process works
+- Easy sign in/sign up access
+
 ---
 
 ## ✨ Features
