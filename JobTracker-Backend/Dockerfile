@@ -19,12 +19,14 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies (this will run prisma generate via postinstall)
+ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 RUN npm ci --only=production
 
 # Copy rest of application code
 COPY . .
 
 # Ensure Prisma client is generated with correct binary targets
+ENV DATABASE_URL="postgresql://user:pass@localhost:5432/db"
 RUN npx prisma generate
 
 # Set environment variables

@@ -37,12 +37,6 @@ function ForgotPassword() {
     try {
       const response = await forgotPassword(email)
       setMessage(response.message)
-      
-      // For demo purposes, show the reset code
-      if (response.resetCode) {
-        setMessage(prev => prev + ` Reset code: ${response.resetCode}`)
-      }
-      
       setStep(2)
     } catch (error) {
       setError(error.message || 'Failed to send reset code')
