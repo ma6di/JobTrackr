@@ -331,19 +331,10 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Resume not found' })
     }
 
-    // Generate fresh download URL if file exists in S3
-    let downloadUrl = null
-    if (resume.fileName && resume.s3Url) {
-      try {
-        downloadUrl = await generateSignedUrl(resume.fileName, 3600) // 1 hour expiry
-      } catch (urlError) {
-        console.warn('Could not generate download URL:', urlError.message)
-      }
-    }
-
+    // For Cloudinary, just return the cloudinaryUrl
     res.json({
       ...resume,
-      downloadUrl
+      downloadUrl: resume.cloudinaryUrl || null
     })
 
   } catch (error) {
@@ -499,59 +490,16 @@ router.get('/:id/preview', async (req, res) => {
       return res.status(404).json({ error: 'Resume not found' })
     }
 
-    // Check if resume has a file
-    if (!resume.fileName) {
-      return res.status(404).json({ 
-        error: 'Resume file not found',
-        message: 'This resume does not have an associated file'
-      })
+    // Check if resume has a cloudinaryUrl
+    if (resume.cloudinaryUrl) {
+      // Redirect to Cloudinary URL for inline preview
+      return res.redirect(resume.cloudinaryUrl);
     }
-
-    // Check if file is stored in S3 or locally
-    if (resume.s3Url && resume.s3Url.startsWith('http')) {
-      // File is in S3, generate signed URL for preview
-      try {
-        const previewUrl = await generateSignedUrl(resume.fileName, 3600)
-        
-        // Redirect to S3 URL for preview
-        res.redirect(previewUrl)
-      } catch (error) {
-        console.error('S3 preview URL generation failed:', error)
-        res.status(500).json({ 
-          error: 'Failed to generate preview URL',
-          details: error.message 
-        })
-      }
-    } else {
-      // File is stored locally, serve it for inline viewing
-      try {
-        const fs = await import('fs/promises')
-        const path = await import('path')
-        
-        const filePath = path.join(process.cwd(), 'temp', 'uploads', resume.fileName)
-        
-        // Check if file exists
-        await fs.access(filePath)
-        
-        // Set appropriate headers for inline viewing
-        res.setHeader('Content-Type', resume.mimeType)
-        res.setHeader('Content-Disposition', `inline; filename="${resume.originalName}"`)
-        
-        // Enable CORS for preview
-        res.setHeader('Access-Control-Allow-Origin', '*')
-        res.setHeader('Access-Control-Allow-Methods', 'GET')
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type')
-        
-        // Send file for preview
-        res.sendFile(path.resolve(filePath))
-      } catch (fileError) {
-        console.error('Local file access error:', fileError)
-        res.status(404).json({ 
-          error: 'File not found on disk',
-          details: fileError.message
-        })
-      }
-    }
+    // If no cloudinaryUrl, file is not available
+    return res.status(404).json({
+      error: 'Resume preview not available on Cloudinary',
+      details: 'No cloudinaryUrl available for this resume.'
+    });
 
   } catch (error) {
     console.error('Preview resume error:', error)
@@ -667,30 +615,16 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Resume not found' })
     }
 
-    // Delete associated file from S3 if it exists
-    if (existingResume.fileName && existingResume.s3Url) {
-      try {
-        const deleteSuccess = await deleteFromS3(existingResume.fileName)
-        if (deleteSuccess) {
-          console.log(`✅ Deleted file from S3: ${existingResume.fileName}`)
-        } else {
-          console.warn(`⚠️ Could not delete file from S3: ${existingResume.fileName}`)
-        }
-      } catch (s3Error) {
-        console.error('S3 deletion error:', s3Error)
-        // Continue with database deletion even if S3 deletion fails
-      }
-    }
-
-    // Delete the resume record from database
+    // Optionally: delete file from Cloudinary here if you want (requires Cloudinary API call)
+    // For now, just delete DB record
     await req.prisma.resume.delete({
       where: { id: resumeId }
-    })
+    });
 
-    res.json({ 
+    res.json({
       message: 'Resume deleted successfully',
       fileName: existingResume.originalName
-    })
+    });
 
   } catch (error) {
     console.error('Delete resume error:', error)
