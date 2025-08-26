@@ -1,200 +1,269 @@
-/* 
-  Fixed + cleaned API service
-  - Handles JSON vs Blob properly
-  - Safer FormData handling for uploads
-  - Unified error handling
+/*
+  LEARNING COMMENT: Main Express Server Entry Point
+  - This is the heart of the JobTracker backend API
+  - Sets up Express server with middleware, routes, and error handling
+  - Configures database connection and AWS services
+  - Provides RESTful API endpoints for the React frontend
 */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+// Import required modules
+import express from 'express'
+import cors from 'cors'
+import helmet from 'helmet'
+import morgan from 'morgan'
+import compression from 'compression'
+import rateLimit from 'express-rate-limit'
+import dotenv from 'dotenv'
 
-/* ===== Token Management ===== */
-export const getToken = () => localStorage.getItem('authToken')
-export const setToken = (token) => localStorage.setItem('authToken', token)
-export const removeToken = () => localStorage.removeItem('authToken')
-export const isAuthenticated = () => !!getToken()
+// Import custom modules (we'll create these)
+import { connectDatabase, getPrismaClient } from './config/database.js'
+import { configureAWS } from './config/aws.js'
+import errorHandler from './middleware/errorHandler.js'
+import { requireAuth } from './middleware/auth.js'
 
-/* ===== Headers ===== */
-const getDefaultHeaders = () => {
-  const headers = {}
-  const token = getToken()
-  if (token) headers.Authorization = `Bearer ${token}`
-  return headers
+// Import route handlers (we'll create these)
+import authRoutes from './routes/auth.js'
+import userRoutes from './routes/users.js'
+import resumeRoutes from './routes/resumes.js'
+import jobRoutes from './routes/jobs.js'
+
+/* 
+  LEARNING COMMENT: Environment Configuration
+  - dotenv loads environment variables from .env file
+  - Keeps sensitive data (passwords, API keys) out of code
+  - Different configs for development vs production
+*/
+dotenv.config()
+
+/* 
+  LEARNING COMMENT: Express App Initialization
+  - Creates Express application instance
+  - Express is the web framework that handles HTTP requests
+*/
+const app = express()
+
+/* 
+  LEARNING COMMENT: Port Configuration
+  - Uses environment variable PORT or defaults to 5000
+  - Cloud platforms (AWS, Heroku) inject PORT automatically
+  - Allows flexible deployment across different environments
+*/
+const PORT = process.env.PORT || 3001
+
+/* 
+  LEARNING COMMENT: Security Middleware Setup
+  - helmet(): Sets security-related HTTP headers
+  - Protects against common web vulnerabilities
+  - Essential for production applications
+*/
+app.use(helmet())
+
+/* 
+  LEARNING COMMENT: CORS (Cross-Origin Resource Sharing) Setup
+  - Allows React frontend (localhost:3000) to call API (localhost:5000)
+  - Configures which origins can access the API
+  - Essential for frontend-backend communication
+*/
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174', 
+    'http://localhost:5175',
+    process.env.CORS_ORIGIN
+  ].filter(Boolean),
+  credentials: true, // Allow cookies and auth headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
+
+/* 
+  LEARNING COMMENT: Request Parsing Middleware
+  - express.json(): Parses JSON request bodies (from fetch() calls)
+  - express.urlencoded(): Parses form data
+  - Converts request data into JavaScript objects
+*/
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
+
+/* 
+  LEARNING COMMENT: Prisma Middleware
+  - Adds Prisma client to req.prisma for use in routes
+  - Makes database operations available in all route handlers
+*/
+app.use((req, res, next) => {
+  req.prisma = getPrismaClient()
+  next()
+})
+
+/* 
+  LEARNING COMMENT: Compression Middleware
+  - Compresses HTTP responses (gzip)
+  - Reduces bandwidth usage and improves performance
+  - Especially helpful for JSON API responses
+*/
+app.use(compression())
+
+/* 
+  LEARNING COMMENT: Request Logging Middleware
+  - morgan logs HTTP requests to console
+  - 'combined' format includes detailed request info
+  - Helps with debugging and monitoring
+*/
+app.use(morgan('combined'))
+
+/* 
+  LEARNING COMMENT: Rate Limiting Middleware - Development Mode
+  - More lenient rate limiting for development
+  - 1 minute window, max 1000 requests per IP
+  - Can be tightened for production deployment
+*/
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 1000, // Limit each IP to 1000 requests per minute (very lenient for dev)
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: '1 minute'
+  },
+  standardHeaders: true, // Return rate limit info in headers
+  legacyHeaders: false   // Disable X-RateLimit-* headers
+})
+
+// Only apply rate limiting in production
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api/', limiter)
+} else {
+  console.log('🔧 Rate limiting disabled in development mode')
 }
 
-/* ===== Core API Request (JSON endpoints only) ===== */
-const apiRequest = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`
+/* 
+  LEARNING COMMENT: Health Check Endpoint
+  - Simple endpoint to verify server is running
+  - Used by AWS load balancers and monitoring tools
+  - Returns basic server status information
+*/
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0'
+  })
+})
 
-  const config = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getDefaultHeaders(),
-      ...(options.headers || {}),
-    },
-    ...options,
-  }
+/* 
+  LEARNING COMMENT: API Routes Setup
+  - Mounts different route handlers under /api prefix
+  - Organizes endpoints by functionality (auth, users, resumes, jobs)
+  - RESTful API design pattern
+*/
+app.use('/api/auth', authRoutes)                    // Authentication: /api/auth/login, /api/auth/register
+app.use('/api/users', requireAuth, userRoutes)     // User management: /api/users/profile (protected)
+app.use('/api/resumes', requireAuth, resumeRoutes) // Resume CRUD: /api/resumes, /api/resumes/:id (protected)
+app.use('/api/jobs', requireAuth, jobRoutes)       // Job applications: /api/jobs, /api/jobs/:id (protected)
 
+/* 
+  LEARNING COMMENT: 404 Handler for Unknown Routes
+  - Catches requests to non-existent endpoints
+  - Returns consistent error format
+  - Prevents server crashes from invalid URLs
+*/
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Route ${req.method} ${req.originalUrl} not found`,
+    availableRoutes: [
+      'GET /health',
+      'POST /api/auth/login',
+      'POST /api/auth/register',
+      'GET /api/users/profile',
+      'GET /api/resumes',
+      'GET /api/jobs'
+    ]
+  })
+})
+
+/* 
+  LEARNING COMMENT: Global Error Handler
+  - Catches all unhandled errors in the application
+  - Provides consistent error response format
+  - Logs errors for debugging while hiding sensitive details from users
+*/
+app.use(errorHandler)
+
+/* 
+  LEARNING COMMENT: Server Startup Function
+  - Initializes database connection and AWS services
+  - Starts HTTP server on specified port
+  - Handles startup errors gracefully
+*/
+async function startServer() {
   try {
-    const response = await fetch(url, config)
+    // Initialize database connection
+    console.log('🗄️  Connecting to database...')
+    await connectDatabase()
+    console.log('✅ Database connected successfully')
 
-    if (!response.ok) {
-      let errorMessage = response.statusText
-      try {
-        const errorData = await response.json()
-        errorMessage = errorData.error || errorMessage
-      } catch (_) {}
-      if (response.status === 401) errorMessage = 'Unauthorized. Please log in again.'
-      if (response.status === 429) errorMessage = 'Too many requests. Please try again later.'
-      if (response.status === 500) errorMessage = 'Server error. Please try again later.'
-      throw new Error(errorMessage)
-    }
+    // Configure AWS services
+    console.log('☁️  Configuring AWS services...')
+    await configureAWS()
+    console.log('✅ AWS services configured')
 
-    // 🔑 Only parse JSON if Content-Type is JSON
-    const contentType = response.headers.get('Content-Type')
-    if (contentType && contentType.includes('application/json')) {
-      return await response.json()
-    }
-    return response
-  } catch (err) {
-    console.error('API Request failed:', err)
-    throw err
+    // Start HTTP server
+    app.listen(PORT, () => {
+      console.log('')
+      console.log('🚀 JobTracker Backend Server Started!')
+      console.log('================================')
+      console.log(`🌐 Server running on port: ${PORT}`)
+      console.log(`📍 Health check: http://localhost:${PORT}/health`)
+      console.log(`🔗 API base URL: http://localhost:${PORT}/api`)
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`)
+      console.log(`⏰ Started at: ${new Date().toISOString()}`)
+      console.log('================================')
+      console.log('')
+    })
+
+  } catch (error) {
+    console.error('❌ Failed to start server:', error.message)
+    console.error('🔍 Error details:', error)
+    process.exit(1) // Exit with error code
   }
 }
 
-/* ===== Auth ===== */
-export const login = async (email, password) => {
-  const res = await apiRequest('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  })
-  if (res.token) setToken(res.token)
-  return res
-}
+/* 
+  LEARNING COMMENT: Graceful Shutdown Handling
+  - Handles SIGTERM and SIGINT signals (Ctrl+C)
+  - Closes database connections cleanly
+  - Prevents data corruption during shutdown
+*/
+process.on('SIGTERM', () => {
+  console.log('⚠️  SIGTERM received, shutting down gracefully...')
+  process.exit(0)
+})
 
-export const register = async (userData) => {
-  const res = await apiRequest('/auth/register', {
-    method: 'POST',
-    body: JSON.stringify(userData),
-  })
-  if (res.token) setToken(res.token)
-  return res
-}
+process.on('SIGINT', () => {
+  console.log('⚠️  SIGINT received, shutting down gracefully...')
+  process.exit(0)
+})
 
-export const logout = async () => {
-  try {
-    await apiRequest('/auth/logout', { method: 'POST' })
-  } catch (e) {
-    console.warn('Backend logout failed:', e)
-  } finally {
-    removeToken()
-  }
-}
+/* 
+  LEARNING COMMENT: Unhandled Error Catchers
+  - Catches promise rejections and exceptions
+  - Logs errors and exits gracefully
+  - Prevents server from hanging in error states
+*/
+process.on('unhandledRejection', (err) => {
+  console.error('💥 Unhandled Promise Rejection:', err.message)
+  console.error('🔍 Full error:', err)
+  process.exit(1)
+})
 
-export const getCurrentUser = () => apiRequest('/auth/me')
-export const updateProfile = (profileData) =>
-  apiRequest('/users/profile', { method: 'PUT', body: JSON.stringify(profileData) })
-export const changePassword = (passwordData) =>
-  apiRequest('/users/change-password', { method: 'PUT', body: JSON.stringify(passwordData) })
-export const forgotPassword = (email) =>
-  apiRequest('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) })
-export const resetPassword = (resetData) =>
-  apiRequest('/auth/reset-password', { method: 'POST', body: JSON.stringify(resetData) })
+process.on('uncaughtException', (err) => {
+  console.error('💥 Uncaught Exception:', err.message)
+  console.error('🔍 Full error:', err)
+  process.exit(1)
+})
 
-/* ===== Resumes ===== */
-export const getResumes = async () => {
-  const res = await apiRequest('/resumes')
-  // Normalize shape → always return array
-  if (Array.isArray(res)) return res
-  if (res?.resumes) return res.resumes
-  if (res?.data) return res.data
-  return []
-}
+// Start the server
+startServer()
 
-export const createResume = async (resumeData) => {
-  const formData = new FormData()
-  formData.append('title', resumeData.name)
-  formData.append('file', resumeData.file)
-  if (resumeData.description) {
-    formData.append('description', resumeData.description)
-  }
-
-  return await apiRequest('/resumes', {
-    method: 'POST',
-    headers: { ...getDefaultHeaders() }, // no Content-Type!
-    body: formData,
-  })
-}
-
-export const updateResume = (id, updateData) =>
-  apiRequest(`/resumes/${id}`, { method: 'PUT', body: JSON.stringify(updateData) })
-
-export const deleteResume = (id) =>
-  apiRequest(`/resumes/${id}`, { method: 'DELETE' })
-
-export const previewResume = async (id) => {
-  const res = await fetch(`${API_BASE_URL}/resumes/${id}/preview`, {
-    headers: { ...getDefaultHeaders() },
-  })
-  if (!res.ok) throw new Error(`Preview failed: ${res.statusText}`)
-  return res // caller decides how to read (text/blob)
-}
-
-export const downloadResume = async (id, filename = 'resume.pdf') => {
-  const res = await fetch(`${API_BASE_URL}/resumes/${id}/download`, {
-    headers: { ...getDefaultHeaders() },
-  })
-  if (!res.ok) throw new Error(`Download failed: ${res.statusText}`)
-
-  const blob = await res.blob()
-  const url = window.URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  window.URL.revokeObjectURL(url)
-}
-
-/* ===== Jobs ===== */
-export const getJobs = () => apiRequest('/jobs')
-export const createJob = (jobData) =>
-  apiRequest('/jobs', { method: 'POST', body: JSON.stringify(jobData) })
-export const updateJob = (id, updateData) =>
-  apiRequest(`/jobs/${id}`, { method: 'PUT', body: JSON.stringify(updateData) })
-export const deleteJob = (id) =>
-  apiRequest(`/jobs/${id}`, { method: 'DELETE' })
-
-/* ===== Dashboard ===== */
-export const getDashboardStats = () => apiRequest('/dashboard/stats')
-
-/* ===== Export ===== */
-export default {
-  login,
-  register,
-  logout,
-  getCurrentUser,
-  updateProfile,
-  changePassword,
-  forgotPassword,
-  resetPassword,
-  isAuthenticated,
-  getToken,
-  setToken,
-  removeToken,
-
-  getResumes,
-  createResume,
-  updateResume,
-  deleteResume,
-  previewResume,
-  downloadResume,
-
-  getJobs,
-  createJob,
-  updateJob,
-  deleteJob,
-
-  getDashboardStats,
-}
+export default app
