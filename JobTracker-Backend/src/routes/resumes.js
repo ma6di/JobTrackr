@@ -143,59 +143,44 @@ router.post('/', upload.single('file'), async (req, res) => {
       })
     }
 
-    // Generate secure filename for S3
-    const s3FileName = generateSecureFilename(userId, file.originalname)
+    // Upload file to Cloudinary
+    const cloudinary = require('cloudinary').v2;
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+
+    let cloudinaryResult;
+    try {
+      cloudinaryResult = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: 'auto',
+            folder: 'resumes',
+            public_id: `${userId}_${Date.now()}_${file.originalname}`,
+            overwrite: true
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        stream.end(file.buffer);
+      });
+    } catch (cloudError) {
+      console.error('Cloudinary upload failed:', cloudError);
+      return res.status(500).json({
+        error: 'File upload failed',
+        details: cloudError.message
+      });
+    }
 
     // Extract file metadata
     const metadata = extractFileMetadata({
       ...file,
-      filename: s3FileName
-    })
-
-    // Try to upload file to S3, fallback to local storage if S3 fails
-    let s3Result = null
-    let storageLocation = 'local'
-    
-    try {
-      s3Result = await uploadToS3(
-        file.buffer, 
-        s3FileName, 
-        file.mimetype,
-        {
-          'user-id': userId.toString(),
-          'original-name': file.originalname,
-          'title': title.trim()
-        }
-      )
-      storageLocation = 's3'
-      console.log('✅ File uploaded to S3 successfully')
-    } catch (uploadError) {
-      console.warn('⚠️ S3 upload failed, saving locally:', uploadError.message)
-      
-      // Fallback: Save file locally
-      try {
-        const fs = await import('fs/promises')
-        const path = await import('path')
-        
-        // Create full directory structure including nested directories
-        const localFilePath = path.join(process.cwd(), 'temp', 'uploads', s3FileName)
-        const fileDir = path.dirname(localFilePath)
-        await fs.mkdir(fileDir, { recursive: true })
-        
-        // Save file locally
-        await fs.writeFile(localFilePath, file.buffer)
-        
-        storageLocation = 'local'
-        console.log('✅ File saved locally successfully')
-      } catch (localError) {
-        console.error('❌ Both S3 and local storage failed:', localError)
-        return res.status(500).json({ 
-          error: 'File upload failed',
-          message: 'Could not save file to storage',
-          details: 'Both cloud and local storage failed'
-        })
-      }
-    }
+      filename: cloudinaryResult.public_id
+    });
 
     // Create resume record in database
     const newResume = await req.prisma.resume.create({
@@ -203,25 +188,17 @@ router.post('/', upload.single('file'), async (req, res) => {
         userId,
         title: title.trim(),
         originalName: file.originalname,
-        fileName: s3FileName,
-        s3Url: storageLocation === 's3' ? s3Result?.url : null,
+        fileName: cloudinaryResult.public_id,
+        cloudinaryUrl: cloudinaryResult.secure_url,
         fileSize: file.size,
         mimeType: file.mimetype,
         resumeType,
         description: description.trim()
       }
-    })
+    });
 
-    // Generate download URL after resume is created
-    let downloadUrl = `/api/resumes/${newResume.id}/download`
-    if (storageLocation === 's3') {
-      try {
-        downloadUrl = await generateSignedUrl(s3FileName, 3600)
-      } catch (urlError) {
-        console.warn('Could not generate signed URL:', urlError.message)
-        downloadUrl = `/api/resumes/${newResume.id}/download` // Fallback to ID-based URL
-      }
-    }
+    // Download URL is always the Cloudinary URL
+    const downloadUrl = cloudinaryResult.secure_url;
 
     res.status(201).json({
       ...newResume,
@@ -232,7 +209,7 @@ router.post('/', upload.single('file'), async (req, res) => {
         isWord: metadata.isWord,
         extension: metadata.extension
       }
-    })
+    });
 
   } catch (error) {
     console.error('Create resume error:', error)
