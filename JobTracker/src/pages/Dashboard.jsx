@@ -164,9 +164,9 @@ function Dashboard() {
   // Main component return statement - Everything inside return() becomes the actual HTML that users see
   return (
     // Main container with full screen height - min-h-screen ensures the content takes at least the full height of the browser window
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col items-center justify-center">
       {/* Content wrapper with responsive width and padding */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="w-full max-w-2xl mx-auto px-4 py-8 flex flex-col items-center justify-center">
         {/* Dashboard Header Section */}
         <div className="text-center mb-12">
           {/* Main Dashboard Title with gradient text */}
@@ -181,7 +181,7 @@ function Dashboard() {
 
         {/* Statistics Cards Section */}
         <div className="flex justify-center items-center mb-12">
-          <div className="grid grid-cols-4 gap-4 w-fit">
+          <div className="grid grid-cols-4 gap-4 w-fit justify-center">
             
             {/* Total Applications Card */}
             <div className="bg-gradient-to-br from-white via-slate-50 to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 rounded-xl shadow-lg p-4 text-center border border-slate-200 dark:border-gray-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm w-28">
@@ -267,7 +267,7 @@ function Dashboard() {
             Monthly Overview • {monthlyCounts.reduce((sum, count) => sum + count, 0)} total applications
           </p>
           <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData} margin={{ top: 30, right: 30, left: 20, bottom: 5 }} barCategoryGap="20%">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" interval={0} />
@@ -337,8 +337,8 @@ function Dashboard() {
             </div>
           </div>
           
-          <div className="overflow-x-auto bg-white dark:bg-gray-800">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto bg-white dark:bg-gray-800 flex justify-center">
+            <table className="min-w-[500px] max-w-[600px] mx-auto text-sm text-center">
               <thead className="bg-slate-100 dark:bg-gray-700 border-b-2 border-slate-300 dark:border-gray-600">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">
@@ -388,7 +388,7 @@ function Dashboard() {
                         <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{job.salary || ''}</div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(job.status)}`}>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(job.status)}`}> 
                           {job.status || 'Unknown'}
                         </span>
                       </td>
@@ -407,7 +407,7 @@ function Dashboard() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-4 py-8 text-center">
+                    <td colSpan="4" className="px-4 py-8 text-center">
                       <div className="text-slate-500 dark:text-slate-400">
                         <svg className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd"></path>
