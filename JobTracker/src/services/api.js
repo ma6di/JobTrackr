@@ -5,7 +5,9 @@
   - Unified error handling
 */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://your-railway-app.up.railway.app/api'
+/* ===== API Service for JobTrackr ===== */
+
+const API_BASE_URL = 'https://jobtrackr-production.up.railway.app/api'
 
 /* ===== Token Management ===== */
 export const getToken = () => localStorage.getItem('authToken')
@@ -24,7 +26,6 @@ const getDefaultHeaders = () => {
 /* ===== Core API Request (JSON endpoints only) ===== */
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`
-
   const config = {
     method: 'GET',
     headers: {
@@ -37,7 +38,6 @@ const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config)
-
     if (!response.ok) {
       let errorMessage = response.statusText
       try {
@@ -50,7 +50,6 @@ const apiRequest = async (endpoint, options = {}) => {
       throw new Error(errorMessage)
     }
 
-    // 🔑 Only parse JSON if Content-Type is JSON
     const contentType = response.headers.get('Content-Type')
     if (contentType && contentType.includes('application/json')) {
       return await response.json()
@@ -104,7 +103,6 @@ export const resetPassword = (resetData) =>
 /* ===== Resumes ===== */
 export const getResumes = async () => {
   const res = await apiRequest('/resumes')
-  // Normalize shape → always return array
   if (Array.isArray(res)) return res
   if (res?.resumes) return res.resumes
   if (res?.data) return res.data
@@ -115,15 +113,13 @@ export const createResume = async (resumeData) => {
   const formData = new FormData()
   formData.append('title', resumeData.name)
   formData.append('file', resumeData.file)
-  if (resumeData.description) {
-    formData.append('description', resumeData.description)
-  }
+  if (resumeData.description) formData.append('description', resumeData.description)
 
-  return await apiRequest('/resumes', {
+  return await fetch(`${API_BASE_URL}/resumes`, {
     method: 'POST',
-    headers: { ...getDefaultHeaders() }, // no Content-Type!
+    headers: getDefaultHeaders(), // DO NOT set Content-Type for FormData
     body: formData,
-  })
+  }).then(res => res.json())
 }
 
 export const updateResume = (id, updateData) =>
@@ -134,18 +130,17 @@ export const deleteResume = (id) =>
 
 export const previewResume = async (id) => {
   const res = await fetch(`${API_BASE_URL}/resumes/${id}/preview`, {
-    headers: { ...getDefaultHeaders() },
+    headers: getDefaultHeaders(),
   })
   if (!res.ok) throw new Error(`Preview failed: ${res.statusText}`)
-  return res // caller decides how to read (text/blob)
+  return res.blob() // returns Blob for preview in browser
 }
 
 export const downloadResume = async (id, filename = 'resume.pdf') => {
   const res = await fetch(`${API_BASE_URL}/resumes/${id}/download`, {
-    headers: { ...getDefaultHeaders() },
+    headers: getDefaultHeaders(),
   })
   if (!res.ok) throw new Error(`Download failed: ${res.statusText}`)
-
   const blob = await res.blob()
   const url = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
@@ -171,7 +166,6 @@ export const getDashboardStats = () => apiRequest('/dashboard/stats')
 
 /* ===== Export ===== */
 export default {
-  // Auth
   login,
   register,
   logout,
@@ -184,21 +178,15 @@ export default {
   getToken,
   setToken,
   removeToken,
-
-  // Resumes
   getResumes,
   createResume,
   updateResume,
   deleteResume,
   previewResume,
   downloadResume,
-
-  // Jobs
   getJobs,
   createJob,
   updateJob,
   deleteJob,
-
-  // Dashboard
   getDashboardStats,
 }
