@@ -767,51 +767,45 @@ router.get('/stats', async (req, res) => {
 */
 router.get('/download/:filename', async (req, res) => {
   try {
-    const { filename } = req.params
-    const userId = req.user.id
-    
-    // Verify file belongs to user
+    const { filename } = req.params;
+    const userId = req.user.id;
+
+    // Find resume by filename and user
     const resume = await req.prisma.resume.findFirst({
       where: {
         fileName: filename,
         userId
       }
-    })
-    
+    });
+
     if (!resume) {
-      return res.status(404).json({ 
-        error: 'File not found or access denied' 
-      })
+      return res.status(404).json({
+        error: 'File not found or access denied'
+      });
     }
-    
-    // Serve local file
-    const fs = await import('fs/promises')
-    const path = await import('path')
-    
-    const filePath = path.join(process.cwd(), 'temp', 'uploads', filename)
-    
-    try {
-      await fs.access(filePath) // Check if file exists
-      
-      // Set appropriate headers
-      res.setHeader('Content-Type', resume.mimeType)
-      res.setHeader('Content-Disposition', `attachment; filename="${resume.originalName}"`)
-      
-      // Send file
-      res.sendFile(path.resolve(filePath))
-    } catch (fileError) {
-      console.error('File access error:', fileError)
-      res.status(404).json({ 
-        error: 'File not found on disk' 
-      })
+
+    // Use Cloudinary URL for download
+    if (resume.cloudinaryUrl) {
+      // Optionally increment download count
+      await req.prisma.resume.update({
+        where: { id: resume.id },
+        data: { downloadCount: { increment: 1 } }
+      });
+      // Redirect to Cloudinary file
+      return res.redirect(resume.cloudinaryUrl);
     }
-    
+
+    // If no cloudinaryUrl, file is not available
+    return res.status(404).json({
+      error: 'Resume file not found on Cloudinary',
+      details: 'No cloudinaryUrl available for this resume.'
+    });
   } catch (error) {
-    console.error('Download error:', error)
-    res.status(500).json({ 
+    console.error('Download error:', error);
+    res.status(500).json({
       error: 'Failed to download file',
-      details: error.message 
-    })
+      details: error.message
+    });
   }
 })
 
