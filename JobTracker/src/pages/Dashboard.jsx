@@ -15,16 +15,30 @@ const StatsCards = ({ stats }) => {
   return (
     <div className="flex justify-center items-center mb-12">
       <div className="grid grid-cols-4 gap-4 w-fit justify-center">
-        {cards.map(card => (
-          <div key={card.label} className="bg-gradient-to-br from-white via-slate-50 to-gray-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 rounded-xl shadow-lg p-4 text-center border border-slate-200 dark:border-gray-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm w-28">
-            <div className="flex flex-col items-center space-y-2">
-              <div className="w-10 h-10 bg-slate-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">{card.label}</span>
+        {cards.map(card => {
+          let bgColor = '';
+          let textColor = '';
+          switch (card.color) {
+            case 'amber':
+              bgColor = 'bg-amber-100'; textColor = 'text-amber-800'; break;
+            case 'emerald':
+              bgColor = 'bg-emerald-100'; textColor = 'text-emerald-800'; break;
+            case 'rose':
+              bgColor = 'bg-rose-100'; textColor = 'text-rose-800'; break;
+            default:
+              bgColor = 'bg-slate-100'; textColor = 'text-slate-800';
+          }
+          return (
+            <div key={card.label} className={`rounded-xl shadow-lg p-4 text-center border border-slate-200 dark:border-gray-600 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm w-28 ${bgColor} ${textColor}`}>
+              <div className="flex flex-col items-center space-y-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${bgColor} ${textColor}`}>
+                  <span className="text-xs font-medium">{card.label}</span>
+                </div>
               </div>
+              <div className={`text-2xl font-light mt-2 ${textColor}`}>{card.value}</div>
             </div>
-            <div className="text-2xl font-light text-slate-700 dark:text-slate-300 mt-2">{card.value}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   )
