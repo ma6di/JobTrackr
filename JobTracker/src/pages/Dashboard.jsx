@@ -368,17 +368,9 @@ function Dashboard() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                     <div className="flex items-center space-x-2">
                       <svg className="w-4 h-4 text-slate-500 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clipRule="evenodd"></path>
+                        <path d="M6 2a1 1 0 011 1v1h6V3a1 1 0 112 0v1a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2V3a1 1 0 011-1zm1 4v10h8V6H7z" />
                       </svg>
-                      <span>Match</span>
-                    </div>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4 text-slate-500 dark:text-slate-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"></path>
-                      </svg>
-                      <span>Quick</span>
+                      <span>Applied (date)</span>
                     </div>
                   </th>
                 </tr>
@@ -390,15 +382,6 @@ function Dashboard() {
                         onClick={() => navigate('/jobs')}>
                       <td className="px-4 py-4">
                         <div className="font-medium text-slate-900 dark:text-slate-200 text-sm">{job.position || job.title || 'N/A'}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                          {job.appliedAt ? (() => {
-                            try {
-                              return new Date(job.appliedAt).toLocaleDateString()
-                            } catch (err) {
-                              return 'Invalid Date'
-                            }
-                          })() : 'N/A'}
-                        </div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm text-slate-700 dark:text-slate-300 font-medium">{job.company || 'N/A'}</div>
@@ -410,26 +393,15 @@ function Dashboard() {
                         </span>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-12 bg-slate-200 dark:bg-gray-600 rounded-full h-1.5">
-                            <div 
-                              className="bg-slate-600 dark:bg-slate-400 h-1.5 rounded-full transition-all duration-500"
-                              style={{ width: `${job.matchScore || 0}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">{job.matchScore || 0}%</span>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                          {job.appliedAt ? (() => {
+                            try {
+                              return new Date(job.appliedAt).toLocaleDateString()
+                            } catch (err) {
+                              return 'Invalid Date'
+                            }
+                          })() : 'N/A'}
                         </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate('/jobs');
-                          }}
-                          className="bg-slate-100 hover:bg-slate-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-md transition-all duration-200 text-xs font-medium border border-slate-200 dark:border-gray-600"
-                        >
-                          View Details
-                        </button>
                       </td>
                     </tr>
                   ))
