@@ -166,7 +166,7 @@ function Dashboard() {
     // Main container with full screen height - min-h-screen ensures the content takes at least the full height of the browser window
     <div className="min-h-screen flex flex-col items-center justify-center">
       {/* Content wrapper with responsive width and padding */}
-      <div className="w-full max-w-2xl mx-auto px-4 py-8 flex flex-col items-center justify-center">
+      <div className="w-full max-w-4xl mx-auto px-4 py-8 flex flex-col items-center justify-center">
         {/* Dashboard Header Section */}
         <div className="text-center mb-12">
           {/* Main Dashboard Title with gradient text */}
@@ -338,7 +338,7 @@ function Dashboard() {
           </div>
           
           <div className="overflow-x-auto bg-white dark:bg-gray-800 flex justify-center">
-            <table className="min-w-[500px] max-w-[600px] mx-auto text-sm text-center">
+            <table className="w-full text-sm text-center">
               <thead className="bg-slate-100 dark:bg-gray-700 border-b-2 border-slate-300 dark:border-gray-600">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wider">
