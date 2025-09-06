@@ -144,8 +144,17 @@ router.get('/', async (req, res) => {
 })
 
 /**
- * Preview a resume → redirect to Cloudinary or S3
+ * Preview a resume → serve directly or redirect
  */
+router.options('/:id/preview', (req, res) => {
+  // CORS preflight response
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control')
+  res.setHeader('Access-Control-Max-Age', '86400') // 24 hours
+  res.status(204).end()
+})
+
 router.get('/:id/preview', async (req, res) => {
   try {
     const resumeId = req.params.id
@@ -190,22 +199,29 @@ router.get('/:id/preview', async (req, res) => {
       if (resume.fileContent) {
         // Set headers for inline PDF display
         const contentType = resume.mimeType || 'application/pdf'
+        
+        // Enhanced CORS headers for frontend compatibility
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control')
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Type, Content-Disposition')
+        
+        // PDF headers
         res.setHeader('Content-Type', contentType)
-        res.setHeader('Content-Disposition', 'inline')
+        res.setHeader('Content-Disposition', 'inline; filename="' + resume.originalName + '"')
         res.setHeader('Accept-Ranges', 'bytes')
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-        res.setHeader('Pragma', 'no-cache')
-        res.setHeader('Expires', '0')
         res.setHeader('Content-Length', resume.fileContent.length)
         
-        // CORS headers
-        res.setHeader('Access-Control-Allow-Origin', 'https://job-trackr-murex.vercel.app')
-        res.setHeader('Access-Control-Allow-Credentials', 'true')
+        // Cache headers
+        res.setHeader('Cache-Control', 'public, max-age=3600')
+        res.setHeader('Last-Modified', new Date(resume.updatedAt).toUTCString())
+        res.setHeader('ETag', `"${resume.id}-${resume.fileContent.length}"`)
         
         console.log('Direct preview headers set:', {
           contentType,
-          disposition: 'inline',
-          size: resume.fileContent.length
+          disposition: `inline; filename="${resume.originalName}"`,
+          size: resume.fileContent.length,
+          corsOrigin: '*'
         })
         
         return res.send(resume.fileContent)
@@ -478,10 +494,10 @@ router.get('/file/:filename', async (req, res) => {
         res.setHeader('ETag', `"${resume.id}-${resume.fileContent.length}"`)
         
         // CORS headers for cross-origin preview
-        res.setHeader('Access-Control-Allow-Origin', 'https://job-trackr-murex.vercel.app')
-        res.setHeader('Access-Control-Allow-Credentials', 'true')
-        res.setHeader('Access-Control-Allow-Methods', 'GET')
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control')
+        res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Type, Content-Disposition')
         
         console.log('Preview headers set:', {
           contentType,
