@@ -14,20 +14,40 @@ const upload = multer({ dest: 'uploads/' })
  */
 router.post('/', upload.single('file'), async (req, res) => {
   try {
+    console.log('Upload request started')
+    console.log('User ID:', req.user.id)
+    console.log('File received:', req.file ? {
+      originalname: req.file.originalname,
+      filename: req.file.filename,
+      size: req.file.size,
+      mimetype: req.file.mimetype
+    } : 'No file')
+    console.log('Body data:', req.body)
+    
     if (!req.file) {
+      console.log('No file uploaded - returning 400')
       return res.status(400).json({ error: 'No file uploaded' })
     }
 
     const { title, description } = req.body
-
+    
+    console.log('Uploading to Cloudinary...')
+    
     // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
       resource_type: 'raw', // important for PDFs/docs
       folder: 'resumes',
       public_id: `user_${req.user.id}_${Date.now()}`,
     })
+    
+    console.log('Cloudinary upload successful:', {
+      public_id: result.public_id,
+      secure_url: result.secure_url,
+      resource_type: result.resource_type
+    })
 
     // Save DB record
+    console.log('Creating database record...')
     const resume = await db.Resume.create({
       userId: req.user.id,
       title: title || req.file.originalname,
@@ -39,11 +59,21 @@ router.post('/', upload.single('file'), async (req, res) => {
       mimeType: req.file.mimetype,
       description: description || '',
     })
+    
+    console.log('Resume created successfully:', {
+      id: resume.id,
+      title: resume.title,
+      cloudinaryUrl: resume.cloudinaryUrl
+    })
 
     res.status(201).json(resume)
   } catch (err) {
     console.error('Resume upload error:', err)
-    res.status(500).json({ error: 'Resume upload failed' })
+    console.error('Error stack:', err.stack)
+    res.status(500).json({ 
+      error: 'Resume upload failed',
+      details: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    })
   }
 })
 
@@ -80,10 +110,20 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id/preview', async (req, res) => {
   try {
-    console.log('Preview request for resume ID:', req.params.id)
+    const resumeId = req.params.id
+    console.log('Preview request for resume ID:', resumeId)
     console.log('User ID:', req.user.id)
     
-    const resume = await db.Resume.findByPk(req.params.id)
+    // Validate resume ID
+    if (!resumeId || resumeId === 'undefined' || resumeId === 'null') {
+      console.log('Invalid resume ID provided:', resumeId)
+      return res.status(400).json({ 
+        error: 'Invalid resume ID',
+        details: 'Resume ID is required and must be a valid number'
+      })
+    }
+    
+    const resume = await db.Resume.findByPk(resumeId)
     console.log('Found resume:', resume ? {
       id: resume.id,
       userId: resume.userId,
@@ -126,10 +166,20 @@ router.get('/:id/preview', async (req, res) => {
  */
 router.get('/:id/download', async (req, res) => {
   try {
-    console.log('Download request for resume ID:', req.params.id)
+    const resumeId = req.params.id
+    console.log('Download request for resume ID:', resumeId)
     console.log('User ID:', req.user.id)
     
-    const resume = await db.Resume.findByPk(req.params.id)
+    // Validate resume ID
+    if (!resumeId || resumeId === 'undefined' || resumeId === 'null') {
+      console.log('Invalid resume ID provided:', resumeId)
+      return res.status(400).json({ 
+        error: 'Invalid resume ID',
+        details: 'Resume ID is required and must be a valid number'
+      })
+    }
+    
+    const resume = await db.Resume.findByPk(resumeId)
     console.log('Found resume:', resume ? {
       id: resume.id,
       userId: resume.userId,
