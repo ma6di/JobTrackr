@@ -76,7 +76,7 @@ router.get('/', async (req, res) => {
 })
 
 /**
- * Preview a resume → redirect to Cloudinary
+ * Preview a resume → redirect to Cloudinary or S3
  */
 router.get('/:id/preview', async (req, res) => {
   try {
@@ -89,7 +89,9 @@ router.get('/:id/preview', async (req, res) => {
       userId: resume.userId,
       title: resume.title,
       cloudinaryUrl: resume.cloudinaryUrl,
-      s3Url: resume.s3Url
+      s3Url: resume.s3Url,
+      hasCloudinaryUrl: !!resume.cloudinaryUrl,
+      hasS3Url: !!resume.s3Url
     } : 'null')
     
     if (!resume) {
@@ -97,14 +99,20 @@ router.get('/:id/preview', async (req, res) => {
     }
     
     if (resume.userId !== req.user.id) {
-      return res.status(403).json({ error: 'Access denied' })
+      return res.status(403).json({ error: 'Access denied - you can only access your own resumes' })
     }
     
-    if (!resume.cloudinaryUrl && !resume.s3Url) {
-      return res.status(404).json({ error: 'Resume file not found' })
-    }
-    
+    // Try Cloudinary URL first, then S3 URL as fallback
     const fileUrl = resume.cloudinaryUrl || resume.s3Url
+    
+    if (!fileUrl) {
+      console.log('No file URL found for resume ID:', resume.id)
+      return res.status(404).json({ 
+        error: 'Resume file not found',
+        details: 'This resume does not have an associated file URL. Please re-upload the resume.'
+      })
+    }
+    
     console.log('Redirecting to:', fileUrl)
     res.redirect(fileUrl)
   } catch (err) {
@@ -114,7 +122,7 @@ router.get('/:id/preview', async (req, res) => {
 })
 
 /**
- * Download a resume → redirect to Cloudinary
+ * Download a resume → redirect to Cloudinary or S3
  */
 router.get('/:id/download', async (req, res) => {
   try {
@@ -127,7 +135,8 @@ router.get('/:id/download', async (req, res) => {
       userId: resume.userId,
       title: resume.title,
       cloudinaryUrl: resume.cloudinaryUrl,
-      s3Url: resume.s3Url
+      s3Url: resume.s3Url,
+      downloadCount: resume.downloadCount
     } : 'null')
     
     if (!resume) {
@@ -135,19 +144,31 @@ router.get('/:id/download', async (req, res) => {
     }
     
     if (resume.userId !== req.user.id) {
-      return res.status(403).json({ error: 'Access denied' })
+      return res.status(403).json({ error: 'Access denied - you can only download your own resumes' })
     }
     
-    if (!resume.cloudinaryUrl && !resume.s3Url) {
-      return res.status(404).json({ error: 'Resume file not found' })
+    // Try Cloudinary URL first, then S3 URL as fallback
+    const fileUrl = resume.cloudinaryUrl || resume.s3Url
+    
+    if (!fileUrl) {
+      console.log('No file URL found for resume ID:', resume.id)
+      return res.status(404).json({ 
+        error: 'Resume file not found',
+        details: 'This resume does not have an associated file URL. Please re-upload the resume.'
+      })
     }
     
     // Increment download count
-    await resume.increment('downloadCount')
+    try {
+      await resume.increment('downloadCount')
+      console.log('Incremented download count for resume ID:', resume.id)
+    } catch (incrementError) {
+      console.error('Failed to increment download count:', incrementError)
+      // Don't fail the download if we can't increment counter
+    }
     
-    const fileUrl = resume.cloudinaryUrl || resume.s3Url
     console.log('Redirecting to:', fileUrl)
-    res.redirect(fileUrl) // Cloudinary serves the file
+    res.redirect(fileUrl)
   } catch (err) {
     console.error('Download error:', err)
     res.status(500).json({ error: 'Failed to download resume' })
