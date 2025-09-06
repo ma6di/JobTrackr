@@ -8,7 +8,7 @@ export default (sequelize) => {
       autoIncrement: true,
       primaryKey: true,
     },
-    user_id: {
+    userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -16,16 +16,51 @@ export default (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    originalName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    fileName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    s3Url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    cloudinaryUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    cloudinaryPublicId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    fileSize: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    mimeType: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    resumeType: {
+      type: DataTypes.STRING,
+      defaultValue: 'general',
+      allowNull: false,
+    },
     description: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    url: {
-      type: DataTypes.STRING,
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
       allowNull: false,
     },
-    cloudinary_id: {
-      type: DataTypes.STRING,
+    downloadCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
       allowNull: false,
     },
   }, {

@@ -29,11 +29,15 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     // Save DB record
     const resume = await db.Resume.create({
-      user_id: req.user.id,
-      title,
-      description,
-      url: result.secure_url,
-      cloudinary_id: result.public_id,
+      userId: req.user.id,
+      title: title || req.file.originalname,
+      originalName: req.file.originalname,
+      fileName: req.file.filename,
+      cloudinaryUrl: result.secure_url,
+      cloudinaryPublicId: result.public_id,
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+      description: description || '',
     })
 
     res.status(201).json(resume)
@@ -49,7 +53,7 @@ router.post('/', upload.single('file'), async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const resumes = await db.Resume.findAll({
-      where: { user_id: req.user.id },
+      where: { userId: req.user.id },
       order: [['createdAt', 'DESC']],
     })
     res.json(resumes)
@@ -65,10 +69,10 @@ router.get('/', async (req, res) => {
 router.get('/:id/preview', async (req, res) => {
   try {
     const resume = await db.Resume.findByPk(req.params.id)
-    if (!resume || resume.user_id !== req.user.id) {
+    if (!resume || resume.userId !== req.user.id) {
       return res.status(404).json({ error: 'Resume not found' })
     }
-    res.redirect(resume.url)
+    res.redirect(resume.cloudinaryUrl)
   } catch (err) {
     console.error('Preview error:', err)
     res.status(500).json({ error: 'Failed to preview resume' })
@@ -81,10 +85,14 @@ router.get('/:id/preview', async (req, res) => {
 router.get('/:id/download', async (req, res) => {
   try {
     const resume = await db.Resume.findByPk(req.params.id)
-    if (!resume || resume.user_id !== req.user.id) {
+    if (!resume || resume.userId !== req.user.id) {
       return res.status(404).json({ error: 'Resume not found' })
     }
-    res.redirect(resume.url) // Cloudinary serves the file
+    
+    // Increment download count
+    await resume.increment('downloadCount')
+    
+    res.redirect(resume.cloudinaryUrl) // Cloudinary serves the file
   } catch (err) {
     console.error('Download error:', err)
     res.status(500).json({ error: 'Failed to download resume' })
@@ -97,14 +105,21 @@ router.get('/:id/download', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const resume = await db.Resume.findByPk(req.params.id)
-    if (!resume || resume.user_id !== req.user.id) {
+    if (!resume || resume.userId !== req.user.id) {
       return res.status(404).json({ error: 'Resume not found' })
     }
 
-    // Delete from Cloudinary
-    await cloudinary.uploader.destroy(resume.cloudinary_id, {
-      resource_type: 'raw',
-    })
+    // Delete from Cloudinary using stored public_id
+    if (resume.cloudinaryPublicId) {
+      try {
+        await cloudinary.uploader.destroy(resume.cloudinaryPublicId, {
+          resource_type: 'raw',
+        })
+      } catch (cloudinaryError) {
+        console.error('Cloudinary deletion error:', cloudinaryError)
+        // Continue with DB deletion even if Cloudinary fails
+      }
+    }
 
     // Delete DB record
     await resume.destroy()

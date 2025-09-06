@@ -71,6 +71,7 @@ model Resume {
   fileName     String
   s3Url        String?
   cloudinaryUrl String?
+  cloudinaryPublicId String?
   fileSize     Int
   mimeType     String
   resumeType   String   @default("general")
