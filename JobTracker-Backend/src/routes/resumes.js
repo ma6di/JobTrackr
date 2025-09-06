@@ -173,7 +173,7 @@ router.get('/:id/preview', async (req, res) => {
     if (fileUrl && fileUrl.startsWith('/uploads/')) {
       const filename = fileUrl.replace('/uploads/', '')
       fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${filename}`
-      console.log('Converting local path to served URL:', fileUrl)
+      console.log('Converting local path to preview URL:', fileUrl)
     }
     
     if (!fileUrl) {
@@ -234,8 +234,8 @@ router.get('/:id/download', async (req, res) => {
     // If s3Url is a local path, convert to our file serving endpoint
     if (fileUrl && fileUrl.startsWith('/uploads/')) {
       const filename = fileUrl.replace('/uploads/', '')
-      fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${filename}`
-      console.log('Converting local path to served URL:', fileUrl)
+      fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${filename}?download=true`
+      console.log('Converting local path to download URL:', fileUrl)
     }
     
     if (!fileUrl) {
@@ -393,7 +393,8 @@ router.post('/test-upload', upload.single('file'), async (req, res) => {
 router.get('/file/:filename', async (req, res) => {
   try {
     const filename = req.params.filename
-    console.log('Serving local file:', filename)
+    const download = req.query.download === 'true' // Check if download is requested
+    console.log('Serving local file:', filename, download ? '(download)' : '(preview)')
     
     // Validate filename to prevent directory traversal
     if (!filename || filename.includes('..') || filename.includes('/')) {
@@ -409,9 +410,21 @@ router.get('/file/:filename', async (req, res) => {
       return res.status(404).json({ error: 'File not found' })
     }
     
-    // Set appropriate headers
-    res.setHeader('Content-Type', 'application/octet-stream')
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    // Get file stats to determine content type
+    const stats = fs.statSync(filePath)
+    
+    // Set appropriate headers based on whether it's download or preview
+    if (download) {
+      // Force download
+      res.setHeader('Content-Type', 'application/octet-stream')
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    } else {
+      // For preview - set correct content type
+      res.setHeader('Content-Type', 'application/pdf') // Assume PDF for now
+      res.setHeader('Content-Disposition', 'inline') // Display in browser
+    }
+    
+    res.setHeader('Content-Length', stats.size)
     
     // Stream the file
     const fileStream = fs.createReadStream(filePath)
