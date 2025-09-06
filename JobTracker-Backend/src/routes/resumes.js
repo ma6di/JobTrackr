@@ -184,7 +184,34 @@ router.get('/:id/preview', async (req, res) => {
     let fileUrl = resume.cloudinaryUrl
     
     if (!fileUrl && resume.s3Url === 'database://content') {
-      // File content is stored in database
+      // File content is stored in database - serve directly instead of redirecting
+      console.log('Serving PDF preview directly from database')
+      
+      if (resume.fileContent) {
+        // Set headers for inline PDF display
+        const contentType = resume.mimeType || 'application/pdf'
+        res.setHeader('Content-Type', contentType)
+        res.setHeader('Content-Disposition', 'inline')
+        res.setHeader('Accept-Ranges', 'bytes')
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+        res.setHeader('Pragma', 'no-cache')
+        res.setHeader('Expires', '0')
+        res.setHeader('Content-Length', resume.fileContent.length)
+        
+        // CORS headers
+        res.setHeader('Access-Control-Allow-Origin', 'https://job-trackr-murex.vercel.app')
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+        
+        console.log('Direct preview headers set:', {
+          contentType,
+          disposition: 'inline',
+          size: resume.fileContent.length
+        })
+        
+        return res.send(resume.fileContent)
+      }
+      
+      // Fallback to redirect if no file content
       fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${resume.fileName}`
       console.log('Converting database storage to preview URL:', fileUrl)
     } else if (!fileUrl && resume.s3Url && resume.s3Url.startsWith('/uploads/')) {
@@ -443,18 +470,24 @@ router.get('/file/:filename', async (req, res) => {
         res.setHeader('Content-Type', contentType)
         res.setHeader('Content-Disposition', 'inline')
         
-        // Additional headers for better PDF preview
+        // Additional headers for better PDF preview and cache busting
         res.setHeader('Accept-Ranges', 'bytes')
-        res.setHeader('Cache-Control', 'no-cache')
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+        res.setHeader('Pragma', 'no-cache')
+        res.setHeader('Expires', '0')
+        res.setHeader('ETag', `"${resume.id}-${resume.fileContent.length}"`)
         
         // CORS headers for cross-origin preview
         res.setHeader('Access-Control-Allow-Origin', 'https://job-trackr-murex.vercel.app')
         res.setHeader('Access-Control-Allow-Credentials', 'true')
+        res.setHeader('Access-Control-Allow-Methods', 'GET')
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
         
         console.log('Preview headers set:', {
           contentType,
           disposition: 'inline',
-          size: resume.fileContent.length
+          size: resume.fileContent.length,
+          etag: `"${resume.id}-${resume.fileContent.length}"`
         })
       }
       
