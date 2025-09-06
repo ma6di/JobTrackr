@@ -64,6 +64,17 @@ function Resumes() {
   }
 
   /* 
+    LEARNING COMMENT: Text truncation utility function
+    - Truncates text to specified length and adds ellipsis (...)
+    - Used to display descriptions in a compact format
+    - Prevents long descriptions from breaking card layout
+  */
+  const truncateText = (text, maxLength = 80) => {
+    if (!text || text.length <= maxLength) return text
+    return text.substring(0, maxLength).trim() + '...'
+  }
+
+  /* 
     LEARNING COMMENT: Async resume submission handler
     - Called when user successfully uploads a new resume through the modal
     - resumeData: object containing new resume information (name, file, etc.)
@@ -356,9 +367,23 @@ function Resumes() {
                 - Displays the title of the resume file
                 - {resume.title}: dynamically shows the resume title from state
                 - text-base: 16px font size, font-semibold: bold weight
-                - mb-2: adds bottom margin to separate from metadata below
+                - mb-2: adds bottom margin to separate from content below
               */}
               <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200 mb-2">{resume.title}</h3>
+              
+              {/* 
+                LEARNING COMMENT: Resume description
+                - Displays the description if available, truncated with "..." for long text
+                - Only shown when description exists and is not empty
+                - text-sm: 14px font size, slightly smaller than title
+                - text-slate-600: muted color for secondary information
+                - mb-3: bottom margin to separate from metadata
+              */}
+              {resume.description && resume.description.trim() && (
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
+                  {truncateText(resume.description, 100)}
+                </p>
+              )}
               
               {/* 
                 LEARNING COMMENT: Resume metadata section
