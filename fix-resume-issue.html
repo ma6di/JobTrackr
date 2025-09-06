@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Resume Issue</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            line-height: 1.6;
+        }
+        .issue { 
+            background: #ffe6e6; 
+            padding: 15px; 
+            border-left: 4px solid #ff4444; 
+            margin: 20px 0; 
+        }
+        .solution { 
+            background: #e6f7ff; 
+            padding: 15px; 
+            border-left: 4px solid #1890ff; 
+            margin: 20px 0; 
+        }
+        button { 
+            padding: 12px 24px; 
+            background: #ff4444; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover { background: #cc0000; }
+        .result { 
+            margin: 20px 0; 
+            padding: 15px; 
+            background: #f5f5f5; 
+            border-radius: 4px; 
+            white-space: pre-wrap; 
+            font-family: monospace;
+        }
+        .success { background: #e6ffe6; border-left: 4px solid #00cc00; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff4444; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Resume File Not Found Issue</h1>
+    
+    <div class="issue">
+        <h3>❌ Current Issue:</h3>
+        <p>Resume "Resume_Cheraghali" (ID: 3) has a broken file reference:</p>
+        <ul>
+            <li>Points to: <code>/uploads/078991a84fc635568901565179febc25</code></li>
+            <li>File doesn't exist on Railway containers (ephemeral storage)</li>
+            <li>Causing "File not found" errors on preview/download</li>
+        </ul>
+    </div>
+
+    <div class="solution">
+        <h3>✅ Solution:</h3>
+        <p>Remove the broken resume record so you can upload a fresh one that will work properly.</p>
+        <p>The new upload will use database storage and work correctly on Railway.</p>
+    </div>
+
+    <button onclick="deleteBrokenResume()">🗑️ Delete Broken Resume Record</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function deleteBrokenResume() {
+            const resultDiv = document.getElementById('result');
+            const button = event.target;
+            
+            button.disabled = true;
+            button.textContent = '🔄 Deleting...';
+            
+            resultDiv.innerHTML = 'Calling cleanup endpoint...';
+            
+            try {
+                // Try the cleanup endpoint first
+                const cleanupResponse = await fetch('https://jobtrackr-production.up.railway.app/api/resumes/cleanup-broken', {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (cleanupResponse.ok) {
+                    const data = await cleanupResponse.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ SUCCESS! Cleanup completed.
+
+${data.message}
+
+📊 Results:
+• Found: ${data.totalFound || 0} broken resume records
+• Deleted: ${data.deletedCount || 0} records
+
+${data.deletedResumes && data.deletedResumes.length > 0 ? 
+`🗑️ Deleted:
+${data.deletedResumes.map(r => `• "${r.title}" (ID: ${r.id})`).join('\n')}` : ''}
+
+📝 Next Steps:
+1. Go to your resumes page: https://job-trackr-murex.vercel.app/resumes  
+2. Upload your resume again
+3. The new upload will work properly with database storage!`;
+                    
+                } else {
+                    // If cleanup endpoint fails, try direct delete
+                    const deleteResponse = await fetch('https://jobtrackr-production.up.railway.app/api/resumes/3', {
+                        method: 'DELETE',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (deleteResponse.ok) {
+                        resultDiv.className = 'result success';
+                        resultDiv.innerHTML = `✅ SUCCESS! Broken resume deleted directly.
+
+The problematic "Resume_Cheraghali" record has been removed.
+
+📝 Next Steps:
+1. Go to your resumes page: https://job-trackr-murex.vercel.app/resumes
+2. Upload your resume again  
+3. The new upload will work properly!`;
+                    } else {
+                        throw new Error('Both cleanup and direct delete failed');
+                    }
+                }
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}
+
+💡 Manual solution:
+1. Go to: https://job-trackr-murex.vercel.app/resumes
+2. Click the delete button next to "Resume_Cheraghali"
+3. Upload your resume again`;
+            } finally {
+                button.disabled = false;
+                button.textContent = '🗑️ Delete Broken Resume Record';
+            }
+        }
+        
+        // Show current status
+        window.addEventListener('load', function() {
+            document.getElementById('result').innerHTML = `ℹ️ Status: Ready to fix the broken resume record.
+
+Current broken record:
+• ID: 3
+• Title: "Resume_Cheraghali"  
+• Problem: Points to non-existent file
+• User: ${new Date().toLocaleString()}`;
+        });
+    </script>
+</body>
+</html>
