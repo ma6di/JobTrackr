@@ -133,7 +133,7 @@ export const previewResume = async (id) => {
     headers: getDefaultHeaders(),
   })
   if (!res.ok) throw new Error(`Preview failed: ${res.statusText}`)
-  return res.blob() // returns Blob for preview in browser
+  return res // Return the response object so component can check status and get blob
 }
 
 export const downloadResume = async (id, filename = 'resume.pdf') => {
