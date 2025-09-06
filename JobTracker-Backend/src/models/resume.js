@@ -36,6 +36,11 @@ export default (sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    fileContent: {
+      type: DataTypes.BLOB('long'),
+      allowNull: true,
+      comment: 'Binary file content when Cloudinary is not available'
+    },
     fileSize: {
       type: DataTypes.INTEGER,
       allowNull: false,

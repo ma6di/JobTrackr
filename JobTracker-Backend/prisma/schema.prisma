@@ -72,6 +72,7 @@ model Resume {
   s3Url        String?
   cloudinaryUrl String?
   cloudinaryPublicId String?
+  fileContent  Bytes?   // Binary file content when cloud storage unavailable
   fileSize     Int
   mimeType     String
   resumeType   String   @default("general")

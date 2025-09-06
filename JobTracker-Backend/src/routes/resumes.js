@@ -40,6 +40,7 @@ router.post('/', upload.single('file'), async (req, res) => {
     
     let cloudinaryUrl = null
     let cloudinaryPublicId = null
+    let fileContent = null
     
     if (hasCloudinaryConfig) {
       try {
@@ -62,10 +63,21 @@ router.post('/', upload.single('file'), async (req, res) => {
         cloudinaryPublicId = result.public_id
       } catch (cloudinaryError) {
         console.error('Cloudinary upload failed:', cloudinaryError.message)
-        console.log('Falling back to local file storage')
+        console.log('Falling back to database storage')
       }
     } else {
-      console.log('Cloudinary not configured, using local file storage')
+      console.log('Cloudinary not configured, storing file content in database')
+    }
+    
+    // If Cloudinary failed or not configured, store file content in database
+    if (!cloudinaryUrl) {
+      try {
+        fileContent = fs.readFileSync(req.file.path)
+        console.log('File content stored in database, size:', fileContent.length)
+      } catch (fileError) {
+        console.error('Failed to read file:', fileError.message)
+        return res.status(500).json({ error: 'Failed to process uploaded file' })
+      }
     }
 
     // Save DB record
@@ -77,7 +89,8 @@ router.post('/', upload.single('file'), async (req, res) => {
       fileName: req.file.filename,
       cloudinaryUrl: cloudinaryUrl,
       cloudinaryPublicId: cloudinaryPublicId,
-      s3Url: cloudinaryUrl ? null : `/uploads/${req.file.filename}`, // fallback to local
+      s3Url: cloudinaryUrl ? null : 'database://content', // indicates content is in DB
+      fileContent: fileContent, // Store binary data if no Cloudinary
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       description: description || '',
@@ -87,7 +100,8 @@ router.post('/', upload.single('file'), async (req, res) => {
       id: resume.id,
       title: resume.title,
       cloudinaryUrl: resume.cloudinaryUrl,
-      s3Url: resume.s3Url
+      s3Url: resume.s3Url,
+      hasFileContent: !!fileContent
     })
 
     res.status(201).json(resume)
@@ -166,12 +180,16 @@ router.get('/:id/preview', async (req, res) => {
       return res.status(403).json({ error: 'Access denied - you can only access your own resumes' })
     }
     
-    // Try Cloudinary URL first, then S3 URL as fallback
-    let fileUrl = resume.cloudinaryUrl || resume.s3Url
+    // Try Cloudinary URL first, then check if content is in database
+    let fileUrl = resume.cloudinaryUrl
     
-    // If s3Url is a local path, convert to our file serving endpoint
-    if (fileUrl && fileUrl.startsWith('/uploads/')) {
-      const filename = fileUrl.replace('/uploads/', '')
+    if (!fileUrl && resume.s3Url === 'database://content') {
+      // File content is stored in database
+      fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${resume.fileName}`
+      console.log('Converting database storage to preview URL:', fileUrl)
+    } else if (!fileUrl && resume.s3Url && resume.s3Url.startsWith('/uploads/')) {
+      // Legacy local file path
+      const filename = resume.s3Url.replace('/uploads/', '')
       fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${filename}`
       console.log('Converting local path to preview URL:', fileUrl)
     }
@@ -228,12 +246,16 @@ router.get('/:id/download', async (req, res) => {
       return res.status(403).json({ error: 'Access denied - you can only download your own resumes' })
     }
     
-    // Try Cloudinary URL first, then S3 URL as fallback
-    let fileUrl = resume.cloudinaryUrl || resume.s3Url
+    // Try Cloudinary URL first, then check if content is in database
+    let fileUrl = resume.cloudinaryUrl
     
-    // If s3Url is a local path, convert to our file serving endpoint
-    if (fileUrl && fileUrl.startsWith('/uploads/')) {
-      const filename = fileUrl.replace('/uploads/', '')
+    if (!fileUrl && resume.s3Url === 'database://content') {
+      // File content is stored in database
+      fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${resume.fileName}?download=true`
+      console.log('Converting database storage to download URL:', fileUrl)
+    } else if (!fileUrl && resume.s3Url && resume.s3Url.startsWith('/uploads/')) {
+      // Legacy local file path
+      const filename = resume.s3Url.replace('/uploads/', '')
       fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${filename}?download=true`
       console.log('Converting local path to download URL:', fileUrl)
     }
@@ -394,15 +416,41 @@ router.get('/file/:filename', async (req, res) => {
   try {
     const filename = req.params.filename
     const download = req.query.download === 'true' // Check if download is requested
-    console.log('Serving local file:', filename, download ? '(download)' : '(preview)')
+    console.log('Serving file:', filename, download ? '(download)' : '(preview)')
     
-    // Validate filename to prevent directory traversal
-    if (!filename || filename.includes('..') || filename.includes('/')) {
-      return res.status(400).json({ error: 'Invalid filename' })
+    // First, try to find the resume by filename in database
+    const resume = await db.Resume.findOne({
+      where: { fileName: filename }
+    })
+    
+    if (!resume) {
+      console.log('Resume not found for filename:', filename)
+      return res.status(404).json({ error: 'File not found' })
     }
     
+    // If we have file content in database, serve it
+    if (resume.fileContent) {
+      console.log('Serving file from database, size:', resume.fileContent.length)
+      
+      // Set appropriate headers based on whether it's download or preview
+      if (download) {
+        // Force download
+        res.setHeader('Content-Type', 'application/octet-stream')
+        res.setHeader('Content-Disposition', `attachment; filename="${resume.originalName}"`)
+      } else {
+        // For preview - set correct content type
+        res.setHeader('Content-Type', resume.mimeType || 'application/pdf')
+        res.setHeader('Content-Disposition', 'inline')
+      }
+      
+      res.setHeader('Content-Length', resume.fileContent.length)
+      res.send(resume.fileContent)
+      return
+    }
+    
+    // Fallback to filesystem (though this likely won't work on Railway)
     const filePath = path.join(process.cwd(), 'uploads', filename)
-    console.log('File path:', filePath)
+    console.log('Trying file path:', filePath)
     
     // Check if file exists
     if (!fs.existsSync(filePath)) {
@@ -417,11 +465,11 @@ router.get('/file/:filename', async (req, res) => {
     if (download) {
       // Force download
       res.setHeader('Content-Type', 'application/octet-stream')
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+      res.setHeader('Content-Disposition', `attachment; filename="${resume.originalName}"`)
     } else {
       // For preview - set correct content type
-      res.setHeader('Content-Type', 'application/pdf') // Assume PDF for now
-      res.setHeader('Content-Disposition', 'inline') // Display in browser
+      res.setHeader('Content-Type', resume.mimeType || 'application/pdf')
+      res.setHeader('Content-Disposition', 'inline')
     }
     
     res.setHeader('Content-Length', stats.size)
