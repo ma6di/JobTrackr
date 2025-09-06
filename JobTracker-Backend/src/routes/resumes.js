@@ -484,4 +484,112 @@ router.get('/file/:filename', async (req, res) => {
   }
 })
 
+/**
+ * Cleanup endpoint to remove broken resume records
+ * This removes resumes that have local file paths but no accessible files
+ */
+router.delete('/cleanup-broken', async (req, res) => {
+  try {
+    console.log('🧹 Starting broken resume cleanup...')
+    
+    // Find resumes with local file paths but no file content or cloudinary URL
+    const brokenResumes = await db.Resume.findAll({
+      where: {
+        [db.Sequelize.Op.and]: [
+          // Has local file path in s3Url
+          {
+            s3Url: {
+              [db.Sequelize.Op.or]: [
+                { [db.Sequelize.Op.like]: '/uploads/%' },
+                { [db.Sequelize.Op.like]: 'local://%' }
+              ]
+            }
+          },
+          // No Cloudinary URL
+          {
+            [db.Sequelize.Op.or]: [
+              { cloudinaryUrl: null },
+              { cloudinaryUrl: '' }
+            ]
+          },
+          // No file content in database
+          {
+            [db.Sequelize.Op.or]: [
+              { fileContent: null },
+              { fileContent: '' }
+            ]
+          }
+        ]
+      }
+    })
+
+    console.log(`📊 Found ${brokenResumes.length} broken resume records`)
+
+    if (brokenResumes.length === 0) {
+      return res.json({
+        message: 'No broken resumes found! Database is clean.',
+        deletedCount: 0,
+        brokenResumes: []
+      })
+    }
+
+    // Log details of what will be deleted
+    const resumeDetails = brokenResumes.map(resume => ({
+      id: resume.id,
+      title: resume.title,
+      userId: resume.userId,
+      originalName: resume.originalName,
+      s3Url: resume.s3Url,
+      createdAt: resume.createdAt,
+      downloadCount: resume.downloadCount
+    }))
+
+    console.log('📋 Broken resume details:', resumeDetails)
+    
+    console.log('🗑️  Deleting broken resume records...')
+    
+    let deletedCount = 0
+    const deletedResumes = []
+    
+    for (const resume of brokenResumes) {
+      try {
+        const resumeInfo = {
+          id: resume.id,
+          title: resume.title,
+          userId: resume.userId,
+          originalName: resume.originalName
+        }
+        
+        await resume.destroy()
+        console.log(`✅ Deleted: "${resume.title}" (ID: ${resume.id})`)
+        deletedCount++
+        deletedResumes.push(resumeInfo)
+      } catch (error) {
+        console.log(`❌ Failed to delete resume ID ${resume.id}: ${error.message}`)
+      }
+    }
+
+    console.log(`🎯 Cleanup completed! Deleted ${deletedCount} broken resume records`)
+
+    res.json({
+      message: `Cleanup completed! Deleted ${deletedCount} broken resume records.`,
+      deletedCount,
+      totalFound: brokenResumes.length,
+      deletedResumes,
+      nextSteps: [
+        'Users should re-upload their resumes through the frontend',
+        'New uploads will use database storage and work properly on Railway',
+        'Test upload/preview/download functionality'
+      ]
+    })
+
+  } catch (error) {
+    console.error('❌ Cleanup failed:', error)
+    res.status(500).json({ 
+      error: 'Cleanup failed',
+      details: error.message 
+    })
+  }
+})
+
 export default router
