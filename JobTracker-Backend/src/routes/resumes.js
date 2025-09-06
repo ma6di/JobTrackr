@@ -3,6 +3,8 @@ import express from 'express'
 import multer from 'multer'
 import cloudinary from '../config/cloudinary.js'
 import db from '../models/index.js' // Sequelize models
+import path from 'path'
+import fs from 'fs'
 
 const router = express.Router()
 
@@ -31,20 +33,40 @@ router.post('/', upload.single('file'), async (req, res) => {
 
     const { title, description } = req.body
     
-    console.log('Uploading to Cloudinary...')
+    // Check if Cloudinary is configured
+    const hasCloudinaryConfig = process.env.CLOUDINARY_CLOUD_NAME && 
+                               process.env.CLOUDINARY_API_KEY && 
+                               process.env.CLOUDINARY_API_SECRET
     
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      resource_type: 'raw', // important for PDFs/docs
-      folder: 'resumes',
-      public_id: `user_${req.user.id}_${Date.now()}`,
-    })
+    let cloudinaryUrl = null
+    let cloudinaryPublicId = null
     
-    console.log('Cloudinary upload successful:', {
-      public_id: result.public_id,
-      secure_url: result.secure_url,
-      resource_type: result.resource_type
-    })
+    if (hasCloudinaryConfig) {
+      try {
+        console.log('Uploading to Cloudinary...')
+        
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          resource_type: 'raw', // important for PDFs/docs
+          folder: 'resumes',
+          public_id: `user_${req.user.id}_${Date.now()}`,
+        })
+        
+        console.log('Cloudinary upload successful:', {
+          public_id: result.public_id,
+          secure_url: result.secure_url,
+          resource_type: result.resource_type
+        })
+        
+        cloudinaryUrl = result.secure_url
+        cloudinaryPublicId = result.public_id
+      } catch (cloudinaryError) {
+        console.error('Cloudinary upload failed:', cloudinaryError.message)
+        console.log('Falling back to local file storage')
+      }
+    } else {
+      console.log('Cloudinary not configured, using local file storage')
+    }
 
     // Save DB record
     console.log('Creating database record...')
@@ -53,8 +75,9 @@ router.post('/', upload.single('file'), async (req, res) => {
       title: title || req.file.originalname,
       originalName: req.file.originalname,
       fileName: req.file.filename,
-      cloudinaryUrl: result.secure_url,
-      cloudinaryPublicId: result.public_id,
+      cloudinaryUrl: cloudinaryUrl,
+      cloudinaryPublicId: cloudinaryPublicId,
+      s3Url: cloudinaryUrl ? null : `/uploads/${req.file.filename}`, // fallback to local
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       description: description || '',
@@ -63,7 +86,8 @@ router.post('/', upload.single('file'), async (req, res) => {
     console.log('Resume created successfully:', {
       id: resume.id,
       title: resume.title,
-      cloudinaryUrl: resume.cloudinaryUrl
+      cloudinaryUrl: resume.cloudinaryUrl,
+      s3Url: resume.s3Url
     })
 
     res.status(201).json(resume)
@@ -143,7 +167,14 @@ router.get('/:id/preview', async (req, res) => {
     }
     
     // Try Cloudinary URL first, then S3 URL as fallback
-    const fileUrl = resume.cloudinaryUrl || resume.s3Url
+    let fileUrl = resume.cloudinaryUrl || resume.s3Url
+    
+    // If s3Url is a local path, convert to our file serving endpoint
+    if (fileUrl && fileUrl.startsWith('/uploads/')) {
+      const filename = fileUrl.replace('/uploads/', '')
+      fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${filename}`
+      console.log('Converting local path to served URL:', fileUrl)
+    }
     
     if (!fileUrl) {
       console.log('No file URL found for resume ID:', resume.id)
@@ -198,7 +229,14 @@ router.get('/:id/download', async (req, res) => {
     }
     
     // Try Cloudinary URL first, then S3 URL as fallback
-    const fileUrl = resume.cloudinaryUrl || resume.s3Url
+    let fileUrl = resume.cloudinaryUrl || resume.s3Url
+    
+    // If s3Url is a local path, convert to our file serving endpoint
+    if (fileUrl && fileUrl.startsWith('/uploads/')) {
+      const filename = fileUrl.replace('/uploads/', '')
+      fileUrl = `${req.protocol}://${req.get('host')}/api/resumes/file/${filename}`
+      console.log('Converting local path to served URL:', fileUrl)
+    }
     
     if (!fileUrl) {
       console.log('No file URL found for resume ID:', resume.id)
@@ -254,6 +292,134 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error('Delete error:', err)
     res.status(500).json({ error: 'Failed to delete resume' })
+  }
+})
+
+// Test endpoint to check Cloudinary configuration
+router.get('/test-config', (req, res) => {
+  try {
+    console.log('Testing Cloudinary configuration...')
+    
+    const hasCloudName = !!process.env.CLOUDINARY_CLOUD_NAME
+    const hasApiKey = !!process.env.CLOUDINARY_API_KEY
+    const hasApiSecret = !!process.env.CLOUDINARY_API_SECRET
+    
+    console.log('Cloudinary config check:', {
+      hasCloudName,
+      hasApiKey,
+      hasApiSecret,
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME ? 'set' : 'missing'
+    })
+    
+    res.json({
+      cloudinary: {
+        configured: hasCloudName && hasApiKey && hasApiSecret,
+        hasCloudName,
+        hasApiKey,
+        hasApiSecret,
+        cloudName: hasCloudName ? process.env.CLOUDINARY_CLOUD_NAME : 'not set'
+      },
+      database: {
+        connected: !!db.Resume
+      },
+      user: {
+        id: req.user.id,
+        email: req.user.email
+      }
+    })
+  } catch (error) {
+    console.error('Config test error:', error)
+    res.status(500).json({ error: error.message })
+  }
+})
+
+/**
+ * Test upload without Cloudinary - save to local only
+ */
+router.post('/test-upload', upload.single('file'), async (req, res) => {
+  try {
+    console.log('Test upload request started')
+    console.log('User ID:', req.user.id)
+    console.log('File received:', req.file ? {
+      originalname: req.file.originalname,
+      filename: req.file.filename,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+      path: req.file.path
+    } : 'No file')
+    console.log('Body data:', req.body)
+    
+    if (!req.file) {
+      console.log('No file uploaded - returning 400')
+      return res.status(400).json({ error: 'No file uploaded' })
+    }
+
+    const { title, description } = req.body
+    
+    console.log('Creating database record without Cloudinary...')
+    
+    // Save DB record with local file path (for testing)
+    const resume = await db.Resume.create({
+      userId: req.user.id,
+      title: title || req.file.originalname,
+      originalName: req.file.originalname,
+      fileName: req.file.filename,
+      s3Url: `local://uploads/${req.file.filename}`, // temporary local URL
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+      description: description || '',
+    })
+    
+    console.log('Test resume created successfully:', {
+      id: resume.id,
+      title: resume.title,
+      s3Url: resume.s3Url
+    })
+
+    res.status(201).json(resume)
+  } catch (err) {
+    console.error('Test resume upload error:', err)
+    console.error('Error stack:', err.stack)
+    res.status(500).json({ 
+      error: 'Test resume upload failed',
+      details: err.message
+    })
+  }
+})
+
+/**
+ * Serve local files when Cloudinary is not available
+ */
+router.get('/file/:filename', async (req, res) => {
+  try {
+    const filename = req.params.filename
+    console.log('Serving local file:', filename)
+    
+    // Validate filename to prevent directory traversal
+    if (!filename || filename.includes('..') || filename.includes('/')) {
+      return res.status(400).json({ error: 'Invalid filename' })
+    }
+    
+    const filePath = path.join(process.cwd(), 'uploads', filename)
+    console.log('File path:', filePath)
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.log('File not found:', filePath)
+      return res.status(404).json({ error: 'File not found' })
+    }
+    
+    // Set appropriate headers
+    res.setHeader('Content-Type', 'application/octet-stream')
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+    
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath)
+    fileStream.pipe(res)
+    
+  } catch (error) {
+    console.error('File serving error:', error)
+    res.status(500).json({ error: 'Failed to serve file' })
   }
 })
 
