@@ -51,6 +51,14 @@ const app = express()
 const PORT = process.env.PORT || 3001
 
 /* 
+  LEARNING COMMENT: Trust Proxy Configuration
+  - Enables Express to trust reverse proxy headers (X-Forwarded-For)
+  - Required for rate limiting and IP detection in production
+  - Railway, Heroku, Cloudflare all use reverse proxies
+*/
+app.set('trust proxy', 1)
+
+/* 
   LEARNING COMMENT: Security Middleware Setup
   - helmet(): Sets security-related HTTP headers
   - Protects against common web vulnerabilities

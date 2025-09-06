@@ -52,10 +52,22 @@ router.post('/', upload.single('file'), async (req, res) => {
  */
 router.get('/', async (req, res) => {
   try {
+    console.log('Fetching resumes for user ID:', req.user.id)
     const resumes = await db.Resume.findAll({
       where: { userId: req.user.id },
       order: [['createdAt', 'DESC']],
     })
+    console.log('Found resumes:', resumes.length)
+    if (resumes.length > 0) {
+      console.log('Sample resume data:', {
+        id: resumes[0].id,
+        title: resumes[0].title,
+        cloudinaryUrl: resumes[0].cloudinaryUrl,
+        s3Url: resumes[0].s3Url,
+        hasCloudinaryUrl: !!resumes[0].cloudinaryUrl,
+        hasS3Url: !!resumes[0].s3Url
+      })
+    }
     res.json(resumes)
   } catch (err) {
     console.error('Fetch resumes error:', err)
@@ -68,11 +80,33 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id/preview', async (req, res) => {
   try {
+    console.log('Preview request for resume ID:', req.params.id)
+    console.log('User ID:', req.user.id)
+    
     const resume = await db.Resume.findByPk(req.params.id)
-    if (!resume || resume.userId !== req.user.id) {
+    console.log('Found resume:', resume ? {
+      id: resume.id,
+      userId: resume.userId,
+      title: resume.title,
+      cloudinaryUrl: resume.cloudinaryUrl,
+      s3Url: resume.s3Url
+    } : 'null')
+    
+    if (!resume) {
       return res.status(404).json({ error: 'Resume not found' })
     }
-    res.redirect(resume.cloudinaryUrl)
+    
+    if (resume.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' })
+    }
+    
+    if (!resume.cloudinaryUrl && !resume.s3Url) {
+      return res.status(404).json({ error: 'Resume file not found' })
+    }
+    
+    const fileUrl = resume.cloudinaryUrl || resume.s3Url
+    console.log('Redirecting to:', fileUrl)
+    res.redirect(fileUrl)
   } catch (err) {
     console.error('Preview error:', err)
     res.status(500).json({ error: 'Failed to preview resume' })
@@ -84,15 +118,36 @@ router.get('/:id/preview', async (req, res) => {
  */
 router.get('/:id/download', async (req, res) => {
   try {
+    console.log('Download request for resume ID:', req.params.id)
+    console.log('User ID:', req.user.id)
+    
     const resume = await db.Resume.findByPk(req.params.id)
-    if (!resume || resume.userId !== req.user.id) {
+    console.log('Found resume:', resume ? {
+      id: resume.id,
+      userId: resume.userId,
+      title: resume.title,
+      cloudinaryUrl: resume.cloudinaryUrl,
+      s3Url: resume.s3Url
+    } : 'null')
+    
+    if (!resume) {
       return res.status(404).json({ error: 'Resume not found' })
+    }
+    
+    if (resume.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' })
+    }
+    
+    if (!resume.cloudinaryUrl && !resume.s3Url) {
+      return res.status(404).json({ error: 'Resume file not found' })
     }
     
     // Increment download count
     await resume.increment('downloadCount')
     
-    res.redirect(resume.cloudinaryUrl) // Cloudinary serves the file
+    const fileUrl = resume.cloudinaryUrl || resume.s3Url
+    console.log('Redirecting to:', fileUrl)
+    res.redirect(fileUrl) // Cloudinary serves the file
   } catch (err) {
     console.error('Download error:', err)
     res.status(500).json({ error: 'Failed to download resume' })
