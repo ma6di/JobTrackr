@@ -434,13 +434,28 @@ router.get('/file/:filename', async (req, res) => {
       
       // Set appropriate headers based on whether it's download or preview
       if (download) {
-        // Force download
+        // Force download - don't change this, it's working
         res.setHeader('Content-Type', 'application/octet-stream')
         res.setHeader('Content-Disposition', `attachment; filename="${resume.originalName}"`)
       } else {
-        // For preview - set correct content type
-        res.setHeader('Content-Type', resume.mimeType || 'application/pdf')
+        // For preview - enhanced headers for proper PDF display
+        const contentType = resume.mimeType || 'application/pdf'
+        res.setHeader('Content-Type', contentType)
         res.setHeader('Content-Disposition', 'inline')
+        
+        // Additional headers for better PDF preview
+        res.setHeader('Accept-Ranges', 'bytes')
+        res.setHeader('Cache-Control', 'no-cache')
+        
+        // CORS headers for cross-origin preview
+        res.setHeader('Access-Control-Allow-Origin', 'https://job-trackr-murex.vercel.app')
+        res.setHeader('Access-Control-Allow-Credentials', 'true')
+        
+        console.log('Preview headers set:', {
+          contentType,
+          disposition: 'inline',
+          size: resume.fileContent.length
+        })
       }
       
       res.setHeader('Content-Length', resume.fileContent.length)
