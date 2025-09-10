@@ -73,12 +73,22 @@ app.use(helmet())
   - Essential for frontend-backend communication
 */
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:5174', 
-    'http://localhost:5175',
-    process.env.CORS_ORIGIN
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost for development
+    if (origin.includes('localhost')) return callback(null, true);
+    
+    // Allow Vercel domains
+    if (origin.includes('vercel.app')) return callback(null, true);
+    
+    // Allow specific configured origin
+    if (origin === process.env.CORS_ORIGIN) return callback(null, true);
+    
+    // For development/demo, allow all origins (remove this in production)
+    return callback(null, true);
+  },
   credentials: true, // Allow cookies and auth headers
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
