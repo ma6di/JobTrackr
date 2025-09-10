@@ -99,7 +99,7 @@ export function generateToken(user) {
     // Sign token with secret key and set expiration
     const token = jwt.sign(
       payload, // Data to include in token
-      process.env.JWT_SECRET, // Secret key for signing
+      process.env.JWT_SECRET || 'fallback-secret-key-for-development', // Secret key for signing
       { 
         expiresIn: '7d', // Token expires in 7 days
         issuer: 'jobtracker-api', // Who issued this token
@@ -123,7 +123,7 @@ export function verifyToken(token) {
     // Verify token signature and check expiration
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'fallback-secret-key-for-development',
       {
         issuer: 'jobtracker-api', // Must match what we set when creating
         audience: 'jobtracker-app' // Must match what we set when creating
