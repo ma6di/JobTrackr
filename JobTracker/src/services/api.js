@@ -7,7 +7,7 @@
 
 /* ===== API Service for JobTrackr ===== */
 
-const API_BASE_URL = 'https://jobtrackr-production.up.railway.app/api'
+const API_BASE_URL = 'https://jobtrackr-s44s.onrender.com/api'
 
 /* ===== Token Management ===== */
 export const getToken = () => localStorage.getItem('authToken')
