@@ -1,7 +1,7 @@
 // routes/resumeRoutes.js
 import express from 'express'
 import multer from 'multer'
-import cloudinary from '../config/cloudinary.js'
+import cloudinary, { hasCloudinaryConfig } from '../config/cloudinary.js'
 import db from '../models/index.js' // Sequelize models
 import path from 'path'
 import fs from 'fs'
@@ -32,11 +32,6 @@ router.post('/', upload.single('file'), async (req, res) => {
     }
 
     const { title, description } = req.body
-    
-    // Check if Cloudinary is configured
-    const hasCloudinaryConfig = process.env.CLOUDINARY_CLOUD_NAME && 
-                               process.env.CLOUDINARY_API_KEY && 
-                               process.env.CLOUDINARY_API_SECRET
     
     let cloudinaryUrl = null
     let cloudinaryPublicId = null
