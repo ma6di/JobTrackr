@@ -96,10 +96,17 @@ export function generateToken(user) {
       lastName: user.lastName
     }
     
+    // Get JWT secret with fallback
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-for-development-12345'
+    
+    // Debug logging (remove in production)
+    console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET)
+    console.log('Using secret length:', jwtSecret.length)
+    
     // Sign token with secret key and set expiration
     const token = jwt.sign(
       payload, // Data to include in token
-      process.env.JWT_SECRET || 'fallback-secret-key-for-development', // Secret key for signing
+      jwtSecret, // Secret key for signing
       { 
         expiresIn: '7d', // Token expires in 7 days
         issuer: 'jobtracker-api', // Who issued this token
@@ -120,10 +127,13 @@ export function generateToken(user) {
  */
 export function verifyToken(token) {
   try {
+    // Get JWT secret with fallback
+    const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key-for-development-12345'
+    
     // Verify token signature and check expiration
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'fallback-secret-key-for-development',
+      jwtSecret,
       {
         issuer: 'jobtracker-api', // Must match what we set when creating
         audience: 'jobtracker-app' // Must match what we set when creating
