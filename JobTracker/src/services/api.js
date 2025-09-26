@@ -153,7 +153,7 @@ export const downloadResume = async (id, filename = 'resume.pdf') => {
 }
 
 /* ===== Jobs ===== */
-export const getJobs = () => apiRequest('/jobs')
+export const getJobs = () => apiRequest('/jobs?limit=1000') // Get all jobs (up to 1000)
 export const createJob = (jobData) =>
   apiRequest('/jobs', { method: 'POST', body: JSON.stringify(jobData) })
 export const updateJob = (id, updateData) =>
@@ -162,7 +162,7 @@ export const deleteJob = (id) =>
   apiRequest(`/jobs/${id}`, { method: 'DELETE' })
 
 /* ===== Dashboard ===== */
-export const getDashboardStats = () => apiRequest('/dashboard/stats')
+export const getDashboardStats = () => apiRequest('/jobs/stats')
 
 /* ===== Export ===== */
 export default {
